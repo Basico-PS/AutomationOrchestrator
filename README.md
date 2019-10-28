@@ -5,8 +5,8 @@ For support, please contact us: robotics@basico.dk
 ## Installation
 
 1. Download the [latest version](https://github.com/Basico-PS/AutomationOrchestrator/archive/v0.0.1.zip).
-2. Unzip the folder somewhere appropriate, we suggest directly on the C: drive for easier access. So, your path would be similar to "C:\AutomationOrchestrator-0.0.1.zip" or "C:\Program Files\AutomationOrchestrator-0.0.1.zip".
-3. After unzipping the files, run the "INSTALL.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/INSTALL.bat) for an automated installation process. You may also manually run the installation steps via, for example, the CMD. Remember to run the batch file (or commands manually) as an administrator.
+2. Unzip the folder somewhere convenient, for example, directly on the C: drive. So, your path could be similar to "C:\AutomationOrchestrator-0.0.1.zip" or "C:\Program Files\AutomationOrchestrator-0.0.1.zip". However, you may unzip the folder anywhere on your system.
+3. After unzipping the folder, run the "INSTALL.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/INSTALL.bat) for an automated installation process. You may also manually run the installation steps via, for example, the CMD. Remember to run the batch file (or commands manually) as an administrator.
 4. The last command of the installation process will prompt you to create an account, a super user who has all permissions. After creating the super user, the installation process is complete.
 
 ## Usage

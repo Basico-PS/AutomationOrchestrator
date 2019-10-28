@@ -1,5 +1,7 @@
 # Basico P/S - Automation Orchestrator
 
+<i>Still under initial development, better documentation underway...</i>
+
 For support, please contact us: robotics@basico.dk
 
 ## Installation

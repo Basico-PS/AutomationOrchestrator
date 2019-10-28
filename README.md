@@ -1,6 +1,6 @@
 # Basico P/S - Automation Orchestrator
 
-<i>Still under initial development, better documentation underway...</i>
+<i>Still under initial development, better documentation is underway...</i>
 
 For support, please contact us: robotics@basico.dk
 
@@ -15,4 +15,4 @@ For support, please contact us: robotics@basico.dk
 
 After a succesful installation, you can now start your local server by running the "RUN_SERVER.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER.bat). Remember to run the batch file (or commands manually) as an administrator. As long as the server is running, you are able to locally (only on your own machine) access the Automation Orchestrator via a browser on http://127.0.0.1:8000/.
 
-More documentation on how to up the system and how to make the Automation Orchestrator accessible from other machines in the network...
+More documentation on how to set up the system and how to make the Automation Orchestrator accessible from other machines in the network is underway...

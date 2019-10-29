@@ -21,9 +21,9 @@ The purpose of this solution is to offer a well-functioning, fully customizable 
 
 For the solution to work, you need to install [Python](https://www.python.org/). The solution is tested with Python 3.7 and 3.8.
 
-1. Download the [latest version](https://github.com/Basico-PS/AutomationOrchestrator/archive/v0.0.2.zip).
+1. Download the [latest version](https://github.com/Basico-PS/AutomationOrchestrator/archive/v0.0.3.zip).
 2. Create a folder called "Automation Orchestrator" somewhere convenient, for example, directly on the C: drive or in the "Program Files" folder.
-3. Unzip the folder in your created "Automation Orchestrator" folder. So, your path could be similar to "C:\Automation Orchestrator\AutomationOrchestrator-0.0.1.zip" or "C:\Program Files\Automation Orchestrator\AutomationOrchestrator-0.0.1.zip". However, you may unzip the folder anywhere on your system.
+3. Unzip the folder in your created "Automation Orchestrator" folder. So, your path could be similar to "C:\Automation Orchestrator\AutomationOrchestrator-0.0.3.zip" or "C:\Program Files\Automation Orchestrator\AutomationOrchestrator-0.0.3.zip". However, you may unzip the folder anywhere on your system.
 4. After unzipping the folder, run the "INSTALL.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/INSTALL.bat) for an automated installation process. You may also manually run the installation steps via, for example, the CMD. Remember to run the batch file (or commands manually) as an administrator.
 5. The last command of the installation process will prompt you to create an account, a super user who has all permissions. After creating the super user, the installation process is complete.
 

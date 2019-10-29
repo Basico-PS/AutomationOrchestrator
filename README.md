@@ -4,11 +4,16 @@
 
 For support, please contact us: robotics@basico.dk
 
-This solution allows you to run a local [Django Web Application](https://www.djangoproject.com/) to administrate and orchestrate automation scripts such as Nintex RPA botflows. As described on the official Django project site, it "is a high-level Python Web framework that encourages rapid development and clean, pragmatic design. Built by experienced developers, it takes care of much of the hassle of Web development, so you can focus on writing your app without needing to reinvent the wheel. It’s free and open source."
+This solution allows you to run a local [Django Web Application](https://www.djangoproject.com/) to administrate and orchestrate automation scripts such as Nintex RPA botflows. As described on the official Django project site, it "is a high-level Python Web framework that encourages rapid development and clean, pragmatic design. Built by experienced developers, it takes care of much of the hassle of Web development, so you can focus on writing your app without needing to reinvent the wheel. It’s free and open source." Some of the biggest web platforms and brands like Instagram and Pinterest [uses the Django Framework](https://www.djangoproject.com/start/overview/).
 
-The purpose of this solution is to offer a well-functioning, fully customizable automation orchestrator application to schedule and trigger scripts.
+The purpose of this solution is to offer a well-functioning, fully customizable automation orchestrator application to schedule and trigger scripts. At this moment, the solution is only intended to work as a local automation orchestrator running on the same machine and user as the scripts are supposed to be executed. IMPORTANT: The solution runs with the ["DEBUG" flag](https://docs.djangoproject.com/en/2.2/ref/settings/#debug) set to "True" even though it is not recommended in a cloud production environment since the solution should only be used to run fully locally or shared in the protected internal network. It is in the plans to make it possible to use the automation orchestrator as a centralized tool in the protected internal network to orchestrate scripts across machines and users, however, if you wish to deploy the solution in the open cloud, there are [many additional steps](https://docs.djangoproject.com/en/2.2/howto/deployment/) to consider and implement.
 
-At this moment, the solution is only intended to work as a local automation orchestrator running on the same machine and user as the scripts are supposed to be executed. It is in the plans to make it possible to use the automation orchestrator as a centralized tool to orchestrate scripts across machines and users.
+Feature highlights out-of-the-box:
+- Groups and User Setup
+- File Triggers
+- Schedule Triggers
+- Queue Functionality
+- Execution Log
 
 ## Installation
 

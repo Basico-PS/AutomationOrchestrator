@@ -14,8 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.contrib.auth import views as auth_views
-from django.urls import path
+from django.urls import path, include
 from orchestrator.monitoring import file_trigger_monitor, schedule_trigger_monitor, execution_monitor
 import os
 import threading
@@ -41,8 +40,8 @@ def start_execution_monitor():
 
 urlpatterns = [
     path('', admin.site.urls),
-    
-]
+    path('api/0/', include('orchestrator.urls')),
+    ]
 
 if os.path.exists('error.txt'):
     os.remove('error.txt')

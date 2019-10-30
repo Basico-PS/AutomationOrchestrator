@@ -257,11 +257,8 @@ def execution_monitor_evaluate():
     items = Execution.objects.filter(status="Pending", computer_name__iexact=os.environ['COMPUTERNAME'], user_name__iexact=os.environ['USERNAME']).order_by('-priority', 'time_queued')
     
     for item in items:
-        while True:
-            if not any(item.app.split("\\")[-1].lower() in process.lower() for process in subprocess.run(["wmic", "process", "get", "description,executablepath"], stdout=subprocess.PIPE, text=True).stdout.split('\n')):
-                break
-            range(10000)
-            t.sleep(queue_sleep)
+        if any(item.app.split("\\")[-1].lower() in process.lower() for process in subprocess.run(["wmic", "process", "get", "description,executablepath"], stdout=subprocess.PIPE, text=True).stdout.split('\n')):
+            continue
             
         item.time_start = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))}00")
         item.status = "Running"

@@ -276,17 +276,8 @@ def outlook_trigger_monitor():
         if len(OutlookTrigger.objects.filter(activated=True)) >= 1:
             break
     
-    try:
-        outlook.Application.Quit()
-    except:
-        pass
-    outlook = None
-    del outlook
-    
-    pythoncom.CoUninitialize()
     
     pythoncom.CoInitialize()
-    
     outlook = win32.dynamic.Dispatch('Outlook.Application')
     
     while True:
@@ -302,6 +293,14 @@ def outlook_trigger_monitor():
         except OutlookDispatchException:
             print("Connection to Outlook lost, attempting to restart monitoring...")
             
+            try:
+                outlook.Application.Quit()
+            except:
+                pass
+            outlook = None
+            del outlook
+            pythoncom.CoUninitialize()
+    
             outlook_trigger_monitor()
         
         except:
@@ -314,6 +313,14 @@ def outlook_trigger_monitor():
             break
         
         if len(OutlookTrigger.objects.filter(activated=True)) == 0:
+            try:
+                outlook.Application.Quit()
+            except:
+                pass
+            outlook = None
+            del outlook
+            pythoncom.CoUninitialize()
+            
             outlook_trigger_monitor()
 
     try:
@@ -322,18 +329,17 @@ def outlook_trigger_monitor():
         pass
     outlook = None
     del outlook
-    
     pythoncom.CoUninitialize()
 
 
 def outlook_trigger_monitor_evaluate(outlook):
     items = OutlookTrigger.objects.filter(activated=True)
     
-    for item in items:
-        accounts = outlook.Session.Accounts
-        accounts_list = [account.DisplayName for account in accounts]
-        
+    for item in items:        
         try:
+            accounts = outlook.Session.Accounts
+            accounts_list = [account.DisplayName for account in accounts]
+            
             if item.email == "Default":
                 namespace = outlook.GetNamespace("MAPI")
             else:
@@ -348,8 +354,10 @@ def outlook_trigger_monitor_evaluate(outlook):
             inbox = namespace.GetDefaultFolder(6)
             
         except:
-            items, namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None, None
+            items, accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None, None, None, None
             del items
+            del accounts
+            del accounts_list
             del namespace
             del inbox
             del folder_in
@@ -424,12 +432,14 @@ def outlook_trigger_monitor_evaluate(outlook):
             already_running = None
             del already_running
             
-        namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None
-        del emails
+        accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None, None, None
+        del accounts
+        del accounts_list
+        del namespace
+        del inbox
         del folder_in
         del folder_out
-        del inbox
-        del namespace
+        del emails
 
     items = None
     del items

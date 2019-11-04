@@ -271,6 +271,22 @@ def schedule_trigger_monitor_evaluate():
 def outlook_trigger_monitor():
     pythoncom.CoInitialize()
     
+    outlook = None
+    
+    while True:
+        range(10000)
+        t.sleep(outlook_sleep)
+        
+        if len(OutlookTrigger.objects.filter(activated=True)) >= 1:
+            break
+    
+    try:
+        outlook.Application.Quit()
+    except:
+        pass
+    outlook = None
+    del outlook
+    
     outlook = win32.dynamic.Dispatch('Outlook.Application')
     
     while True:
@@ -284,18 +300,9 @@ def outlook_trigger_monitor():
             outlook_trigger_monitor_evaluate(outlook)
             
         except OutlookDispatchException:
-            print("Connection to Outlook lost, attempting to reconnect...")
+            print("Connection to Outlook lost, attempting to restart monitoring...")
             
-            try:
-                outlook.Application.Quit()
-            except:
-                pass
-            
-            outlook = None
-            del outlook
-            
-            outlook = win32.Dispatch('Outlook.Application')
-            continue
+            outlook_trigger_monitor()
         
         except:
             with open("error.txt", 'a') as f:
@@ -305,8 +312,14 @@ def outlook_trigger_monitor():
                 except:
                     pass
             break
+        
+        if len(OutlookTrigger.objects.filter(activated=True)) == 0:
+            outlook_trigger_monitor()
 
-    outlook.Application.Quit()
+    try:
+        outlook.Application.Quit()
+    except:
+        pass
     outlook = None
     del outlook
     
@@ -421,6 +434,7 @@ def outlook_trigger_monitor_evaluate(outlook):
 
     items = None
     del items
+
 
 def execution_monitor():
     while True:

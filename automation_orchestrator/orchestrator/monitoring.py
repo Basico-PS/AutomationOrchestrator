@@ -268,11 +268,7 @@ def schedule_trigger_monitor_evaluate():
     del items
 
 
-def outlook_trigger_monitor():
-    pythoncom.CoInitialize()
-    
-    outlook = None
-    
+def outlook_trigger_monitor():    
     while True:
         range(10000)
         t.sleep(outlook_sleep)
@@ -286,6 +282,10 @@ def outlook_trigger_monitor():
         pass
     outlook = None
     del outlook
+    
+    pythoncom.CoUninitialize()
+    
+    pythoncom.CoInitialize()
     
     outlook = win32.dynamic.Dispatch('Outlook.Application')
     
@@ -333,13 +333,12 @@ def outlook_trigger_monitor_evaluate(outlook):
         accounts = outlook.Session.Accounts
         accounts_list = [account.DisplayName for account in accounts]
         
-        if not item.email in accounts_list:
-            continue
-        
-        try:            
+        try:
             if item.email == "Default":
                 namespace = outlook.GetNamespace("MAPI")
             else:
+                if not item.email in accounts_list:
+                    continue
                 namespace = None
                 for account in accounts:
                     if item.email == account.DisplayName:

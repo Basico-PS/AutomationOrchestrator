@@ -1,6 +1,6 @@
 # Basico P/S - Automation Orchestrator
 
-<i>Still under initial development, better documentation is underway...</i>
+<i>Better documentation is underway...</i>
 
 For support, please contact us: robotics@basico.dk
 
@@ -13,7 +13,7 @@ This solution allows you to run a local [Django Web Application](https://www.dja
 
 As described on the official Django project site, it <i>"is a high-level Python Web framework that encourages rapid development and clean, pragmatic design. Built by experienced developers, it takes care of much of the hassle of Web development, so you can focus on writing your app without needing to reinvent the wheel. It’s free and open source."</i>
 
-Some of the biggest web platforms and brands like [Instagram and Pinterest uses the Django Framework](https://www.djangoproject.com/start/overview/) due to its leading security features and ability to scale.
+Some of the biggest web platforms and brands like [Instagram and Pinterest use the Django Framework](https://www.djangoproject.com/start/overview/) due to its leading security features and ability to scale.
 
 The purpose of this solution is to offer a well-functioning, fully customizable automation orchestrator application to trigger and schedule scripts. At this moment, the solution is only intended to work as a local automation orchestrator running on the same machine and user as where the scripts are supposed to be executed. IMPORTANT: The solution runs with the ["DEBUG" flag set to "True"](https://docs.djangoproject.com/en/2.2/ref/settings/#debug) even though it is not recommended in a cloud production environment since the solution should only be used to run fully locally or shared in your protected internal network. It is in the plans to make it possible to use the automation orchestrator as a centralized tool in your protected internal network to orchestrate scripts across machines and users, however, if you wish to deploy the solution in the open cloud, there are [many additional steps](https://docs.djangoproject.com/en/2.2/howto/deployment/) to consider and implement.
 

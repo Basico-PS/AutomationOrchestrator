@@ -8,6 +8,7 @@ This solution allows you to run a local [Django Web Application](https://www.dja
 - Groups and User Setup
 - File Triggers
 - Schedule Triggers
+- Outlook Triggers
 - Queue Functionality
 - Execution Log
 

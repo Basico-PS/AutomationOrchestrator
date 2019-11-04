@@ -25,6 +25,9 @@ class App(models.Model):
 class Botflow(models.Model):    
     name = models.CharField(max_length=255)
     path = models.CharField(max_length=255)
+    queue_if_already_running = models.BooleanField(default=True)
+    
+    close_bot_automatically = models.BooleanField(default=False)
     
     timeout_minutes = models.PositiveIntegerField(default=60, validators=[MinValueValidator(1)])
     timeout_kill_processes = models.CharField(max_length=255, blank=True)
@@ -35,12 +38,13 @@ class Botflow(models.Model):
     def __str__(self):
         return self.name
 
+
 class FileTrigger(models.Model):
     app = models.ForeignKey(App, on_delete=models.CASCADE)
     botflow = models.ForeignKey(Botflow, on_delete=models.CASCADE)
     
-    path_in = models.CharField(max_length=255)
-    path_out = models.CharField(max_length=255)
+    folder_in = models.CharField(max_length=255)
+    folder_out = models.CharField(max_length=255)
     
     run_after = models.TimeField(null=True, blank=True)
     run_until = models.TimeField(null=True, blank=True)
@@ -81,6 +85,29 @@ class ScheduleTrigger(models.Model):
     date_updated = models.DateTimeField(auto_now=True, editable=False)
 
 
+class OutlookTrigger(models.Model):
+    app = models.ForeignKey(App, on_delete=models.CASCADE)
+    botflow = models.ForeignKey(Botflow, on_delete=models.CASCADE)
+    
+    email = models.CharField(max_length=255, default="Default")
+    
+    folder_in = models.CharField(max_length=255)
+    folder_out = models.CharField(max_length=255)
+    
+    run_after = models.TimeField(null=True, blank=True)
+    run_until = models.TimeField(null=True, blank=True)
+    run_on_week_days = models.BooleanField(default=True)
+    run_on_weekend_days = models.BooleanField(default=True)
+    
+    computer_name = models.CharField(max_length=255, default=get_computer_name)
+    user_name = models.CharField(max_length=255, default=get_user_name)
+    priority = models.PositiveIntegerField(default=3, validators=[MinValueValidator(1), MaxValueValidator(5)])
+    activated = models.BooleanField(default=False)
+
+    date_created = models.DateTimeField(auto_now_add=True, editable=False)
+    date_updated = models.DateTimeField(auto_now=True, editable=False)
+
+
 class Execution(models.Model):
     time_queued = models.DateTimeField(auto_now_add=True)
     
@@ -92,6 +119,8 @@ class Execution(models.Model):
     user_name = models.CharField(max_length=255)
     priority = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     status = models.CharField(max_length=255)
+
+    close_bot_automatically = models.BooleanField(default=False)
     
     timeout_minutes = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     timeout_kill_processes = models.CharField(max_length=255, blank=True)

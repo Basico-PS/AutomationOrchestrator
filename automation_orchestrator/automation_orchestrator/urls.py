@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from orchestrator.monitoring import file_trigger_monitor, schedule_trigger_monitor, execution_monitor
+from orchestrator.monitoring import file_trigger_monitor, schedule_trigger_monitor, outlook_trigger_monitor, execution_monitor
 import os
 import threading
 
@@ -28,6 +28,12 @@ def start_file_trigger_monitor():
 
 def start_schedule_trigger_monitor():
     t = threading.Thread(target=schedule_trigger_monitor)
+    t.setDaemon(True)
+    t.start()
+
+
+def start_outlook_trigger_monitor():
+    t = threading.Thread(target=outlook_trigger_monitor)
     t.setDaemon(True)
     t.start()
 
@@ -48,4 +54,5 @@ if os.path.exists('error.txt'):
 
 start_file_trigger_monitor()
 start_schedule_trigger_monitor()
+start_outlook_trigger_monitor()
 start_execution_monitor()

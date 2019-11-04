@@ -5,12 +5,21 @@ import shutil
 import datetime
 import traceback
 import subprocess
+import pythoncom
 import time as t
-from .models import App, Botflow, FileTrigger, ScheduleTrigger, Execution
+import win32com.client as win32
+from .models import App, Botflow, FileTrigger, ScheduleTrigger, OutlookTrigger, Execution
+from django.db.models import Q
 
 
 trigger_sleep = 2
+outlook_sleep = 2
 queue_sleep = 3
+
+
+class OutlookDispatchException(Exception):
+    # Exception to be used when the connection to the dispatched Outlook object is lost.
+    pass
 
 
 def calculate_next_execution(run_start, frequency, run_every, run_after, run_until, run_on_week_days, run_on_weekend_days):    
@@ -81,7 +90,7 @@ def file_trigger_monitor_evaluate():
     items = FileTrigger.objects.filter(activated=True)
     
     for item in items:
-        if not os.path.isdir(item.path_in) or not os.path.isdir(item.path_out):
+        if not os.path.isdir(item.folder_in) or not os.path.isdir(item.folder_out):
             continue
                     
         if item.run_on_week_days == False:
@@ -114,7 +123,7 @@ def file_trigger_monitor_evaluate():
             else:
                 continue
         
-        files = [file for file in glob.glob(item.path_in + r"\*") if os.path.isfile(file)]
+        files = [file for file in glob.glob(item.folder_in + r"\*") if os.path.isfile(file)]
         files.sort(key=os.path.getctime)
 
         for file in files:
@@ -124,9 +133,9 @@ def file_trigger_monitor_evaluate():
             file_name, file_extension = os.path.splitext(file_name)
 
             try:
-                path_destination = os.path.join(item.path_out, file_name + '' + file_extension)
+                path_destination = os.path.join(item.folder_out, file_name + '' + file_extension)
                 
-                shutil.move(file, item.path_out)
+                shutil.move(file, item.folder_out)
 
             except shutil.Error:
                 index = 0
@@ -134,7 +143,7 @@ def file_trigger_monitor_evaluate():
                 while True:
                     index += 1
 
-                    path_destination = os.path.join(item.path_out, file_name + f'_{index}' + file_extension)
+                    path_destination = os.path.join(item.folder_out, file_name + f'_{index}' + file_extension)
 
                     if not os.path.isfile(path_destination):
                         shutil.move(file, path_destination)
@@ -142,17 +151,30 @@ def file_trigger_monitor_evaluate():
                         continue
                     break
             
-            execution = Execution(app=App.objects.get(pk=item.app.pk).path, 
-                                  botflow=Botflow.objects.get(pk=item.botflow.pk).path,
-                                  trigger=path_destination,
-                                  timeout_minutes=Botflow.objects.get(pk=item.botflow.pk).timeout_minutes,
-                                  timeout_kill_processes=Botflow.objects.get(pk=item.botflow.pk).timeout_kill_processes,
-                                  computer_name=item.computer_name,
-                                  user_name=item.user_name,
-                                  priority=item.priority,
-                                  status="Pending")
+            if Botflow.objects.get(pk=item.botflow.pk).queue_if_already_running == False:
+                already_running = Execution.objects.filter(Q(status="Pending") | Q(status="Running"), botflow=Botflow.objects.get(pk=item.botflow.pk).path)
+            else:
+                already_running = []
             
-            execution.save()
+            if len(already_running) < 1:
+                execution = Execution(app=App.objects.get(pk=item.app.pk).path, 
+                                    botflow=Botflow.objects.get(pk=item.botflow.pk).path,
+                                    trigger=f"File Trigger: {path_destination}",
+                                    close_bot_automatically=Botflow.objects.get(pk=item.botflow.pk).close_bot_automatically,
+                                    timeout_minutes=Botflow.objects.get(pk=item.botflow.pk).timeout_minutes,
+                                    timeout_kill_processes=Botflow.objects.get(pk=item.botflow.pk).timeout_kill_processes,
+                                    computer_name=item.computer_name,
+                                    user_name=item.user_name,
+                                    priority=item.priority,
+                                    status="Pending")
+                
+                execution.save()
+        
+            already_running = None
+            del already_running
+        
+    items = None
+    del items
 
 
 def schedule_trigger_monitor():
@@ -207,30 +229,198 @@ def schedule_trigger_monitor_evaluate():
             item.past_settings = settings
             item.save()
             
-            
         if datetime.datetime.strptime(item.next_execution, "%Y-%m-%d %H:%M") == now:
-            execution = Execution(app=App.objects.get(pk=item.app.pk).path, 
-                                  botflow=Botflow.objects.get(pk=item.botflow.pk).path,
-                                  trigger=datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime("%Y-%m-%d %H:%M"),
-                                  timeout_minutes=Botflow.objects.get(pk=item.botflow.pk).timeout_minutes,
-                                  timeout_kill_processes=Botflow.objects.get(pk=item.botflow.pk).timeout_kill_processes,
-                                  computer_name=item.computer_name,
-                                  user_name=item.user_name,
-                                  priority=item.priority,
-                                  status="Pending")
-            execution.save()
+            if Botflow.objects.get(pk=item.botflow.pk).queue_if_already_running == False:
+                already_running = Execution.objects.filter(Q(status="Pending") | Q(status="Running"), botflow=Botflow.objects.get(pk=item.botflow.pk).path)
+            else:
+                already_running = []
+            
+            if len(already_running) < 1:
+                time_trigger = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime("%Y-%m-%d %H:%M")
+                
+                execution = Execution(app=App.objects.get(pk=item.app.pk).path,
+                                    botflow=Botflow.objects.get(pk=item.botflow.pk).path,
+                                    trigger=f"Schedule Trigger: {time_trigger}",
+                                    close_bot_automatically=Botflow.objects.get(pk=item.botflow.pk).close_bot_automatically,
+                                    timeout_minutes=Botflow.objects.get(pk=item.botflow.pk).timeout_minutes,
+                                    timeout_kill_processes=Botflow.objects.get(pk=item.botflow.pk).timeout_kill_processes,
+                                    computer_name=item.computer_name,
+                                    user_name=item.user_name,
+                                    priority=item.priority,
+                                    status="Pending")
+                execution.save()
             
             run_start = now.replace(tzinfo=pytz.timezone('UTC'))
             item.next_execution = calculate_next_execution(run_start, item.frequency, item.run_every, run_after, run_until, item.run_on_week_days, item.run_on_weekend_days)
             item.past_settings = settings
             item.save()
         
+            already_running = None
+            del already_running
+        
         elif datetime.datetime.strptime(item.next_execution, "%Y-%m-%d %H:%M") < now:
             run_start = now.replace(tzinfo=pytz.timezone('UTC'))
             item.next_execution = calculate_next_execution(run_start, item.frequency, item.run_every, run_after, run_until, item.run_on_week_days, item.run_on_weekend_days)
             item.past_settings = settings
             item.save()
+        
+    items = None
+    del items
 
+
+def outlook_trigger_monitor():
+    pythoncom.CoInitialize()
+    
+    outlook = win32.dynamic.Dispatch('Outlook.Application')
+    
+    while True:
+        range(10000)
+        t.sleep(outlook_sleep)
+        
+        if os.path.exists("error.txt"):
+            break
+        
+        try:
+            outlook_trigger_monitor_evaluate(outlook)
+            
+        except OutlookDispatchException:
+            print("Connection to Outlook lost, attempting to reconnect...")
+            
+            try:
+                outlook.Application.Quit()
+            except:
+                pass
+            
+            outlook = None
+            del outlook
+            
+            outlook = win32.Dispatch('Outlook.Application')
+            continue
+        
+        except:
+            with open("error.txt", 'a') as f:
+                try:
+                    f.write(traceback.format_exc())
+                    print(traceback.format_exc())
+                except:
+                    pass
+            break
+
+    outlook.Application.Quit()
+    outlook = None
+    del outlook
+    
+    pythoncom.CoUninitialize()
+
+
+def outlook_trigger_monitor_evaluate(outlook):
+    items = OutlookTrigger.objects.filter(activated=True)
+    
+    for item in items:
+        accounts = outlook.Session.Accounts
+        accounts_list = [account.DisplayName for account in accounts]
+        
+        if not item.email in accounts_list:
+            continue
+        
+        try:            
+            if item.email == "Default":
+                namespace = outlook.GetNamespace("MAPI")
+            else:
+                namespace = None
+                for account in accounts:
+                    if item.email == account.DisplayName:
+                        namespace = account.DeliveryStore
+                        break
+            
+            inbox = namespace.GetDefaultFolder(6)
+            
+        except:
+            items, namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None, None
+            del items
+            del namespace
+            del inbox
+            del folder_in
+            del folder_out
+            del emails
+            
+            raise OutlookDispatchException
+    
+        if item.run_on_week_days == False:
+            if 0 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 4:
+                continue
+        if item.run_on_weekend_days == False:
+            if 5 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 6:
+                continue
+        
+        if item.run_after != None:
+            run_after = datetime.timedelta(hours=item.run_after.hour, minutes=item.run_after.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
+        else:
+            run_after = datetime.timedelta(hours=0, minutes=0)
+            
+        if item.run_until != None:
+            run_until = datetime.timedelta(hours=item.run_until.hour, minutes=item.run_until.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
+        else:
+            run_until = datetime.timedelta(hours=0, minutes=0)
+            
+        time_timedelta = datetime.timedelta(hours=datetime.datetime.now(pytz.timezone('UTC')).hour, minutes=datetime.datetime.now(pytz.timezone('UTC')).minute)
+            
+        if run_after < run_until:
+            if time_timedelta < run_after:
+                continue
+            if time_timedelta >= run_until:
+                continue
+        else:
+            if time_timedelta >= run_after or time_timedelta < run_until:
+                pass
+            else:
+                continue
+        
+        folder_in = inbox
+        folder_out = inbox
+        
+        for folder in item.folder_in.split("\\"):
+            folder_in = folder_in.Folders[folder]
+        
+        for folder in item.folder_out.split("\\"):
+            folder_out = folder_out.Folders[folder]
+            
+        emails = folder_in.Items
+
+        for email in emails:
+            email.Move(folder_out)
+            
+            if Botflow.objects.get(pk=item.botflow.pk).queue_if_already_running == False:
+                already_running = Execution.objects.filter(Q(status="Pending") | Q(status="Running"), botflow=Botflow.objects.get(pk=item.botflow.pk).path)
+            else:
+                already_running = []
+            
+            if len(already_running) < 1:
+                execution = Execution(app=App.objects.get(pk=item.app.pk).path, 
+                                        botflow=Botflow.objects.get(pk=item.botflow.pk).path,
+                                        trigger=f"Outlook Trigger: {email.Subject}",
+                                        close_bot_automatically=Botflow.objects.get(pk=item.botflow.pk).close_bot_automatically,
+                                        timeout_minutes=Botflow.objects.get(pk=item.botflow.pk).timeout_minutes,
+                                        timeout_kill_processes=Botflow.objects.get(pk=item.botflow.pk).timeout_kill_processes,
+                                        computer_name=item.computer_name,
+                                        user_name=item.user_name,
+                                        priority=item.priority,
+                                        status="Pending")
+                
+                execution.save()
+        
+            already_running = None
+            del already_running
+            
+        namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None
+        del emails
+        del folder_in
+        del folder_out
+        del inbox
+        del namespace
+
+    items = None
+    del items
 
 def execution_monitor():
     while True:
@@ -270,12 +460,16 @@ def execution_monitor_evaluate():
             if not [{'botflow': x.botflow, 'trigger': x.trigger} for x in items if x.status == 'Completed'].count({'botflow': item.botflow, 'trigger': item.trigger}) >= 1:
                 try:
                     if 'foxtrot' or 'foxbot' in item.app.lower():
-                        subprocess.run([item.app, r'/Open', item.botflow, r'/Run', r'/Close', r'/Exit'], timeout=(item.timeout_minutes * 60))
+                        if item.close_bot_automatically == True:
+                            subprocess.run([item.app, r'/Open', item.botflow, r'/Run', r'/Close', r'/Exit'], timeout=(item.timeout_minutes * 60))
+                        else:
+                            subprocess.run([item.app, r'/Open', item.botflow, r'/Run'], timeout=(item.timeout_minutes * 60))
                     else:
                         subprocess.run([item.app, item.botflow], timeout=(item.timeout_minutes * 60))
                     
                 except subprocess.TimeoutExpired:
                     status = "Error - Botflow Timeout"
+                    
                     try:
                         if 'foxtrot' or 'foxbot' in item.app.lower():
                             os.system('taskkill /f /im foxtrot64.exe')
@@ -301,3 +495,6 @@ def execution_monitor_evaluate():
         item.save()
         
         break
+        
+    items = None
+    del items

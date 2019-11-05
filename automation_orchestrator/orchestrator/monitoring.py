@@ -347,7 +347,7 @@ def outlook_trigger_monitor_evaluate(outlook):
                     continue
                 namespace = None
                 for account in accounts:
-                    if item.email == account.DisplayName:
+                    if str(item.email).upper() == str(account.DisplayName).upper():
                         namespace = account.DeliveryStore
                         break
             

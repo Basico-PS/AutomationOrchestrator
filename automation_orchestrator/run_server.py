@@ -25,13 +25,18 @@ def main():
     restart_time = 10
     error_count = 0
     
+    if not os.path.exists("automation_orchestrator\\manage.py"):
+        print(f"{datetime.now()}: ERROR! The 'manage.py' file was not found, closing down...")
+        sleep(restart_time)
+        return None
+    
     if str(sys.argv[-1]).lower() == '--locally=true':
         url = "http://127.0.0.1:8000/"
-        cmd = ['python', r'C:\Python\Projects\AutomationOrchestrator\automation_orchestrator\manage.py', 'runserver', '--noreload']
+        cmd = ['python', 'automation_orchestrator\\manage.py', 'runserver', '--noreload']
     else:
         url = gethostbyname_ex(gethostname())[-1][-1]
         url = f"http://{url}:8000/"
-        cmd = ['python', r'C:\Python\Projects\AutomationOrchestrator\automation_orchestrator\manage.py', 'runserver', '0.0.0.0:8000', '--noreload']
+        cmd = ['python', 'automation_orchestrator\\manage.py', 'runserver', '0.0.0.0:8000', '--noreload']
 
     while True:
         start_time_loop = datetime.now()

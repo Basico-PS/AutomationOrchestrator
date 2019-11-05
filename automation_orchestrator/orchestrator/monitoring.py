@@ -259,7 +259,7 @@ def schedule_trigger_monitor_evaluate():
             del already_running
         
         elif datetime.datetime.strptime(item.next_execution, "%Y-%m-%d %H:%M") < now:
-            run_start = now.replace(tzinfo=pytz.timezone('UTC'))
+            run_start = datetime.datetime.strptime(item.next_execution, "%Y-%m-%d %H:%M").replace(tzinfo=pytz.timezone('UTC'))
             item.next_execution = calculate_next_execution(run_start, item.frequency, item.run_every, run_after, run_until, item.run_on_week_days, item.run_on_weekend_days)
             item.past_settings = settings
             item.save()

@@ -8,9 +8,39 @@ import csv
 admin.site.site_header = 'Basico P/S - Automation Orchestrator'
 
 
+def queue_item(item, trigger):
+    execution = Execution(app=App.objects.get(pk=item.app.pk).path, 
+                            botflow=Botflow.objects.get(pk=item.botflow.pk).path,
+                            trigger=trigger,
+                            close_bot_automatically=Botflow.objects.get(pk=item.botflow.pk).close_bot_automatically,
+                            timeout_minutes=Botflow.objects.get(pk=item.botflow.pk).timeout_minutes,
+                            timeout_kill_processes=Botflow.objects.get(pk=item.botflow.pk).timeout_kill_processes,
+                            computer_name=item.computer_name,
+                            user_name=item.user_name,
+                            priority=item.priority,
+                            status="Pending")
+    execution.save()
+    
+
+def activate_selected_file_triggers(modeladmin, request, queryset):
+    for item in queryset:
+        queue_item(item, "File Trigger: Activated Manually")
+    
+
+def activate_selected_schedule_triggers(modeladmin, request, queryset):
+    for item in queryset:
+        queue_item(item, "Schedule Trigger: Activated Manually")
+    
+
+def activate_selected_outlook_triggers(modeladmin, request, queryset):
+    for item in queryset:
+        queue_item(item, "Outlook Trigger: Activated Manually")
+
+
 def export_selected_file_triggers(modeladmin, request, queryset):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="file_triggers.csv"'
+    
     writer = csv.writer(response)
     writer.writerow(['pk', 'app', 'botflow', 
                      'folder_in', 'folder_out',
@@ -18,6 +48,7 @@ def export_selected_file_triggers(modeladmin, request, queryset):
                      'priority',
                      'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',
                      'computer_name', 'user_name'])
+    
     file_triggers = queryset.values_list('pk', 'app', 'botflow', 
                                          'folder_in', 'folder_out',
                                          'activated',
@@ -26,12 +57,14 @@ def export_selected_file_triggers(modeladmin, request, queryset):
                                          'computer_name', 'user_name')
     for file_trigger in file_triggers:
         writer.writerow(file_trigger)
+        
     return response
 
 
 def export_selected_schedule_triggers(modeladmin, request, queryset):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="schedule_triggers.csv"'
+    
     writer = csv.writer(response)
     writer.writerow(['pk', 'app', 'botflow', 
                      'frequency', 'run_every', 'run_start',
@@ -39,6 +72,7 @@ def export_selected_schedule_triggers(modeladmin, request, queryset):
                      'priority',
                      'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',
                      'computer_name', 'user_name'])
+    
     schedule_triggers = queryset.values_list('pk', 'app', 'botflow', 
                                              'frequency', 'run_every', 'run_start',
                                              'activated',
@@ -48,12 +82,14 @@ def export_selected_schedule_triggers(modeladmin, request, queryset):
     
     for schedule_trigger in schedule_triggers:
         writer.writerow(schedule_trigger)
+        
     return response
 
 
 def export_selected_outlook_triggers(modeladmin, request, queryset):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="outlook_triggers.csv"'
+    
     writer = csv.writer(response)
     writer.writerow(['pk', 'app', 'botflow', 
                      'folder_in', 'folder_out',
@@ -61,29 +97,36 @@ def export_selected_outlook_triggers(modeladmin, request, queryset):
                      'priority',
                      'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',
                      'computer_name', 'user_name'])
+    
     outlook_triggers = queryset.values_list('pk', 'app', 'botflow', 
                                             'folder_in', 'folder_out',
                                             'activated',
                                             'priority',
                                             'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',
                                             'computer_name', 'user_name')
+    
     for outlook_trigger in outlook_triggers:
         writer.writerow(outlook_trigger)
+        
     return response
 
 
 def export_selected_executions(modeladmin, request, queryset):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="executions.csv"'
+    
     writer = csv.writer(response)
     writer.writerow(['pk', 'time_queued', 'app', 'botflow', 'trigger', 
                      'computer_name', 'user_name', 'priority', 'timeout_minutes',
                      'status', 'time_start', 'time_end'])
+    
     executions = queryset.values_list('pk', 'time_queued', 'app', 'botflow', 'trigger', 
                                       'computer_name', 'user_name', 'priority', 'timeout_minutes',
                                       'status', 'time_start', 'time_end')
+    
     for execution in executions:
         writer.writerow(execution)
+        
     return response
 
 
@@ -156,7 +199,7 @@ class FileTriggerAdmin(admin.ModelAdmin):
                     'folder_in', 'folder_out', 'activated')
     list_display_links = ['pk']
     
-    actions = [export_selected_file_triggers, ]
+    actions = [export_selected_file_triggers, activate_selected_file_triggers,]
 
 
 class ScheduleTriggerAdmin(admin.ModelAdmin):
@@ -191,7 +234,7 @@ class ScheduleTriggerAdmin(admin.ModelAdmin):
     list_display_links = ['pk']
     exclude = ('next_execution', 'past_settings')
     
-    actions = [export_selected_schedule_triggers, ]
+    actions = [export_selected_schedule_triggers, activate_selected_schedule_triggers,]
 
 
 class OutlookTriggerAdmin(admin.ModelAdmin):
@@ -230,7 +273,7 @@ class OutlookTriggerAdmin(admin.ModelAdmin):
                     'folder_in', 'folder_out', 'activated')
     list_display_links = ['pk']
     
-    actions = [export_selected_outlook_triggers, ]
+    actions = [export_selected_outlook_triggers, activate_selected_outlook_triggers,]
 
 
 class ExecutionAdmin(admin.ModelAdmin):

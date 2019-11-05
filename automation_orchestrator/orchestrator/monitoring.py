@@ -70,14 +70,14 @@ def file_trigger_monitor():
         range(10000)
         t.sleep(trigger_sleep)
         
-        if os.path.exists("error.txt"):
+        if os.path.exists("logs\\error_log.txt"):
             break
         
         try:
             file_trigger_monitor_evaluate()
             
         except:
-            with open("error.txt", 'a') as f:
+            with open("logs\\error_log.txt", 'a') as f:
                 try:
                     f.write(traceback.format_exc())
                     print(traceback.format_exc())
@@ -123,7 +123,7 @@ def file_trigger_monitor_evaluate():
             else:
                 continue
         
-        files = [file for file in glob.glob(item.folder_in + r"\*") if os.path.isfile(file)]
+        files = [file for file in glob.glob(item.folder_in + "\\*") if os.path.isfile(file)]
         files.sort(key=os.path.getctime)
 
         for file in files:
@@ -182,14 +182,14 @@ def schedule_trigger_monitor():
         range(10000)
         t.sleep(trigger_sleep)
         
-        if os.path.exists("error.txt"):
+        if os.path.exists("logs\\error_log.txt"):
             break
         
         try:
             schedule_trigger_monitor_evaluate()
             
         except:
-            with open("error.txt", 'a') as f:
+            with open("logs\\error_log.txt", 'a') as f:
                 try:
                     f.write(traceback.format_exc())
                     print(traceback.format_exc())
@@ -284,7 +284,7 @@ def outlook_trigger_monitor():
         range(10000)
         t.sleep(outlook_sleep)
         
-        if os.path.exists("error.txt"):
+        if os.path.exists("logs\\error_log.txt"):
             break
         
         try:
@@ -304,7 +304,7 @@ def outlook_trigger_monitor():
             outlook_trigger_monitor()
         
         except:
-            with open("error.txt", 'a') as f:
+            with open("logs\\error_log.txt", 'a') as f:
                 try:
                     f.write(traceback.format_exc())
                     print(traceback.format_exc())
@@ -450,14 +450,14 @@ def execution_monitor():
         range(10000)
         t.sleep(queue_sleep)
         
-        if os.path.exists("error.txt"):
+        if os.path.exists("logs\\error_log.txt"):
             break
         
         try:
             execution_monitor_evaluate()
             
         except:
-            with open("error.txt", 'a') as f:
+            with open("logs\\error_log.txt", 'a') as f:
                 try:
                     f.write(traceback.format_exc())
                     print(traceback.format_exc())
@@ -467,10 +467,14 @@ def execution_monitor():
         
 
 def execution_monitor_evaluate():
-    items = Execution.objects.filter(status="Pending", computer_name__iexact=os.environ['COMPUTERNAME'], user_name__iexact=os.environ['USERNAME']).order_by('-priority', 'time_queued')
+    items = Execution.objects.filter(status="Pending", computer_name__iexact=os.environ['COMPUTERNAME'], user_name__iexact=os.environ['USERNAME']).order_by('priority', 'time_queued')
     
     for item in items:
-        if any(item.app.split("\\")[-1].lower() in process.lower() for process in subprocess.run(["wmic", "process", "get", "description,executablepath"], stdout=subprocess.PIPE, text=True).stdout.split('\n')):
+        app = item.app.split("\\")[-1].lower()
+        username = os.environ['USERNAME'].lower()
+        processes = subprocess.run(["wmic", "process", "where", f"name='{app}'", "call", "GetOwner"], stdout=subprocess.PIPE, text=True).stdout.split('\n')
+        
+        if any(str(f'\tuser = "{username}";') in user.lower() for user in processes):
             continue
             
         item.time_start = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))}00")
@@ -484,9 +488,9 @@ def execution_monitor_evaluate():
                 try:
                     if 'foxtrot' or 'foxbot' in item.app.lower():
                         if item.close_bot_automatically == True:
-                            subprocess.run([item.app, r'/Open', item.botflow, r'/Run', r'/Close', r'/Exit'], timeout=(item.timeout_minutes * 60))
+                            subprocess.run([item.app, '/Open', item.botflow, '/Run', '/Close', '/Exit'], timeout=(item.timeout_minutes * 60))
                         else:
-                            subprocess.run([item.app, r'/Open', item.botflow, r'/Run'], timeout=(item.timeout_minutes * 60))
+                            subprocess.run([item.app, '/Open', item.botflow, '/Run'], timeout=(item.timeout_minutes * 60))
                     else:
                         subprocess.run([item.app, item.botflow], timeout=(item.timeout_minutes * 60))
                     

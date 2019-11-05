@@ -1,6 +1,7 @@
 import os
 import sys
 import django
+import requests
 from socket import gethostname, gethostbyname_ex
 from django.db.models import Q
 from subprocess import Popen, PIPE
@@ -22,7 +23,7 @@ def main():
     max_runtime = 10800
     server_runtime = 1800
     sleep_time = 10
-    restart_time = 10
+    restart_time = 2
     error_count = 0
     
     if not os.path.exists("automation_orchestrator\\manage.py"):
@@ -41,31 +42,56 @@ def main():
     while True:
         start_time_loop = datetime.now()
         
-        with Popen(cmd, stdout=PIPE, stderr=PIPE) as p:
-            print(f"{datetime.now()}: The server is now running on: {url}")
-            print(f"{datetime.now()}: The server will automatically restart in {str(server_runtime)} seconds...")
-            
-            while True:
-                sleep(sleep_time)
-                
-                if (datetime.now() - start_time_loop).seconds >= server_runtime or os.path.exists("error.txt"):
-                    executions = Execution.objects.filter(Q(status="Pending") | Q(status="Running"))
-                            
-                    if len(executions) == 0:
-                        if os.path.exists("error.txt"):
-                            error_count += 1
-                            with open("error.txt") as f:
-                                error_message = f.read()
-                                
-                            print(f"{datetime.now()}: ERROR OCCURRED: {error_message}")
-                            
-                        print(f"{datetime.now()}: Stopping the server...")
-                        
-                        p.kill()
-                        break
+        with open("logs\\server_log.txt", "w") as log_file:
+            with Popen(cmd, stdout=log_file, stderr=log_file) as p:
+                try:
+                    print(f"{datetime.now()}: The server is now running on: {url}")
+                    print(f"{datetime.now()}: The server will automatically restart in {str(server_runtime)} seconds...")
                     
-                    else:
-                        print(f"{datetime.now()}: Waiting to restart as something is either 'Pending' or 'Running'...")
+                    while True:
+                        sleep(sleep_time)
+                        
+                        try:
+                            requests.get(url, timeout=restart_time)
+                            server_responded = True
+                        except requests.exceptions.Timeout:
+                            server_responded = False
+                        
+                        if (datetime.now() - start_time_loop).seconds >= server_runtime or os.path.exists("logs\\error_log.txt") or server_responded == False:
+                            executions = Execution.objects.filter(Q(status="Pending") | Q(status="Running"))
+                                    
+                            if len(executions) == 0:
+                                if os.path.exists("logs\\error_log.txt"):
+                                    error_count += 1
+                                    
+                                    with open("logs\\error_log.txt") as error_file:
+                                        error_message = error_file.read()
+                                        
+                                    print(f"{datetime.now()}: ERROR OCCURRED: {error_message}")
+                                    
+                                elif server_responded == False:
+                                    print(f"{datetime.now()}: ERROR OCCURRED: The server does not respond...")
+                                    
+                                    
+                                print(f"{datetime.now()}: Stopping the server...")
+                                
+                                p.terminate()
+                                p.wait()
+                                
+                                print(f"{datetime.now()}: Server stopped!")
+                                break
+                            
+                            else:
+                                print(f"{datetime.now()}: Waiting to restart as something is either 'Pending' or 'Running'...")
+                                
+                except:
+                    print(f"{datetime.now()}: Stopping the server...")
+                    
+                    p.terminate()
+                    p.wait()
+                    
+                    print(f"{datetime.now()}: Server stopped!")
+                    break
         
         if error_count >= 3:
             print(f"{datetime.now()}: NOT restarting the server after {str(error_count)} encountered errors!")

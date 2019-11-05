@@ -53,7 +53,7 @@ class FileTrigger(models.Model):
     
     computer_name = models.CharField(max_length=255, default=get_computer_name, help_text="Specify on which computer the triggered botflow should run.")
     user_name = models.CharField(max_length=255, default=get_user_name, help_text="Specify on which user the triggered botflow should run.")
-    priority = models.PositiveIntegerField(default=3, validators=[MinValueValidator(1), MaxValueValidator(5)], help_text="Specify the priority of the triggered botflow. The triggered botflow with the highest priority will always run first.")
+    priority = models.PositiveIntegerField(default=3, validators=[MinValueValidator(1), MaxValueValidator(5)], help_text="Specify the priority of the triggered botflow (1 is highest, 5 is lowest). The triggered botflow with the highest priority will always run first.")
     activated = models.BooleanField(default=False, help_text="Specify whether the trigger should be active.")
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
@@ -75,7 +75,7 @@ class ScheduleTrigger(models.Model):
     
     computer_name = models.CharField(max_length=255, default=get_computer_name, help_text="Specify on which computer the triggered botflow should run.")
     user_name = models.CharField(max_length=255, default=get_user_name, help_text="Specify on which user the triggered botflow should run.")
-    priority = models.PositiveIntegerField(default=3, validators=[MinValueValidator(1), MaxValueValidator(5)], help_text="Specify the priority of the triggered botflow. The triggered botflow with the highest priority will always run first.")
+    priority = models.PositiveIntegerField(default=3, validators=[MinValueValidator(1), MaxValueValidator(5)], help_text="Specify the priority of the triggered botflow (1 is highest, 5 is lowest). The triggered botflow with the highest priority will always run first.")
     activated = models.BooleanField(default=False, help_text="Specify whether the trigger should be active.")
     
     next_execution = models.CharField(max_length=255, blank=True)
@@ -89,7 +89,7 @@ class OutlookTrigger(models.Model):
     app = models.ForeignKey(App, on_delete=models.CASCADE, help_text="Select the application for this trigger.")
     botflow = models.ForeignKey(Botflow, on_delete=models.CASCADE, help_text="Select the botflow for this trigger.")
     
-    email = models.CharField(max_length=255, default="Default")
+    email = models.CharField(max_length=255, default="Default", help_text="Specify the email of the account to monitor. IMPORTANT: If you wish to monitor the primary Outlook account, the email should be set to 'Default'.")
     
     folder_in = models.CharField(max_length=255, help_text="Specify the folder for incoming emails. When an email is detected in this folder, the trigger will be activated.")
     folder_out = models.CharField(max_length=255, help_text="Specify the folder that the emails should be moved to. When the trigger is activated, the email will be moved to this folder.")
@@ -101,7 +101,7 @@ class OutlookTrigger(models.Model):
     
     computer_name = models.CharField(max_length=255, default=get_computer_name, help_text="Specify on which computer the triggered botflow should run.")
     user_name = models.CharField(max_length=255, default=get_user_name, help_text="Specify on which user the triggered botflow should run.")
-    priority = models.PositiveIntegerField(default=3, validators=[MinValueValidator(1), MaxValueValidator(5)], help_text="Specify the priority of the triggered botflow. The triggered botflow with the highest priority will always run first.")
+    priority = models.PositiveIntegerField(default=3, validators=[MinValueValidator(1), MaxValueValidator(5)], help_text="Specify the priority of the triggered botflow (1 is highest, 5 is lowest). The triggered botflow with the highest priority will always run first.")
     activated = models.BooleanField(default=False, help_text="Specify whether the trigger should be active.")
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)

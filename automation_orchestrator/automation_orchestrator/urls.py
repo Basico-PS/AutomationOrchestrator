@@ -49,8 +49,8 @@ urlpatterns = [
     path('api/0/', include('orchestrator.urls')),
     ]
 
-if os.path.exists('error.txt'):
-    os.remove('error.txt')
+if os.path.exists('logs\\error_log.txt'):
+    os.remove('logs\\error_log.txt')
 
 start_file_trigger_monitor()
 start_schedule_trigger_monitor()

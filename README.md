@@ -1,6 +1,6 @@
 # Basico P/S - Automation Orchestrator
 
-<i>Better documentation is underway...</i>
+<i>More documentation is underway...</i>
 
 For support, please contact us: robotics@basico.dk
 
@@ -16,7 +16,7 @@ As described on the official Django project site, it <i>"is a high-level Python 
 
 Some of the biggest web platforms and brands like [Instagram and Pinterest use the Django Framework](https://www.djangoproject.com/start/overview/) due to its leading security features and ability to scale.
 
-The purpose of this solution is to offer a well-functioning, fully customizable automation orchestrator application to trigger and schedule scripts. At this moment, the solution is only intended to work as a local automation orchestrator running on the same machine and user as where the scripts are supposed to be executed. IMPORTANT: The solution runs with the ["DEBUG" flag set to "True"](https://docs.djangoproject.com/en/2.2/ref/settings/#debug) even though it is not recommended in a cloud production environment since the solution should only be used to run fully locally or shared in your protected internal network. It is in the plans to make it possible to use the automation orchestrator as a centralized tool in your protected internal network to orchestrate scripts across machines and users, however, if you wish to deploy the solution in the open cloud, there are [many additional steps](https://docs.djangoproject.com/en/2.2/howto/deployment/) to consider and implement.
+The purpose of this solution is to offer a well-functioning, fully customizable automation orchestrator application to trigger and schedule scripts. The solution can run as a fully local server only available on the local host or as a server available in your protected internal network. IMPORTANT: The solution runs with the ["DEBUG" flag set to "True"](https://docs.djangoproject.com/en/2.2/ref/settings/#debug), which is not recommended in a cloud production environment, since the solution should only be used to run fully locally or shared in your protected internal network. If you wish to deploy the solution in the open cloud, there are [many additional steps](https://docs.djangoproject.com/en/2.2/howto/deployment/) to consider and implement.
 
 ## Installation
 
@@ -30,6 +30,6 @@ For the solution to work, you need to install [Python](https://www.python.org/).
 
 ## Usage
 
-After a succesful installation, you can now start your local server by running the "RUN_SERVER_LOCALLY.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_LOCALLY.bat). Remember to run the batch file (or commands manually) as an administrator. As long as the server is running, you are able to locally (only on your own machine) access the Automation Orchestrator via a browser on http://127.0.0.1:8000/.
+After a succesful installation, you can now start your server either locally by running the "RUN_SERVER_LOCALLY.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_LOCALLY.bat) or in your protected internal network by running the "RUN_SERVER_NETWORK.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_NETWORK.bat). Remember to run the batch file (or commands manually) as an administrator.
 
-More documentation on how to set up the system and how to make the Automation Orchestrator accessible from other machines in your protected internal network is underway...
+<i>More documentation is underway...</i>

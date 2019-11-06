@@ -31,13 +31,18 @@ def main():
         sleep(restart_time)
         return None
     
+    if os.path.exists('venv\\scripts\\python.exe'):
+        python = 'venv\\scripts\\python.exe'
+    else:
+        python = 'python.exe'
+    
     if str(sys.argv[-1]).lower() == '--locally=true':
         url = "http://127.0.0.1:8000/"
-        cmd = ['python', 'automation_orchestrator\\manage.py', 'runserver', '--noreload']
+        cmd = [python, 'automation_orchestrator\\manage.py', 'runserver', '--noreload']
     else:
         url = gethostbyname_ex(gethostname())[-1][-1]
         url = f"http://{url}:8000/"
-        cmd = ['python', 'automation_orchestrator\\manage.py', 'runserver', '0.0.0.0:8000', '--noreload']
+        cmd = [python, 'automation_orchestrator\\manage.py', 'runserver', '0.0.0.0:8000', '--noreload']
 
     while True:
         start_time_loop = datetime.now()

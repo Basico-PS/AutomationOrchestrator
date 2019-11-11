@@ -4,6 +4,10 @@
 
 For support, please contact us: robotics@basico.dk
 
+<p align="center">
+  <img src="/images/login%20page.png" width="700">
+</p>
+
 This solution allows you to run a local [Django Web Application](https://www.djangoproject.com/) to administrate and orchestrate automation scripts such as Nintex RPA botflows. Feature highlights out-of-the-box:
 - Groups and User Setup
 - File Triggers
@@ -21,6 +25,8 @@ The purpose of this solution is to offer a well-functioning, fully customizable 
 ## Installation
 
 For the solution to work, you need to install [Python](https://www.python.org/). The solution is tested with Python 3.7 and 3.8.
+
+Here is a [video walkthrough](https://www.screencast.com/t/PgK9OkKpx2) of the installation process.
 
 1. Download the [latest version](https://github.com/Basico-PS/AutomationOrchestrator/archive/v0.0.14.zip).
 2. Create a folder called "Automation Orchestrator" somewhere convenient, for example, directly on the C: drive or in the "Program Files" folder.

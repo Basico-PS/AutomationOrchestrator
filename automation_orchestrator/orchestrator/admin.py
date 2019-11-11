@@ -1,8 +1,10 @@
+from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.http import HttpResponse
 from .models import App, Botflow, FileTrigger, ScheduleTrigger, OutlookTrigger, Execution
 import csv
+import os
 
 
 admin.site.site_header = 'Basico P/S - Automation Orchestrator'
@@ -130,7 +132,22 @@ def export_selected_executions(modeladmin, request, queryset):
     return response
 
 
+class AppForm(forms.ModelForm):
+    class Meta:
+        model = App
+        fields = '__all__'
+
+    def clean(self):
+        path = self.cleaned_data.get('path')
+        
+        if not os.path.isfile(path):
+            raise forms.ValidationError("The specified file in the path field does not exist!")
+        
+        return self.cleaned_data
+
+
 class AppAdmin(admin.ModelAdmin):
+    form = AppForm
     fieldsets = (
         ('General', {
             'fields': ('name', 'path',),
@@ -139,6 +156,20 @@ class AppAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'path',)
     list_editable = ('name', 'path',)
     list_display_links = ['pk']
+
+
+class BotflowForm(forms.ModelForm):
+    class Meta:
+        model = Botflow
+        fields = '__all__'
+
+    def clean(self):
+        path = self.cleaned_data.get('path')
+        
+        if not os.path.isfile(path):
+            raise forms.ValidationError("The specified file in the path field does not exist!")
+        
+        return self.cleaned_data
 
 
 class BotflowAdmin(admin.ModelAdmin):
@@ -150,6 +181,7 @@ class BotflowAdmin(admin.ModelAdmin):
             'fields': ('queue_if_already_running',),
         }),
         ('Timeout', {
+            'classes': ('collapse',),
             'fields': ('timeout_minutes', 'timeout_kill_processes',),
         }),
         ('Nintex RPA', {
@@ -225,6 +257,10 @@ class ScheduleTriggerAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'fields': ('computer_name', 'user_name',),
         }),
+        ('Advanced', {
+            'classes': ('collapse',),
+            'fields': ('next_execution',),
+        }),
     )
     
     list_display = ('pk', 'app', 'botflow', 
@@ -232,7 +268,8 @@ class ScheduleTriggerAdmin(admin.ModelAdmin):
     list_editable = ('app', 'botflow', 
                     'frequency', 'run_every', 'run_start', 'activated',)
     list_display_links = ['pk']
-    exclude = ('next_execution', 'past_settings')
+    exclude = ('past_settings',)
+    readonly_fields = ('next_execution',)
     
     actions = [export_selected_schedule_triggers, activate_selected_schedule_triggers,]
 

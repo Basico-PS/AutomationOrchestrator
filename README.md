@@ -5,7 +5,7 @@
 For support, please contact us: robotics@basico.dk
 
 <p align="center">
-  <img src="/images/login%20page.png" width="700">
+  <img src="/images/login%20page.png" width="750">
 </p>
 
 This solution allows you to run a local [Django Web Application](https://www.djangoproject.com/) to administrate and orchestrate automation scripts such as Nintex RPA botflows. Feature highlights out-of-the-box:
@@ -36,6 +36,10 @@ Here is a [video walkthrough](https://www.screencast.com/t/PgK9OkKpx2) of the in
 
 ## Usage
 
-After a succesful installation, you can now start your server either locally by running the "RUN_SERVER_LOCALLY.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_LOCALLY.bat) or in your protected internal network by running the "RUN_SERVER_NETWORK.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_NETWORK.bat). Remember to run the batch file (or commands manually) as an administrator.
+After a succesful installation, you can now start your server either locally by running the "RUN_SERVER_LOCALLY.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_LOCALLY.bat) or in your protected internal network by running the "RUN_SERVER_NETWORK.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_NETWORK.bat). Remember to run the batch file (or commands manually) as an administrator. You are now ready to access the Automation Orchestrator via a browser and get started.
+
+<p align="center">
+  <img src="/images/home%20page.png" width="750">
+</p>
 
 <i>More documentation is underway...</i>

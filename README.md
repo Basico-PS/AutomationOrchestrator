@@ -26,17 +26,29 @@ The purpose of this solution is to offer a well-functioning, fully customizable 
 
 For the solution to work, you need to install [Python](https://www.python.org/). The solution is tested with Python 3.7 and 3.8.
 
-Here is a [video walkthrough](https://www.screencast.com/t/PgK9OkKpx2) of the installation process.
-
 1. Download the [latest version](https://github.com/Basico-PS/AutomationOrchestrator/archive/v0.0.14.zip).
 2. Create a folder called "Automation Orchestrator" somewhere convenient, for example, directly on the C: drive or in the "Program Files" folder.
 3. Unzip the folder in your created "Automation Orchestrator" folder. So, your path could be similar to "C:\Automation Orchestrator\AutomationOrchestrator-0.0.14" or "C:\Program Files\Automation Orchestrator\AutomationOrchestrator-0.0.14". However, you may unzip the folder anywhere on your system.
 4. After unzipping the folder, run the "INSTALL.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/INSTALL.bat) for an automated installation process. You may also manually run the installation steps via, for example, the CMD. Remember to run the batch file (or commands manually) as an administrator.
 5. The last command of the installation process will prompt you to create an account, a super user who has all permissions. After creating the super user, the installation process is complete.
 
+Here is a [video walkthrough](https://www.screencast.com/t/PgK9OkKpx2) of the installation and setup process.
+
 ## Usage
 
-After a succesful installation, you can now start your server either locally by running the "RUN_SERVER_LOCALLY.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_LOCALLY.bat) or in your protected internal network by running the "RUN_SERVER_NETWORK.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_NETWORK.bat). Remember to run the batch file (or commands manually) as an administrator. You are now ready to access the Automation Orchestrator via a browser and get started.
+After a succesful installation, you can now start your server either locally by running the "RUN_SERVER_LOCALLY.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_LOCALLY.bat) or in your protected internal network by running the "RUN_SERVER_NETWORK.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_NETWORK.bat). Remember to run the batch file (or commands manually) as an administrator. 
+
+<p align="center">
+  <img src="/images/run%20server.png" width="750">
+</p>
+
+<b> IMPORTANT: When you wish to stop the server, you <u>MUST</u> click the shortcut ctrl+c in the server window to see the confirmation that the server is stopped before closing the window. Make sure to NOT close the server while anything is running. Sometimes you need to click the shortcut a couple of times before it is registered by the server.</b>
+
+<p align="center">
+  <img src="/images/close%20server.png" width="750">
+</p>
+
+You are now ready to access the Automation Orchestrator via a browser and get started. To see an example of how to set it up, view the [video walkthrough](https://www.screencast.com/t/PgK9OkKpx2) of the installation and setup process.
 
 <p align="center">
   <img src="/images/home%20page.png" width="750">

@@ -29,7 +29,7 @@ class Botflow(models.Model):
     
     close_bot_automatically = models.BooleanField(default=False, help_text="Specify whether to automatically close the bot using the /Close /Exit commands. IMPORTANT: This is a Nintex RPA specific setting.")
     
-    timeout_minutes = models.PositiveIntegerField(default=60, validators=[MinValueValidator(1)], help_text="Specify after how many minutes the botflow process should be forcibly killed.")
+    timeout_minutes = models.PositiveIntegerField(default=300, validators=[MinValueValidator(1)], help_text="Specify after how many minutes the botflow process should be forcibly killed.")
     timeout_kill_processes = models.CharField(max_length=255, blank=True, help_text="Specify any additional processes that should be killed in the event of a timeout. To specify multiple processes, use comma to separate them like this: 'iexplore.exe, explorer.exe'.")
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
@@ -64,7 +64,8 @@ class ScheduleTrigger(models.Model):
     app = models.ForeignKey(App, on_delete=models.CASCADE, help_text="Select the application for this trigger.")
     botflow = models.ForeignKey(Botflow, on_delete=models.CASCADE, help_text="Select the botflow for this trigger.")
 
-    frequency = models.CharField(max_length=2, choices=[('MI', 'Minute'),('HO', 'Hour'),('DA', 'Day'),('WE', 'Week')], help_text="Specify the frequency of the trigger.")
+    frequency = models.CharField(max_length=3, choices=[('MIN', 'Minute'),('HOU', 'Hour'),('DAY', 'Day'),('WEE', 'Week'),('MON', 'Month'),
+                                                        ('FWK', 'First Week Day'),('FWD', 'First Weekend Day'), ('LWK', 'Last Week Day'),('LWD', 'Last Weekend Day')], help_text="Specify the frequency of the trigger.")
     run_every = models.PositiveIntegerField(validators=[MinValueValidator(1)], help_text="Specify how often to run every minute/hour/day/week.")
     run_start = models.DateTimeField(help_text="Specify the start date and time for the trigger. This will be the starting point of the trigger.")
     
@@ -78,7 +79,7 @@ class ScheduleTrigger(models.Model):
     priority = models.PositiveIntegerField(default=3, validators=[MinValueValidator(1), MaxValueValidator(5)], help_text="Specify the priority of the triggered botflow (1 is highest, 5 is lowest). The triggered botflow with the highest priority will always run first.")
     activated = models.BooleanField(default=False, help_text="Specify whether the trigger should be active.")
     
-    next_execution = models.CharField(max_length=255, blank=True)
+    next_execution = models.CharField(max_length=255, blank=True, editable=False, help_text="This field specifies the scheduled time for the next execution. IMPORTANT: This date and time field is in UTC timezone, therefore, an offset is expected!")
     past_settings = models.CharField(max_length=255, blank=True)
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)

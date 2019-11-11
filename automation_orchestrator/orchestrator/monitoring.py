@@ -3,6 +3,7 @@ import glob
 import pytz
 import shutil
 import datetime
+import calendar
 import traceback
 import subprocess
 import pythoncom
@@ -10,6 +11,7 @@ import time as t
 import win32com.client as win32
 from .models import App, Botflow, FileTrigger, ScheduleTrigger, OutlookTrigger, Execution
 from django.db.models import Q
+from dateutil.relativedelta import relativedelta
 
 
 trigger_sleep = 2
@@ -24,17 +26,68 @@ class OutlookDispatchException(Exception):
 
 def calculate_next_execution(run_start, frequency, run_every, run_after, run_until, run_on_week_days, run_on_weekend_days):    
     for i in range(5256000):
-        if frequency == "MI":
+        if frequency == "MIN":
             time = run_start + datetime.timedelta(minutes=int(run_every) * i)
             
-        elif frequency == "HO":
+        elif frequency == "HOU":
             time = run_start + datetime.timedelta(hours=int(run_every) * i)
             
-        elif frequency == "DA":
+        elif frequency == "DAY":
             time = run_start + datetime.timedelta(days=int(run_every) * i)
             
-        elif frequency == "WE":
+        elif frequency == "WEE":
             time = run_start + datetime.timedelta(weeks=int(run_every) * i)
+            
+        elif frequency == "MON":                
+            time = run_start + relativedelta(months=int(run_every) * i)
+            
+        elif frequency == "FWK":
+            time = run_start + relativedelta(months=int(run_every) * i)
+            time = time.replace(day=1)
+            
+            time_temp = time
+            
+            for ii in range(7):
+                if time.weekday() >= 5:
+                    time = time_temp + datetime.timedelta(days=ii)
+                else:
+                    break
+            
+        elif frequency == "FWD":
+            time = run_start + relativedelta(months=int(run_every) * i)
+            time = time.replace(day=1)
+            
+            time_temp = time
+            
+            for ii in range(7):
+                if time.weekday() <= 4:
+                    time = time_temp + datetime.timedelta(days=ii)
+                else:
+                    break
+            
+        elif frequency == "LWK":
+            time = run_start + relativedelta(months=int(run_every) * i)
+            time = time.replace(day=calendar.monthrange(time.year, time.month)[1])
+            
+            time_temp = time
+            
+            for ii in range(7):
+                if time.weekday() >= 5:
+                    time = time_temp - datetime.timedelta(days=ii)
+                else:
+                    break
+            
+        elif frequency == "LWD":
+            time = run_start + relativedelta(months=int(run_every) * i)
+            time = time.replace(day=calendar.monthrange(time.year, time.month)[1])
+            
+            time_temp = time
+            
+            for ii in range(7):
+                if time.weekday() <= 4:
+                    time = time_temp - datetime.timedelta(days=ii)
+                else:
+                    break
         
         else:
             continue

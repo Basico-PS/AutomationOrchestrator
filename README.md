@@ -36,13 +36,15 @@ Here is a [video walkthrough](https://www.screencast.com/t/PgK9OkKpx2) of the in
 
 ## Usage
 
-After a succesful installation, you can now start your server either locally by running the "RUN_SERVER_LOCALLY.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_LOCALLY.bat) or in your protected internal network by running the "RUN_SERVER_NETWORK.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_NETWORK.bat). Remember to run the batch file (or commands manually) as an administrator. 
+After a succesful installation, you can now start your server either locally by running the "RUN_SERVER_LOCALLY.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_LOCALLY.bat) or in your protected internal network by running the "RUN_SERVER_NETWORK.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_NETWORK.bat). Remember to run the batch file (or commands manually) as an administrator. The server will automatically restart every 30 minutes (unless something is running, in the case, it will wait) and run for no more than 3 hours in total. This is to make sure that the server is restarted regurlarly.
+
+<b>IMPORTANT: For the server to succesfully work as an automation orchestrator, it needs to be always running. A recommended way of ensuring this it to add a task in the Windows Task Scheduler that runs every minute of every day to run the batch file but only start if it is not already running.</b>
 
 <p align="center">
   <img src="/images/run%20server.png">
 </p>
 
-<b> IMPORTANT: When you wish to stop the server, you <u>MUST</u> click the shortcut ctrl+c in the server window to see the confirmation that the server is stopped before closing the window. Make sure to NOT close the server while anything is running. Sometimes you need to click the shortcut a couple of times before it is registered by the server.</b>
+<b>IMPORTANT: When you wish to stop the server, <u>you MUST click the shortcut ctrl+c</u> in the server window to see the confirmation that the server is stopped before closing the window. Make sure to NOT close the server while anything is running. Sometimes you need to click the shortcut a couple of times before it is registered by the server.</b>
 
 <p align="center">
   <img src="/images/close%20server.png">

@@ -1,7 +1,7 @@
-Django>=2.2.6
-djangorestframework>=3.10.3
-coreapi>=2.3.3
-Markdown>=3.1.1
-Pygments>=2.4.2
-python-dateutil>=2.8.1
-pywin32>=225
+Django==2.2.6
+djangorestframework==3.10.3
+coreapi==2.3.3
+Markdown==3.1.1
+Pygments==2.4.2
+python-dateutil==2.8.1
+pywin32==224

@@ -20,7 +20,13 @@ As described on the official Django project site, it <i>"is a high-level Python 
 
 Some of the biggest web platforms and brands like [Instagram and Pinterest use the Django Framework](https://www.djangoproject.com/start/overview/) due to its leading security features and ability to scale.
 
-The purpose of this solution is to offer a well-functioning, fully customizable automation orchestrator application to trigger and schedule scripts. The solution can run as a fully local server only available on the local host or as a server available in your protected internal network. IMPORTANT: The solution runs with the ["DEBUG" flag set to "True"](https://docs.djangoproject.com/en/2.2/ref/settings/#debug), which is not recommended in a cloud production environment, since the solution should only be used to run fully locally or shared in your protected internal network. If you wish to deploy the solution in the open cloud, there are [many additional steps](https://docs.djangoproject.com/en/2.2/howto/deployment/) to consider and implement.
+The purpose of this solution is to offer a well-functioning, fully customizable automation orchestrator application to trigger and schedule scripts. The solution can run as a fully local server only available on the local host accessible via a browser or as a server available in your protected internal network accessible via a browser. 
+
+Out-of-the-box, the solution can trigger and schedule scripts on the same machine and user running the server. In case you wish to do either of the two things below, you need to utilize the [Automation Orchestrator Executor add-on](https://github.com/Basico-PS/AutomationOrchestratorExecutor):
+- Run the server on one machine but execute the scripts on a different machine, or
+- Run the server on a machine (for example, a Windows Terminal Server) with multiple users that are supposed to execute scripts
+
+IMPORTANT: The solution runs with the ["DEBUG" flag set to "True"](https://docs.djangoproject.com/en/2.2/ref/settings/#debug), which is not recommended in a cloud production environment, since the solution should only be used to run fully locally or shared in your protected internal network. If you wish to deploy the solution in the open cloud, there are [many additional steps](https://docs.djangoproject.com/en/2.2/howto/deployment/) to consider and implement.
 
 ## Installation
 

@@ -77,7 +77,6 @@ def main():
                                 elif server_responded == False:
                                     print(f"{datetime.now()}: ERROR OCCURRED: The server does not respond...")
                                     
-                                    
                                 print(f"{datetime.now()}: Stopping the server...")
                                 
                                 p.terminate()

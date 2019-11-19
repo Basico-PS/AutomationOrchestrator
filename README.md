@@ -26,6 +26,8 @@ Out-of-the-box, the Automation Orchestrator can trigger and schedule scripts on 
 - Run the Automation Orchestrator on one machine but execute the scripts on a different machine, or
 - Run the Automation Orchestrator on a machine (for example, a Windows Terminal Server) with multiple users that are supposed to execute scripts
 
+IMPORTANT: For the Automation Orchestrator to work, you need to run the server in your protected internal network by using the "RUN_SERVER_NETWORK.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/RUN_SERVER_NETWORK.bat).
+
 IMPORTANT: The Automation Orchestrator runs with the ["DEBUG" flag set to "True"](https://docs.djangoproject.com/en/2.2/ref/settings/#debug), which is not recommended in a cloud production environment, since the Automation Orchestrator should only be used to run fully locally or shared in your protected internal network. If you wish to deploy the Automation Orchestrator in the open cloud, there are [many additional steps](https://docs.djangoproject.com/en/2.2/howto/deployment/) to consider and implement.
 
 ## Installation

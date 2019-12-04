@@ -29,7 +29,6 @@ def get_secret_key():
         if secret_key == "":
             secret_key = generate_secret_key()
             
-    print (secret_key)
     return secret_key
 
 

@@ -45,6 +45,7 @@ class FileTrigger(models.Model):
     
     folder_in = models.CharField(max_length=255, help_text="Specify the folder for incoming files. When a file is detected in this folder, the trigger will be activated.")
     folder_out = models.CharField(max_length=255, help_text="Specify the folder that the files should be moved to. When the trigger is activated, the file will be moved to this folder.")
+    filter = models.CharField(max_length=255, default="*", help_text="Specify any filter to only trigger on certain files. The default value '*' means all files. To specify multiple filters, use comma to separate them like this: '*.txt, *.pdf'.")
     
     run_after = models.TimeField(null=True, blank=True, help_text="Specify a time to limit the trigger to only be active after this time.")
     run_until = models.TimeField(null=True, blank=True, help_text="Specify a time to limit the trigger to only be active before this time.")

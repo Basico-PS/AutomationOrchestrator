@@ -208,6 +208,9 @@ class FileTriggerAdmin(admin.ModelAdmin):
         ('Folders', {
             'fields': ('folder_in', 'folder_out',),
         }),
+        ('Filter', {
+            'fields': ('filter',),
+        }),
         ('Activate', {
             'fields': ('activated',),
         }),
@@ -226,9 +229,9 @@ class FileTriggerAdmin(admin.ModelAdmin):
     )
     
     list_display = ('pk', 'app', 'botflow', 
-                    'folder_in', 'folder_out', 'activated')
+                    'folder_in', 'folder_out', 'filter', 'activated')
     list_editable = ('app', 'botflow', 
-                    'folder_in', 'folder_out', 'activated')
+                    'folder_in', 'folder_out', 'filter', 'activated')
     list_display_links = ['pk']
     
     actions = [export_selected_file_triggers, activate_selected_file_triggers,]

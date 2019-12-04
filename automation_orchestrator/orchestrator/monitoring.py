@@ -176,7 +176,11 @@ def file_trigger_monitor_evaluate():
             else:
                 continue
         
-        files = [file for file in glob.glob(item.folder_in + "\\*") if os.path.isfile(file)]
+        files = []
+        for filter in item.filter.split(","):
+            files = files + [file for file in glob.glob(item.folder_in + "\\" + filter.strip()) if os.path.isfile(file)]
+            
+        files = list(dict.fromkeys(files))
         files.sort(key=os.path.getctime)
 
         for file in files:

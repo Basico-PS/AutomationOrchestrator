@@ -13,21 +13,54 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 import socket
 
+
+# Retrieve the secret key for the server.
+def get_secret_key():
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)) + "\\secret_key.txt")
+    secret_key = None
+
+    if not os.path.exists(path):
+        secret_key = generate_secret_key()
+        
+    else:
+        with open(path, "r") as f:
+            secret_key = f.read().strip()
+            
+        if secret_key == "":
+            secret_key = generate_secret_key()
+            
+    print (secret_key)
+    return secret_key
+
+
+# Generate secret key for the server.
+def generate_secret_key():
+    from django.core.management.utils import get_random_secret_key
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)) + "\\secret_key.txt")
+    
+    secret_key = get_random_secret_key()
+    
+    with open(path, "w") as f:
+        f.write(secret_key)
+    
+    return secret_key
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '#5(=ke9q$j$3uke!o9++^ibc%6gwt4&idmt$p2i6#g@xlz%-tp'
+SECRET_KEY = get_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', socket.gethostbyname_ex(socket.gethostname())[-1][-1]]
-
+ALLOWED_HOSTS = ['127.0.0.1',
+                 'localhost',
+                 socket.gethostbyname_ex(socket.gethostname())[-1][-1]]
 
 # Application definition
 

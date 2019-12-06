@@ -351,9 +351,8 @@ class SmtpAccountForm(forms.ModelForm):
     def clean(self):
         activated = self.cleaned_data.get('activated')
         
-        if activated == True:
-            if SmtpAccount.objects.filter(activated=True).count() >= 1:
-                raise forms.ValidationError("An activated SMTP account already exists! Make sure to not activate this account or deactivate the activated account.")
+        if activated == True and SmtpAccount.objects.filter(activated=True).exists():
+            raise forms.ValidationError("An activated SMTP account already exists! Make sure to not activate this account or deactivate the activated account.")
         
         return self.cleaned_data
         

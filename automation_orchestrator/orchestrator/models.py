@@ -1,6 +1,7 @@
 import os
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
 from fernet_fields import EncryptedCharField
 
 
@@ -35,10 +36,10 @@ class Botflow(models.Model):
     timeout_minutes = models.PositiveIntegerField(default=300, validators=[MinValueValidator(1)], help_text="Specify after how many minutes the botflow process should be forcibly killed.")
     timeout_kill_processes = models.CharField(max_length=255, blank=True, help_text="Specify any additional processes that should be killed in the event of a timeout. To specify multiple processes, use comma to separate them like this: 'iexplore.exe, explorer.exe'.")
     
-    queued_notification = models.BooleanField(default=False, help_text="Specify whether to send an email when the botflow is queued.")
-    started_notification = models.BooleanField(default=False, help_text="Specify whether to send an email when the botflow is started.")
-    completed_notification = models.BooleanField(default=False, help_text="Specify whether to send an email when the botflow is completed.")
-    error_notification = models.BooleanField(default=False, help_text="Specify whether to send an email if the botflow encounters an error. IMPORTANT: This will not include errors during the execution of the botflow.")
+    queued_notification = models.CharField(max_length=255, blank=True, help_text="Specify who (if any) to should receive an email notification when the botflow is queued. To specify multiple processes, use comma to separate them like this: 'abc@basico.dk, xyz@basico.dk'.")
+    started_notification = models.CharField(max_length=255, blank=True, help_text="Specify who (if any) to should receive an email notification when the botflow is started. To specify multiple processes, use comma to separate them like this: 'abc@basico.dk, xyz@basico.dk'.")
+    completed_notification = models.CharField(max_length=255, blank=True, help_text="Specify who (if any) to should receive an email notification when the botflow is completed. To specify multiple processes, use comma to separate them like this: 'abc@basico.dk, xyz@basico.dk'.")
+    error_notification = models.CharField(max_length=255, blank=True, help_text="Specify who (if any) to should receive an email notification when the botflow is queued. To specify multiple processes, use comma to separate them like this: 'abc@basico.dk, xyz@basico.dk'. IMPORTANT: This will not include errors during the execution of the botflow.")
     
     close_bot_automatically = models.BooleanField(default=False, help_text="Specify whether to automatically close the bot using the /Close /Exit commands. IMPORTANT: This is a Nintex RPA specific setting.")
 
@@ -126,10 +127,10 @@ class Execution(models.Model):
     timeout_minutes = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     timeout_kill_processes = models.CharField(max_length=255, blank=True)
     
-    queued_notification = models.BooleanField(default=False)
-    started_notification = models.BooleanField(default=False)
-    completed_notification = models.BooleanField(default=False)
-    error_notification = models.BooleanField(default=False)
+    queued_notification = models.CharField(max_length=255, blank=True)
+    started_notification = models.CharField(max_length=255, blank=True)
+    completed_notification = models.CharField(max_length=255, blank=True)
+    error_notification = models.CharField(max_length=255, blank=True)
 
     close_bot_automatically = models.BooleanField(default=False)
     
@@ -147,3 +148,7 @@ class SmtpAccount(models.Model):
     
     def __str__(self):
         return self.email
+
+    def clean(self):        
+        if self.activated == True and SmtpAccount.objects.filter(activated=True).exists():
+            raise ValidationError('An activated SMTP account already exists! Make sure to not activate this account or deactivate the activated account.')

@@ -8,7 +8,10 @@ from email.mime.text import MIMEText
 
 @receiver(post_save, sender=Execution)
 def save_execution(sender, instance, **kwargs):
-    smtp_account = SmtpAccount.objects.filter(activated=True)[0]
+    try:
+        smtp_account = SmtpAccount.objects.filter(activated=True)[0]
+    except:
+        return
     
     if instance.status == "Pending":
         if instance.queued_notification == True:

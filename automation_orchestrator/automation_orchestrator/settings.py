@@ -16,32 +16,46 @@ import socket
 
 # Retrieve the secret key for the server.
 def get_secret_key():
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)) + "\\secret_key.txt")
-    secret_key = None
-
-    if not os.path.exists(path):
-        secret_key = generate_secret_key()
+    env_var_name = "BASICO_AUTOMATIONORCHESTRATOR_SECRET_KEY"
+    
+    if not env_var_name in os.environ:
+        secret_key = generate_secret_key(env_var_name)
         
     else:
-        with open(path, "r") as f:
-            secret_key = f.read().strip()
-            
-        if secret_key == "":
-            secret_key = generate_secret_key()
+        try:
+            secret_key = os.environ[env_var_name]
+        except:
+            secret_key = generate_secret_key(env_var_name)
             
     return secret_key
 
 
 # Generate secret key for the server.
-def generate_secret_key():
+def generate_secret_key(env_var_name):
+    import subprocess
     from django.core.management.utils import get_random_secret_key
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)) + "\\secret_key.txt")
     
     secret_key = get_random_secret_key()
     
+    subprocess.run(['setx', env_var_name, secret_key], stdout=subprocess.PIPE)
+    
+    path = os.path.dirname(os.path.abspath(__file__)) + "\\secret_key.txt"
+    
     with open(path, "w") as f:
         f.write(secret_key)
-    
+        
+    print(f"""
+***
+
+A secret key for encrypting data in the database has been generated.
+This key is securily stored as an environment variable but also in the following file as a backup.
+You may delete this file to make sure that no one else can get to the secret key.
+
+Path: {path}
+
+***
+""")
+        
     return secret_key
 
 

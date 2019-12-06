@@ -1,6 +1,7 @@
+import os
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-import os
+from fernet_fields import EncryptedCharField
 
 
 def get_computer_name():
@@ -33,6 +34,11 @@ class Botflow(models.Model):
     
     timeout_minutes = models.PositiveIntegerField(default=300, validators=[MinValueValidator(1)], help_text="Specify after how many minutes the botflow process should be forcibly killed.")
     timeout_kill_processes = models.CharField(max_length=255, blank=True, help_text="Specify any additional processes that should be killed in the event of a timeout. To specify multiple processes, use comma to separate them like this: 'iexplore.exe, explorer.exe'.")
+    
+    queued_notification = models.BooleanField(default=False, help_text="Specify whether to send an email when the botflow is queued.")
+    started_notification = models.BooleanField(default=False, help_text="Specify whether to send an email when the botflow is started.")
+    completed_notification = models.BooleanField(default=False, help_text="Specify whether to send an email when the botflow is completed.")
+    error_notification = models.BooleanField(default=False, help_text="Specify whether to send an email if the botflow encounters an error. IMPORTANT: This will not include errors during the execution of the botflow.")
     
     close_bot_automatically = models.BooleanField(default=False, help_text="Specify whether to automatically close the bot using the /Close /Exit commands. IMPORTANT: This is a Nintex RPA specific setting.")
 
@@ -116,11 +122,28 @@ class Execution(models.Model):
     user_name = models.CharField(max_length=255)
     priority = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     status = models.CharField(max_length=255)
-
-    close_bot_automatically = models.BooleanField(default=False)
     
     timeout_minutes = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     timeout_kill_processes = models.CharField(max_length=255, blank=True)
     
+    queued_notification = models.BooleanField(default=False)
+    started_notification = models.BooleanField(default=False)
+    completed_notification = models.BooleanField(default=False)
+    error_notification = models.BooleanField(default=False)
+
+    close_bot_automatically = models.BooleanField(default=False)
+    
     time_start = models.DateTimeField(null=True, blank=True)
     time_end = models.DateTimeField(null=True, blank=True)
+    
+    
+class SmtpAccount(models.Model):
+    email = models.CharField(max_length=255, help_text="Specify the email of the SMTP account.")
+    password = EncryptedCharField(max_length=255, help_text="Specify the password of the SMTP account.")
+    server = models.CharField(max_length=255, help_text="Specify the server of the SMTP account. For example: smtp.office365.com")
+    port = models.PositiveIntegerField(help_text="Specify the port of the SMTP account. For example: 587")
+    tls = models.BooleanField(default=True, help_text="Specify whether the SMTP account requires 'Transport Layer Security'.")
+    activated = models.BooleanField(default=False, help_text="Specify whether the SMTP account should be active.")
+    
+    def __str__(self):
+        return self.email

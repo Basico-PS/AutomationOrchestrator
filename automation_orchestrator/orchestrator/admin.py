@@ -1,8 +1,8 @@
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth.models import Group
 from django.http import HttpResponse
-from .models import App, Botflow, FileTrigger, ScheduleTrigger, OutlookTrigger, Execution
+from .models import App, Botflow, FileTrigger, ScheduleTrigger, OutlookTrigger, Execution, SmtpAccount
 import csv
 import os
 
@@ -23,7 +23,11 @@ def queue_item(item, trigger):
                           computer_name=botflow_object.computer_name,
                           user_name=botflow_object.user_name,
                           priority=botflow_object.priority,
-                          status="Pending")
+                          status="Pending",
+                          queued_notification = botflow_object.queued_notification,
+                          started_notification = botflow_object.started_notification,
+                          completed_notification = botflow_object.completed_notification,
+                          error_notification = botflow_object.error_notification)
     execution.save()
     
 
@@ -121,6 +125,30 @@ def export_selected_executions(modeladmin, request, queryset):
         writer.writerow(execution)
         
     return response
+    
+
+def test_selected_smtp_accounts(modeladmin, request, queryset):
+    import smtplib
+    from email.message import EmailMessage
+    
+    for item in queryset:
+        try:
+            msg = EmailMessage()
+            msg['Subject'] = "[TEST] Basico P/S Automation Orchestrator"
+            msg['From'] = item.email
+            msg['To'] = item.email
+
+            with smtplib.SMTP(item.server, item.port) as server:
+                if item.tls == True:
+                    server.starttls()
+                server.login(item.email, item.password)
+                server.send_message(msg)
+                
+            messages.success(request, f"Successfully sent an email with {item.email}!")
+                
+        except:
+            messages.error(request, f"Failed to send email with {item.email}!")
+            break
 
 
 class AppForm(forms.ModelForm):
@@ -138,7 +166,8 @@ class AppForm(forms.ModelForm):
 
 
 class AppAdmin(admin.ModelAdmin):
-    form = AppForm
+    # form = AppForm
+    
     fieldsets = (
         ('General', {
             'fields': ('name', 'path',),
@@ -149,7 +178,7 @@ class AppAdmin(admin.ModelAdmin):
     list_display_links = ['pk']
 
 
-class BotflowForm(forms.ModelForm):
+class BotflowForm(forms.ModelForm):    
     class Meta:
         model = Botflow
         fields = '__all__'
@@ -164,6 +193,8 @@ class BotflowForm(forms.ModelForm):
 
 
 class BotflowAdmin(admin.ModelAdmin):
+    # form = BotflowForm
+    
     fieldsets = (
         ('General', {
             'fields': ('name', 'path',),
@@ -182,6 +213,10 @@ class BotflowAdmin(admin.ModelAdmin):
         ('Timeout', {
             'classes': ('collapse',),
             'fields': ('timeout_minutes', 'timeout_kill_processes',),
+        }),
+        ('Notifications', {
+            'classes': ('collapse',),
+            'fields': ('queued_notification', 'started_notification', 'completed_notification', 'error_notification',),
         }),
         ('Nintex RPA', {
             'classes': ('collapse',),
@@ -305,9 +340,56 @@ class ExecutionAdmin(admin.ModelAdmin):
         return ['-time_queued']
 
 
+class SmtpAccountForm(forms.ModelForm):    
+    class Meta:
+        model = SmtpAccount
+        fields = '__all__'
+        widgets = {
+            'password': forms.PasswordInput(),
+        }
+
+    def clean(self):
+        activated = self.cleaned_data.get('activated')
+        
+        if activated == True:
+            if SmtpAccount.objects.filter(activated=True).count() >= 1:
+                raise forms.ValidationError("An activated SMTP account already exists! Make sure to not activate this account or deactivate the activated account.")
+        
+        return self.cleaned_data
+        
+
+class SmtpAccountAdmin(admin.ModelAdmin):
+    form = SmtpAccountForm
+    
+    fieldsets = (
+        ('General', {
+            'fields': ('email', 'password',),
+        }),
+        ('Connection', {
+            'fields': ('server', 'port', 'tls',),
+        }),
+        ('Activate', {
+            'fields': ('activated',),
+        }),
+    )
+    
+    list_display = ('pk', 'email',
+                    'server', 'port', 'tls',
+                    'activated',)
+    list_editable = ('server', 'port', 'tls',
+                     'activated',)
+    list_display_links = ['pk']
+    
+    actions = [test_selected_smtp_accounts, ]
+
+    def get_ordering(self, request):
+        return ['-activated']
+
+
 admin.site.register(App, AppAdmin)
 admin.site.register(Botflow, BotflowAdmin)
 admin.site.register(FileTrigger, FileTriggerAdmin)
 admin.site.register(ScheduleTrigger, ScheduleTriggerAdmin)
 admin.site.register(OutlookTrigger, OutlookTriggerAdmin)
 admin.site.register(Execution, ExecutionAdmin)
+admin.site.register(SmtpAccount, SmtpAccountAdmin)

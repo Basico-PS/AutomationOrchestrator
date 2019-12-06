@@ -226,8 +226,11 @@ def file_trigger_monitor_evaluate():
                                       computer_name=botflow_object.computer_name,
                                       user_name=botflow_object.user_name,
                                       priority=botflow_object.priority,
-                                      status="Pending")
-                
+                                      status="Pending",
+                                      queued_notification = botflow_object.queued_notification,
+                                      started_notification = botflow_object.started_notification,
+                                      completed_notification = botflow_object.completed_notification,
+                                      error_notification = botflow_object.error_notification)
                 execution.save()
         
             already_running = None
@@ -310,7 +313,11 @@ def schedule_trigger_monitor_evaluate():
                                       computer_name=botflow_object.computer_name,
                                       user_name=botflow_object.user_name,
                                       priority=botflow_object.priority,
-                                      status="Pending")
+                                      status="Pending",
+                                      queued_notification = botflow_object.queued_notification,
+                                      started_notification = botflow_object.started_notification,
+                                      completed_notification = botflow_object.completed_notification,
+                                      error_notification = botflow_object.error_notification)
                 execution.save()
             
             run_start = now.replace(tzinfo=pytz.timezone('UTC'))
@@ -491,8 +498,11 @@ def outlook_trigger_monitor_evaluate(outlook):
                                       computer_name=botflow_object.computer_name,
                                       user_name=botflow_object.user_name,
                                       priority=botflow_object.priority,
-                                      status="Pending")
-                
+                                      status="Pending",
+                                      queued_notification = botflow_object.queued_notification,
+                                      started_notification = botflow_object.started_notification,
+                                      completed_notification = botflow_object.completed_notification,
+                                      error_notification = botflow_object.error_notification)
                 execution.save()
         
             already_running = None

@@ -214,16 +214,19 @@ def file_trigger_monitor_evaluate():
                 already_running = []
             
             if len(already_running) < 1:
-                execution = Execution(app=App.objects.get(pk=item.app.pk).path, 
-                                    botflow=Botflow.objects.get(pk=item.botflow.pk).path,
-                                    trigger=f"File Trigger: {path_destination}",
-                                    close_bot_automatically=Botflow.objects.get(pk=item.botflow.pk).close_bot_automatically,
-                                    timeout_minutes=Botflow.objects.get(pk=item.botflow.pk).timeout_minutes,
-                                    timeout_kill_processes=Botflow.objects.get(pk=item.botflow.pk).timeout_kill_processes,
-                                    computer_name=item.computer_name,
-                                    user_name=item.user_name,
-                                    priority=item.priority,
-                                    status="Pending")
+                app_object = App.objects.get(pk=item.app.pk)
+                botflow_object = Botflow.objects.get(pk=item.botflow.pk)
+                
+                execution = Execution(app=app_object.path,
+                                      botflow=botflow_object.path,
+                                      trigger=f"File Trigger: {path_destination}",
+                                      close_bot_automatically=botflow_object.close_bot_automatically,
+                                      timeout_minutes=botflow_object.timeout_minutes,
+                                      timeout_kill_processes=botflow_object.timeout_kill_processes,
+                                      computer_name=botflow_object.computer_name,
+                                      user_name=botflow_object.user_name,
+                                      priority=botflow_object.priority,
+                                      status="Pending")
                 
                 execution.save()
         
@@ -293,18 +296,21 @@ def schedule_trigger_monitor_evaluate():
                 already_running = []
             
             if len(already_running) < 1:
+                app_object = App.objects.get(pk=item.app.pk)
+                botflow_object = Botflow.objects.get(pk=item.botflow.pk)
+                
                 time_trigger = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime("%Y-%m-%d %H:%M")
                 
-                execution = Execution(app=App.objects.get(pk=item.app.pk).path,
-                                    botflow=Botflow.objects.get(pk=item.botflow.pk).path,
-                                    trigger=f"Schedule Trigger: {time_trigger}",
-                                    close_bot_automatically=Botflow.objects.get(pk=item.botflow.pk).close_bot_automatically,
-                                    timeout_minutes=Botflow.objects.get(pk=item.botflow.pk).timeout_minutes,
-                                    timeout_kill_processes=Botflow.objects.get(pk=item.botflow.pk).timeout_kill_processes,
-                                    computer_name=item.computer_name,
-                                    user_name=item.user_name,
-                                    priority=item.priority,
-                                    status="Pending")
+                execution = Execution(app=app_object.path,
+                                      botflow=botflow_object.path,
+                                      trigger=f"Schedule Trigger: {time_trigger}",
+                                      close_bot_automatically=botflow_object.close_bot_automatically,
+                                      timeout_minutes=botflow_object.timeout_minutes,
+                                      timeout_kill_processes=botflow_object.timeout_kill_processes,
+                                      computer_name=botflow_object.computer_name,
+                                      user_name=botflow_object.user_name,
+                                      priority=botflow_object.priority,
+                                      status="Pending")
                 execution.save()
             
             run_start = now.replace(tzinfo=pytz.timezone('UTC'))
@@ -473,16 +479,19 @@ def outlook_trigger_monitor_evaluate(outlook):
                 already_running = []
             
             if len(already_running) < 1:
-                execution = Execution(app=App.objects.get(pk=item.app.pk).path, 
-                                        botflow=Botflow.objects.get(pk=item.botflow.pk).path,
-                                        trigger=f"Outlook Trigger: {email.Subject}",
-                                        close_bot_automatically=Botflow.objects.get(pk=item.botflow.pk).close_bot_automatically,
-                                        timeout_minutes=Botflow.objects.get(pk=item.botflow.pk).timeout_minutes,
-                                        timeout_kill_processes=Botflow.objects.get(pk=item.botflow.pk).timeout_kill_processes,
-                                        computer_name=item.computer_name,
-                                        user_name=item.user_name,
-                                        priority=item.priority,
-                                        status="Pending")
+                app_object = App.objects.get(pk=item.app.pk)
+                botflow_object = Botflow.objects.get(pk=item.botflow.pk)
+                
+                execution = Execution(app=app_object.path,
+                                      botflow=botflow_object.path,
+                                      trigger=f"Outlook Trigger: {email.Subject}",
+                                      close_bot_automatically=botflow_object.close_bot_automatically,
+                                      timeout_minutes=botflow_object.timeout_minutes,
+                                      timeout_kill_processes=botflow_object.timeout_kill_processes,
+                                      computer_name=botflow_object.computer_name,
+                                      user_name=botflow_object.user_name,
+                                      priority=botflow_object.priority,
+                                      status="Pending")
                 
                 execution.save()
         

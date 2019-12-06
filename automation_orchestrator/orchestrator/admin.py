@@ -11,16 +11,19 @@ admin.site.site_header = 'Basico P/S - Automation Orchestrator'
 
 
 def queue_item(item, trigger):
-    execution = Execution(app=App.objects.get(pk=item.app.pk).path, 
-                            botflow=Botflow.objects.get(pk=item.botflow.pk).path,
-                            trigger=trigger,
-                            close_bot_automatically=Botflow.objects.get(pk=item.botflow.pk).close_bot_automatically,
-                            timeout_minutes=Botflow.objects.get(pk=item.botflow.pk).timeout_minutes,
-                            timeout_kill_processes=Botflow.objects.get(pk=item.botflow.pk).timeout_kill_processes,
-                            computer_name=item.computer_name,
-                            user_name=item.user_name,
-                            priority=item.priority,
-                            status="Pending")
+    app_object = App.objects.get(pk=item.app.pk)
+    botflow_object = Botflow.objects.get(pk=item.botflow.pk)
+                
+    execution = Execution(app=app_object.path, 
+                          botflow=botflow_object.path,
+                          trigger=trigger,
+                          close_bot_automatically=botflow_object.close_bot_automatically,
+                          timeout_minutes=botflow_object.timeout_minutes,
+                          timeout_kill_processes=botflow_object.timeout_kill_processes,
+                          computer_name=botflow_object.computer_name,
+                          user_name=botflow_object.user_name,
+                          priority=botflow_object.priority,
+                          status="Pending")
     execution.save()
     
 
@@ -47,16 +50,12 @@ def export_selected_file_triggers(modeladmin, request, queryset):
     writer.writerow(['pk', 'app', 'botflow', 
                      'folder_in', 'folder_out',
                      'activated',
-                     'priority',
-                     'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',
-                     'computer_name', 'user_name'])
+                     'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',])
     
     file_triggers = queryset.values_list('pk', 'app', 'botflow', 
                                          'folder_in', 'folder_out',
                                          'activated',
-                                         'priority',
-                                         'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',
-                                         'computer_name', 'user_name')
+                                         'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',)
     for file_trigger in file_triggers:
         writer.writerow(file_trigger)
         
@@ -71,16 +70,12 @@ def export_selected_schedule_triggers(modeladmin, request, queryset):
     writer.writerow(['pk', 'app', 'botflow', 
                      'frequency', 'run_every', 'run_start',
                      'activated',
-                     'priority',
-                     'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',
-                     'computer_name', 'user_name'])
+                     'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',])
     
     schedule_triggers = queryset.values_list('pk', 'app', 'botflow', 
                                              'frequency', 'run_every', 'run_start',
                                              'activated',
-                                             'priority',
-                                             'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',
-                                             'computer_name', 'user_name')
+                                             'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',)
     
     for schedule_trigger in schedule_triggers:
         writer.writerow(schedule_trigger)
@@ -96,16 +91,12 @@ def export_selected_outlook_triggers(modeladmin, request, queryset):
     writer.writerow(['pk', 'app', 'botflow', 
                      'folder_in', 'folder_out',
                      'activated',
-                     'priority',
-                     'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',
-                     'computer_name', 'user_name'])
+                     'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',])
     
     outlook_triggers = queryset.values_list('pk', 'app', 'botflow', 
                                             'folder_in', 'folder_out',
                                             'activated',
-                                            'priority',
-                                            'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',
-                                            'computer_name', 'user_name')
+                                            'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',)
     
     for outlook_trigger in outlook_triggers:
         writer.writerow(outlook_trigger)
@@ -180,6 +171,14 @@ class BotflowAdmin(admin.ModelAdmin):
         ('Queueing', {
             'fields': ('queue_if_already_running',),
         }),
+        ('Computer and User Settings', {
+            'classes': ('collapse',),
+            'fields': ('computer_name', 'user_name',),
+        }),
+        ('Prioritization', {
+            'classes': ('collapse',),
+            'fields': ('priority',),
+        }),
         ('Timeout', {
             'classes': ('collapse',),
             'fields': ('timeout_minutes', 'timeout_kill_processes',),
@@ -191,12 +190,12 @@ class BotflowAdmin(admin.ModelAdmin):
     )
     list_display = ('pk', 'name', 'path',
                     'queue_if_already_running',
-                    'close_bot_automatically',
-                    'timeout_minutes', 'timeout_kill_processes',)
+                    'computer_name', 'user_name',
+                    'priority',)
     list_editable = ('name', 'path',
                      'queue_if_already_running',
-                     'close_bot_automatically',
-                     'timeout_minutes', 'timeout_kill_processes',)
+                     'computer_name', 'user_name',
+                     'priority',)
     list_display_links = ['pk']
 
 
@@ -214,17 +213,9 @@ class FileTriggerAdmin(admin.ModelAdmin):
         ('Activate', {
             'fields': ('activated',),
         }),
-        ('Prioritization', {
-            'classes': ('collapse',),
-            'fields': ('priority',),
-        }),
         ('Time Filter', {
             'classes': ('collapse',),
             'fields': ('run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',),
-        }),
-        ('Computer and User Settings', {
-            'classes': ('collapse',),
-            'fields': ('computer_name', 'user_name',),
         }),
     )
     
@@ -248,17 +239,9 @@ class ScheduleTriggerAdmin(admin.ModelAdmin):
         ('Activate', {
             'fields': ('activated',),
         }),
-        ('Prioritization', {
-            'classes': ('collapse',),
-            'fields': ('priority',),
-        }),
         ('Time Filter', {
             'classes': ('collapse',),
             'fields': ('run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days'),
-        }),
-        ('Computer and User Settings', {
-            'classes': ('collapse',),
-            'fields': ('computer_name', 'user_name',),
         }),
         ('Advanced', {
             'classes': ('collapse',),
@@ -291,17 +274,9 @@ class OutlookTriggerAdmin(admin.ModelAdmin):
         ('Activate', {
             'fields': ('activated',),
         }),
-        ('Prioritization', {
-            'classes': ('collapse',),
-            'fields': ('priority',),
-        }),
         ('Time Filter', {
             'classes': ('collapse',),
             'fields': ('run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',),
-        }),
-        ('Computer and User Settings', {
-            'classes': ('collapse',),
-            'fields': ('computer_name', 'user_name',),
         }),
     )
     
@@ -309,8 +284,8 @@ class OutlookTriggerAdmin(admin.ModelAdmin):
                     'email',
                     'folder_in', 'folder_out', 'activated')
     list_editable = ('app', 'botflow', 
-                    'email',
-                    'folder_in', 'folder_out', 'activated')
+                     'email',
+                     'folder_in', 'folder_out', 'activated')
     list_display_links = ['pk']
     
     actions = [export_selected_outlook_triggers, activate_selected_outlook_triggers,]

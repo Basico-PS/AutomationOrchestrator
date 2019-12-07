@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin, messages
 from django.contrib.auth.models import Group
 from django.http import HttpResponse
-from .models import App, Botflow, FileTrigger, ScheduleTrigger, OutlookTrigger, Execution, SmtpAccount
+from .models import Bot, App, Botflow, FileTrigger, ScheduleTrigger, OutlookTrigger, Execution, SmtpAccount
 import csv
 import os
 
@@ -11,6 +11,7 @@ admin.site.site_header = 'Basico P/S - Automation Orchestrator'
 
 
 def queue_item(item, trigger):
+    bot_object = Bot.objects.get(pk=item.bot.pk)
     app_object = App.objects.get(pk=item.app.pk)
     botflow_object = Botflow.objects.get(pk=item.botflow.pk)
                 
@@ -20,8 +21,8 @@ def queue_item(item, trigger):
                           close_bot_automatically=botflow_object.close_bot_automatically,
                           timeout_minutes=botflow_object.timeout_minutes,
                           timeout_kill_processes=botflow_object.timeout_kill_processes,
-                          computer_name=botflow_object.computer_name,
-                          user_name=botflow_object.user_name,
+                          computer_name=bot_object.computer_name,
+                          user_name=bot_object.user_name,
                           priority=botflow_object.priority,
                           status="Pending",
                           queued_notification = botflow_object.queued_notification,
@@ -139,7 +140,7 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
             msg['To'] = item.email
 
             with smtplib.SMTP(item.server, item.port) as server:
-                if item.tls == True:
+                if item.tls:
                     server.starttls()
                 server.login(item.email, item.password)
                 server.send_message(msg)
@@ -149,6 +150,34 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
         except:
             messages.error(request, f"Failed to send email with {item.email}!")
             break
+
+
+class BotForm(forms.ModelForm):
+    class Meta:
+        model = Bot
+        fields = '__all__'
+
+    def clean(self):
+        computer_name = self.cleaned_data.get('computer_name')
+        user_name = self.cleaned_data.get('user_name')
+        
+        if Bot.objects.filter(computer_name=computer_name).filter(user_name=user_name).exists():
+            raise forms.ValidationError('A bot with the same computer name and username already exist!')
+        
+        return self.cleaned_data
+
+
+class BotAdmin(admin.ModelAdmin):
+    form = BotForm
+    
+    fieldsets = (
+        ('General', {
+            'fields': ('name', 'computer_name', 'user_name',),
+        }),
+    )
+    list_display = ('pk', 'name', 'computer_name', 'user_name',)
+    list_editable = ('name', 'computer_name', 'user_name',)
+    list_display_links = ['pk']
 
 
 class AppForm(forms.ModelForm):
@@ -351,7 +380,7 @@ class SmtpAccountForm(forms.ModelForm):
     def clean(self):
         activated = self.cleaned_data.get('activated')
         
-        if activated == True and SmtpAccount.objects.filter(activated=True).exists():
+        if activated and SmtpAccount.objects.filter(activated=True).exists():
             raise forms.ValidationError("An activated SMTP account already exists! Make sure to not activate this account or deactivate the activated account.")
         
         return self.cleaned_data
@@ -385,6 +414,7 @@ class SmtpAccountAdmin(admin.ModelAdmin):
         return ['-activated']
 
 
+admin.site.register(Bot, BotAdmin)
 admin.site.register(App, AppAdmin)
 admin.site.register(Botflow, BotflowAdmin)
 admin.site.register(FileTrigger, FileTriggerAdmin)

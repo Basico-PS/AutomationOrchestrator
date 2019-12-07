@@ -62,10 +62,8 @@ def main():
                         except requests.exceptions.Timeout:
                             server_responded = False
                         
-                        if (datetime.now() - start_time_loop).seconds >= server_runtime or os.path.exists("logs\\error_log.txt") or server_responded == False:
-                            executions = Execution.objects.filter(Q(status="Pending") | Q(status="Running"))
-                                    
-                            if len(executions) == 0:
+                        if (datetime.now() - start_time_loop).seconds >= server_runtime or os.path.exists("logs\\error_log.txt") or not server_responded:
+                            if not Execution.objects.filter(Q(status="Pending") | Q(status="Running")).exists():
                                 if os.path.exists("logs\\error_log.txt"):
                                     error_count += 1
                                     
@@ -74,7 +72,7 @@ def main():
                                         
                                     print(f"{datetime.now()}: ERROR OCCURRED: {error_message}")
                                     
-                                elif server_responded == False:
+                                elif not server_responded:
                                     print(f"{datetime.now()}: ERROR OCCURRED: The server does not respond...")
                                     
                                 print(f"{datetime.now()}: Stopping the server...")

@@ -61,7 +61,7 @@ def execution_notification(sender, instance, **kwargs):
         msg.set_content(f"Application: {instance.app}\nBotflow: {instance.botflow}\nTrigger: {instance.trigger}\n\nComputer Name: {instance.computer_name}\nUsername: {instance.user_name}\n\nStatus: {instance.status}\n\nTime Start: {instance.time_start}\nTime End: {instance.time_end}")
 
         with smtplib.SMTP(smtp_account.server, smtp_account.port) as server:
-            if smtp_account.tls == True:
+            if smtp_account.tls:
                 server.starttls()
             server.login(smtp_account.email, smtp_account.password)
             server.send_message(msg)

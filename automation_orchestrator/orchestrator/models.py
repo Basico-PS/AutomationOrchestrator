@@ -6,11 +6,39 @@ from fernet_fields import EncryptedCharField
 
 
 def get_computer_name():
-    return os.environ['COMPUTERNAME']
+    computer_name = os.environ['COMPUTERNAME']
+    user_name = os.environ['USERNAME']
+    
+    if not Bot.objects.filter(computer_name=computer_name).filter(user_name=user_name).exists():
+        return computer_name
+    else:
+        return ""
 
 
 def get_user_name():
-    return os.environ['USERNAME']
+    computer_name = os.environ['COMPUTERNAME']
+    user_name = os.environ['USERNAME']
+    
+    if not Bot.objects.filter(computer_name=computer_name).filter(user_name=user_name).exists():
+        return user_name
+    else:
+        return ""
+
+
+class Bot(models.Model):
+    name = models.CharField(max_length=255, help_text="Specify the name of the bot.")
+    computer_name = models.CharField(max_length=255, default=get_computer_name, help_text="Specify the computer name of the bot.")
+    user_name = models.CharField(max_length=255, default=get_user_name, help_text="Specify the username of the bot.")
+
+    date_created = models.DateTimeField(auto_now_add=True, editable=False)
+    date_updated = models.DateTimeField(auto_now=True, editable=False)
+    
+    def __str__(self):
+        return self.name
+
+    def clean(self):        
+        if Bot.objects.filter(computer_name=self.computer_name).filter(user_name=self.user_name).exists():
+            raise ValidationError('A bot with the same computer name and username already exist!')
 
 
 class App(models.Model):
@@ -29,17 +57,15 @@ class Botflow(models.Model):
     path = models.CharField(max_length=255, help_text="Specify the path to the botflow/script/file.")
     queue_if_already_running = models.BooleanField(default=True, help_text="Specify whether the botflow should be added to the queue if this botflow is already in the queue as either 'Pending' or 'Running'.")
     
-    computer_name = models.CharField(max_length=255, default=get_computer_name, help_text="Specify on which computer the triggered botflow should run.")
-    user_name = models.CharField(max_length=255, default=get_user_name, help_text="Specify on which user the triggered botflow should run.")
     priority = models.PositiveIntegerField(default=3, validators=[MinValueValidator(1), MaxValueValidator(5)], help_text="Specify the priority of the triggered botflow (1 is highest, 5 is lowest). The triggered botflow with the highest priority will always run first.")
     
     timeout_minutes = models.PositiveIntegerField(default=300, validators=[MinValueValidator(1)], help_text="Specify after how many minutes the botflow process should be forcibly killed.")
     timeout_kill_processes = models.CharField(max_length=255, blank=True, help_text="Specify any additional processes that should be killed in the event of a timeout. To specify multiple processes, use comma to separate them like this: 'iexplore.exe, explorer.exe'.")
     
-    queued_notification = models.CharField(max_length=255, blank=True, help_text="Specify who (if any) should receive an email notification when the botflow is queued. To specify multiple processes, use comma to separate them like this: 'abc@basico.dk, xyz@basico.dk'.")
-    started_notification = models.CharField(max_length=255, blank=True, help_text="Specify who (if any) should receive an email notification when the botflow is started. To specify multiple processes, use comma to separate them like this: 'abc@basico.dk, xyz@basico.dk'.")
-    completed_notification = models.CharField(max_length=255, blank=True, help_text="Specify who (if any) should receive an email notification when the botflow is completed. To specify multiple processes, use comma to separate them like this: 'abc@basico.dk, xyz@basico.dk'.")
-    error_notification = models.CharField(max_length=255, blank=True, help_text="Specify who (if any) should receive an email notification when the botflow is queued. To specify multiple processes, use comma to separate them like this: 'abc@basico.dk, xyz@basico.dk'. IMPORTANT: This will not include errors during the execution of the botflow.")
+    queued_notification = models.CharField(max_length=255, blank=True, help_text="Specify who (if any) should receive an email notification when the botflow is queued. To specify multiple emails, use comma to separate them like this: 'abc@basico.dk, xyz@basico.dk'.")
+    started_notification = models.CharField(max_length=255, blank=True, help_text="Specify who (if any) should receive an email notification when the botflow is started. To specify multiple emails, use comma to separate them like this: 'abc@basico.dk, xyz@basico.dk'.")
+    completed_notification = models.CharField(max_length=255, blank=True, help_text="Specify who (if any) should receive an email notification when the botflow is completed. To specify multiple emails, use comma to separate them like this: 'abc@basico.dk, xyz@basico.dk'.")
+    error_notification = models.CharField(max_length=255, blank=True, help_text="Specify who (if any) should receive an email notification when the botflow is queued. To specify multiple emails, use comma to separate them like this: 'abc@basico.dk, xyz@basico.dk'. IMPORTANT: This will not include errors during the execution of the botflow.")
     
     close_bot_automatically = models.BooleanField(default=False, help_text="Specify whether to automatically close the bot using the /Close /Exit commands. IMPORTANT: This is a Nintex RPA specific setting.")
 
@@ -51,6 +77,7 @@ class Botflow(models.Model):
 
 
 class FileTrigger(models.Model):
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, help_text="Select the bot for this trigger.")
     app = models.ForeignKey(App, on_delete=models.CASCADE, help_text="Select the application for this trigger.")
     botflow = models.ForeignKey(Botflow, on_delete=models.CASCADE, help_text="Select the botflow for this trigger.")
     
@@ -70,6 +97,7 @@ class FileTrigger(models.Model):
 
 
 class ScheduleTrigger(models.Model):
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, help_text="Select the bot for this trigger.")
     app = models.ForeignKey(App, on_delete=models.CASCADE, help_text="Select the application for this trigger.")
     botflow = models.ForeignKey(Botflow, on_delete=models.CASCADE, help_text="Select the botflow for this trigger.")
 
@@ -93,6 +121,7 @@ class ScheduleTrigger(models.Model):
 
 
 class OutlookTrigger(models.Model):
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, help_text="Select the bot for this trigger.")
     app = models.ForeignKey(App, on_delete=models.CASCADE, help_text="Select the application for this trigger.")
     botflow = models.ForeignKey(Botflow, on_delete=models.CASCADE, help_text="Select the botflow for this trigger.")
     
@@ -150,5 +179,5 @@ class SmtpAccount(models.Model):
         return self.email
 
     def clean(self):        
-        if self.activated == True and SmtpAccount.objects.filter(activated=True).exists():
+        if self.activated and SmtpAccount.objects.filter(activated=True).exists():
             raise ValidationError('An activated SMTP account already exists! Make sure to not activate this account or deactivate the activated account.')

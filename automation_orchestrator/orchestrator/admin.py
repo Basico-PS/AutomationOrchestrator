@@ -52,12 +52,12 @@ def export_selected_file_triggers(modeladmin, request, queryset):
     response['Content-Disposition'] = 'attachment; filename="file_triggers.csv"'
     
     writer = csv.writer(response)
-    writer.writerow(['pk', 'app', 'botflow', 
+    writer.writerow(['pk', 'bot', 'app', 'botflow', 
                      'folder_in', 'folder_out',
                      'activated',
                      'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',])
     
-    file_triggers = queryset.values_list('pk', 'app', 'botflow', 
+    file_triggers = queryset.values_list('pk', 'bot', 'app', 'botflow', 
                                          'folder_in', 'folder_out',
                                          'activated',
                                          'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',)
@@ -72,12 +72,12 @@ def export_selected_schedule_triggers(modeladmin, request, queryset):
     response['Content-Disposition'] = 'attachment; filename="schedule_triggers.csv"'
     
     writer = csv.writer(response)
-    writer.writerow(['pk', 'app', 'botflow', 
+    writer.writerow(['pk', 'bot', 'app', 'botflow', 
                      'frequency', 'run_every', 'run_start',
                      'activated',
                      'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',])
     
-    schedule_triggers = queryset.values_list('pk', 'app', 'botflow', 
+    schedule_triggers = queryset.values_list('pk', 'bot', 'app', 'botflow', 
                                              'frequency', 'run_every', 'run_start',
                                              'activated',
                                              'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',)
@@ -93,12 +93,12 @@ def export_selected_outlook_triggers(modeladmin, request, queryset):
     response['Content-Disposition'] = 'attachment; filename="outlook_triggers.csv"'
     
     writer = csv.writer(response)
-    writer.writerow(['pk', 'app', 'botflow', 
+    writer.writerow(['pk', 'bot', 'app', 'botflow', 
                      'folder_in', 'folder_out',
                      'activated',
                      'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',])
     
-    outlook_triggers = queryset.values_list('pk', 'app', 'botflow', 
+    outlook_triggers = queryset.values_list('pk', 'bot', 'app', 'botflow', 
                                             'folder_in', 'folder_out',
                                             'activated',
                                             'run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',)
@@ -114,12 +114,16 @@ def export_selected_executions(modeladmin, request, queryset):
     response['Content-Disposition'] = 'attachment; filename="executions.csv"'
     
     writer = csv.writer(response)
-    writer.writerow(['pk', 'time_queued', 'app', 'botflow', 'trigger', 
-                     'computer_name', 'user_name', 'priority', 'timeout_minutes',
+    writer.writerow(['pk', 'time_queued',
+                     'computer_name', 'user_name',
+                     'app', 'botflow', 'trigger',
+                     'priority', 'timeout_minutes',
                      'status', 'time_start', 'time_end'])
     
-    executions = queryset.values_list('pk', 'time_queued', 'app', 'botflow', 'trigger', 
-                                      'computer_name', 'user_name', 'priority', 'timeout_minutes',
+    executions = queryset.values_list('pk', 'time_queued',
+                                      'computer_name', 'user_name',
+                                      'app', 'botflow', 'trigger',
+                                      'priority', 'timeout_minutes',
                                       'status', 'time_start', 'time_end')
     
     for execution in executions:
@@ -149,7 +153,6 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
                 
         except:
             messages.error(request, f"Failed to send email with {item.email}!")
-            break
 
 
 class BotForm(forms.ModelForm):
@@ -231,10 +234,6 @@ class BotflowAdmin(admin.ModelAdmin):
         ('Queueing', {
             'fields': ('queue_if_already_running',),
         }),
-        ('Computer and User Settings', {
-            'classes': ('collapse',),
-            'fields': ('computer_name', 'user_name',),
-        }),
         ('Prioritization', {
             'classes': ('collapse',),
             'fields': ('priority',),
@@ -254,11 +253,9 @@ class BotflowAdmin(admin.ModelAdmin):
     )
     list_display = ('pk', 'name', 'path',
                     'queue_if_already_running',
-                    'computer_name', 'user_name',
                     'priority',)
     list_editable = ('name', 'path',
                      'queue_if_already_running',
-                     'computer_name', 'user_name',
                      'priority',)
     list_display_links = ['pk']
 
@@ -266,7 +263,7 @@ class BotflowAdmin(admin.ModelAdmin):
 class FileTriggerAdmin(admin.ModelAdmin):
     fieldsets = (
         ('General', {
-            'fields': ('app', 'botflow',),
+            'fields': ('bot', 'app', 'botflow',),
         }),
         ('Folders', {
             'fields': ('folder_in', 'folder_out',),
@@ -283,9 +280,9 @@ class FileTriggerAdmin(admin.ModelAdmin):
         }),
     )
     
-    list_display = ('pk', 'app', 'botflow', 
+    list_display = ('pk', 'bot', 'app', 'botflow', 
                     'folder_in', 'folder_out', 'filter', 'activated')
-    list_editable = ('app', 'botflow', 
+    list_editable = ('bot', 'app', 'botflow', 
                     'folder_in', 'folder_out', 'filter', 'activated')
     list_display_links = ['pk']
     
@@ -295,7 +292,7 @@ class FileTriggerAdmin(admin.ModelAdmin):
 class ScheduleTriggerAdmin(admin.ModelAdmin):
     fieldsets = (
         ('General', {
-            'fields': ('app', 'botflow'),
+            'fields': ('bot', 'app', 'botflow'),
         }),
         ('Recurrence', {
             'fields': ('frequency', 'run_every', 'run_start',),
@@ -313,9 +310,9 @@ class ScheduleTriggerAdmin(admin.ModelAdmin):
         }),
     )
     
-    list_display = ('pk', 'app', 'botflow', 
+    list_display = ('pk', 'bot', 'app', 'botflow', 
                     'frequency', 'run_every', 'run_start', 'activated',)
-    list_editable = ('app', 'botflow', 
+    list_editable = ('bot', 'app', 'botflow', 
                     'frequency', 'run_every', 'run_start', 'activated',)
     list_display_links = ['pk']
     exclude = ('past_settings',)
@@ -327,7 +324,7 @@ class ScheduleTriggerAdmin(admin.ModelAdmin):
 class OutlookTriggerAdmin(admin.ModelAdmin):
     fieldsets = (
         ('General', {
-            'fields': ('app', 'botflow',),
+            'fields': ('bot', 'app', 'botflow',),
         }),
         ('Outlook', {
             'fields': ('email',),
@@ -344,10 +341,10 @@ class OutlookTriggerAdmin(admin.ModelAdmin):
         }),
     )
     
-    list_display = ('pk', 'app', 'botflow', 
+    list_display = ('pk', 'bot', 'app', 'botflow', 
                     'email',
                     'folder_in', 'folder_out', 'activated')
-    list_editable = ('app', 'botflow', 
+    list_editable = ('bot', 'app', 'botflow', 
                      'email',
                      'folder_in', 'folder_out', 'activated')
     list_display_links = ['pk']
@@ -356,12 +353,14 @@ class OutlookTriggerAdmin(admin.ModelAdmin):
 
 
 class ExecutionAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'time_queued', 'app', 'botflow', 
+    list_display = ('pk', 'time_queued',
+                    'computer_name', 'user_name',
+                    'app', 'botflow',
                     'trigger', 
-                    'computer_name', 'user_name', 'priority', 'timeout_minutes',
+                    'priority', 'timeout_minutes',
                     'status', 'time_start', 'time_end',)
     list_display_links = ['pk']
-    list_filter = ('app', 'botflow', 'computer_name', 'user_name', 'status',)
+    list_filter = ('computer_name', 'user_name', 'app', 'botflow', 'status',)
     
     actions = [export_selected_executions, ]
 

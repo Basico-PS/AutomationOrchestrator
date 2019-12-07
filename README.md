@@ -12,7 +12,7 @@ The Automation Orchestrator allows you to run a local [Django Web Application](h
 - Groups and User Setup
 - File Triggers
 - Schedule Triggers
-- Outlook Triggers
+- Email Outlook Triggers
 - Queue Functionality
 - Execution Log
 

@@ -44,7 +44,7 @@ def activate_selected_schedule_triggers(modeladmin, request, queryset):
 
 def activate_selected_outlook_triggers(modeladmin, request, queryset):
     for item in queryset:
-        queue_item(item, "Outlook Trigger: Activated Manually")
+        queue_item(item, "Email Outlook Trigger: Activated Manually")
 
 
 def export_selected_file_triggers(modeladmin, request, queryset):
@@ -321,12 +321,12 @@ class ScheduleTriggerAdmin(admin.ModelAdmin):
     actions = [export_selected_schedule_triggers, activate_selected_schedule_triggers,]
 
 
-class EmailOutlookTrigger(admin.ModelAdmin):
+class EmailOutlookTriggerAdmin(admin.ModelAdmin):
     fieldsets = (
         ('General', {
             'fields': ('bot', 'app', 'botflow',),
         }),
-        ('Outlook', {
+        ('Email', {
             'fields': ('email',),
         }),
         ('Folders', {

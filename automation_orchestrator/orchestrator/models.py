@@ -120,7 +120,7 @@ class ScheduleTrigger(models.Model):
     date_updated = models.DateTimeField(auto_now=True, editable=False)
 
 
-class OutlookDesktopTrigger(models.Model):
+class EmailOutlookTrigger(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, help_text="Select the bot for this trigger.")
     app = models.ForeignKey(App, on_delete=models.CASCADE, help_text="Select the application for this trigger.")
     botflow = models.ForeignKey(Botflow, on_delete=models.CASCADE, help_text="Select the botflow for this trigger.")

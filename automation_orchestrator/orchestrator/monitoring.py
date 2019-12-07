@@ -550,11 +550,14 @@ def execution_monitor_evaluate():
     
     for item in items:
         app = item.app.split("\\")[-1].lower()
-        username = os.environ['USERNAME'].lower()
-        processes = subprocess.run(["wmic", "process", "where", f"name='{app}'", "call", "GetOwner"], stdout=subprocess.PIPE, text=True).stdout.split('\n')
         
-        if any(str(f'\tuser = "{username}";') in user.lower() for user in processes):
-            continue
+        if app == "foxbot.exe" or app == "foxtrot.exe":
+            processes = subprocess.run(["wmic", "process", "where", f"name='{app}'", "call", "GetOwner"], stdout=subprocess.PIPE, text=True).stdout.split('\n')
+            
+            username = os.environ['USERNAME'].lower()
+            
+            if any(str(f'\tuser = "{username}";') in user.lower() for user in processes):
+                continue
             
         item.time_start = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))}00")
         item.status = "Running"
@@ -565,7 +568,7 @@ def execution_monitor_evaluate():
         if os.path.isfile(item.botflow):
             if not [{'botflow': x.botflow, 'trigger': x.trigger} for x in items if x.status == 'Completed'].count({'botflow': item.botflow, 'trigger': item.trigger}) >= 1:
                 try:
-                    if 'foxtrot' or 'foxbot' in item.app.lower():
+                    if app == "foxbot.exe" or app == "foxtrot.exe":
                         if item.close_bot_automatically:
                             subprocess.run([item.app, '/Open', item.botflow, '/Run', '/Close', '/Exit'], timeout=(item.timeout_minutes * 60))
                         else:
@@ -577,7 +580,7 @@ def execution_monitor_evaluate():
                     status = "Error - Botflow Timeout"
                     
                     try:
-                        if 'foxtrot' or 'foxbot' in item.app.lower():
+                        if app == "foxbot.exe" or app == "foxtrot.exe":
                             os.system('taskkill /f /im foxtrot64.exe')
                     except:
                         pass

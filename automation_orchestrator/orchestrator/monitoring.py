@@ -9,7 +9,7 @@ import subprocess
 import pythoncom
 import time as t
 import win32com.client as win32
-from .models import Bot, App, Botflow, FileTrigger, ScheduleTrigger, OutlookTrigger, Execution
+from .models import Bot, App, Botflow, FileTrigger, ScheduleTrigger, OutlookDesktopTrigger, Execution
 from django.db.models import Q
 from dateutil.relativedelta import relativedelta
 
@@ -345,7 +345,7 @@ def outlook_trigger_monitor():
         range(10000)
         t.sleep(outlook_sleep)
         
-        if OutlookTrigger.objects.filter(activated=True).exists():
+        if OutlookDesktopTrigger.objects.filter(activated=True).exists():
             break
     
     
@@ -384,7 +384,7 @@ def outlook_trigger_monitor():
                     pass
             break
         
-        if not OutlookTrigger.objects.filter(activated=True).exists():
+        if not OutlookDesktopTrigger.objects.filter(activated=True).exists():
             try:
                 outlook.Application.Quit()
             except:
@@ -405,7 +405,7 @@ def outlook_trigger_monitor():
 
 
 def outlook_trigger_monitor_evaluate(outlook):
-    items = OutlookTrigger.objects.filter(activated=True)
+    items = OutlookDesktopTrigger.objects.filter(activated=True)
     
     for item in items:        
         try:

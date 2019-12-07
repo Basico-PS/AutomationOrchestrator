@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin, messages
 from django.contrib.auth.models import Group
 from django.http import HttpResponse
-from .models import Bot, App, Botflow, FileTrigger, ScheduleTrigger, OutlookTrigger, Execution, SmtpAccount
+from .models import Bot, App, Botflow, FileTrigger, ScheduleTrigger, OutlookDesktopTrigger, Execution, SmtpAccount
 import csv
 import os
 
@@ -321,7 +321,7 @@ class ScheduleTriggerAdmin(admin.ModelAdmin):
     actions = [export_selected_schedule_triggers, activate_selected_schedule_triggers,]
 
 
-class OutlookTriggerAdmin(admin.ModelAdmin):
+class OutlookDesktopTriggerAdmin(admin.ModelAdmin):
     fieldsets = (
         ('General', {
             'fields': ('bot', 'app', 'botflow',),
@@ -418,6 +418,6 @@ admin.site.register(App, AppAdmin)
 admin.site.register(Botflow, BotflowAdmin)
 admin.site.register(FileTrigger, FileTriggerAdmin)
 admin.site.register(ScheduleTrigger, ScheduleTriggerAdmin)
-admin.site.register(OutlookTrigger, OutlookTriggerAdmin)
+admin.site.register(OutlookDesktopTrigger, OutlookDesktopTriggerAdmin)
 admin.site.register(Execution, ExecutionAdmin)
 admin.site.register(SmtpAccount, SmtpAccountAdmin)

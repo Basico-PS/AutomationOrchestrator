@@ -120,15 +120,19 @@ class ScheduleTrigger(models.Model):
     date_updated = models.DateTimeField(auto_now=True, editable=False)
 
 
-class EmailOutlookTrigger(models.Model):
+class EmailImapTrigger(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, help_text="Select the bot for this trigger.")
     app = models.ForeignKey(App, on_delete=models.CASCADE, help_text="Select the application for this trigger.")
     botflow = models.ForeignKey(Botflow, on_delete=models.CASCADE, help_text="Select the botflow for this trigger.")
     
-    email = models.CharField(max_length=255, default="Default", help_text="Specify the email of the account to monitor. IMPORTANT: If you wish to monitor the primary Outlook account, the email should be set to 'Default'.")
+    email = models.EmailField(help_text="Specify the email of the IMAP account.")
+    password = EncryptedCharField(max_length=255, help_text="Specify the password of the IMAP account.")
+    server = models.CharField(max_length=255, help_text="Specify the server of the IMAP account. For example: outlook.office365.com")
+    port = models.PositiveIntegerField(help_text="Specify the port of the IMAP account. For example: 993")
+    tls = models.BooleanField("SSL/TLS", default=True, help_text="Specify whether the IMAP account requires 'SSL/TLS'.")
     
-    folder_in = models.CharField(max_length=255, help_text="Specify the folder for incoming emails. When an email is detected in this folder, the trigger will be activated.")
-    folder_out = models.CharField(max_length=255, help_text="Specify the folder that the emails should be moved to. When the trigger is activated, the email will be moved to this folder.")
+    folder_in = models.CharField(max_length=255, help_text="Specify the folder for incoming emails. When an email is detected in this folder, the trigger will be activated. The folder must be a folder must be in the 'INBOX'. To specify subfolders, use slash to separate the folder names like this: Invoices/Incoming")
+    folder_out = models.CharField(max_length=255, help_text="Specify the folder that the emails should be moved to. When the trigger is activated, the email will be moved to this folder. The folder must be a folder must be in the 'INBOX'. To specify subfolders, use slash to separate the folder names like this: Invoices/Incoming/Handled")
     
     activated = models.BooleanField(default=False, help_text="Specify whether the trigger should be active.")
     
@@ -139,6 +143,35 @@ class EmailOutlookTrigger(models.Model):
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
+    
+    class Meta:
+        verbose_name = 'Email IMAP trigger'
+        verbose_name_plural = 'Email IMAP triggers'
+
+
+class EmailOutlookTrigger(models.Model):
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, help_text="Select the bot for this trigger.")
+    app = models.ForeignKey(App, on_delete=models.CASCADE, help_text="Select the application for this trigger.")
+    botflow = models.ForeignKey(Botflow, on_delete=models.CASCADE, help_text="Select the botflow for this trigger.")
+    
+    email = models.CharField(max_length=255, default="Default", help_text="Specify the email of the account to monitor. IMPORTANT: If you wish to monitor the primary Outlook account, the email should be set to 'Default'.")
+    
+    folder_in = models.CharField(max_length=255, help_text="Specify the folder for incoming emails. When an email is detected in this folder, the trigger will be activated. The folder must be a folder must be in the 'INBOX'. To specify subfolders, use slash to separate the folder names like this: Invoices/Incoming")
+    folder_out = models.CharField(max_length=255, help_text="Specify the folder that the emails should be moved to. When the trigger is activated, the email will be moved to this folder. The folder must be a folder must be in the 'INBOX'. To specify subfolders, use slash to separate the folder names like this: Invoices/Incoming/Handled")
+    
+    activated = models.BooleanField(default=False, help_text="Specify whether the trigger should be active.")
+    
+    run_after = models.TimeField(null=True, blank=True, help_text="Specify a time to limit the trigger to only be active after this time.")
+    run_until = models.TimeField(null=True, blank=True, help_text="Specify a time to limit the trigger to only be active before this time.")
+    run_on_week_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on week days.")
+    run_on_weekend_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on weekend days.")
+
+    date_created = models.DateTimeField(auto_now_add=True, editable=False)
+    date_updated = models.DateTimeField(auto_now=True, editable=False)
+    
+    class Meta:
+        verbose_name = 'Email Outlook trigger'
+        verbose_name_plural = 'Email Outlook triggers'
 
 
 class Execution(models.Model):
@@ -168,12 +201,16 @@ class Execution(models.Model):
     
     
 class SmtpAccount(models.Model):
-    email = models.CharField(max_length=255, help_text="Specify the email of the SMTP account.")
+    email = models.EmailField(help_text="Specify the email of the SMTP account.")
     password = EncryptedCharField(max_length=255, help_text="Specify the password of the SMTP account.")
     server = models.CharField(max_length=255, help_text="Specify the server of the SMTP account. For example: smtp.office365.com")
     port = models.PositiveIntegerField(help_text="Specify the port of the SMTP account. For example: 587")
-    tls = models.BooleanField(default=True, help_text="Specify whether the SMTP account requires 'Transport Layer Security'.")
+    tls = models.BooleanField("SSL/TLS", default=True, help_text="Specify whether the SMTP account requires 'SSL/TLS'.")
     activated = models.BooleanField(default=False, help_text="Specify whether the SMTP account should be active.")
+    
+    class Meta:
+        verbose_name = 'SMTP account'
+        verbose_name_plural = 'SMTP accounts'
     
     def __str__(self):
         return self.email

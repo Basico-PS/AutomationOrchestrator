@@ -1,9 +1,8 @@
-from .models import Botflow, Execution, SmtpAccount
+from .models import Execution, SmtpAccount
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-import smtplib
+from smtplib import SMTP, SMTP_SSL
 from email.message import EmailMessage
-from email.mime.text import MIMEText
 
 
 @receiver(post_save, sender=Execution)
@@ -60,11 +59,29 @@ def execution_notification(sender, instance, **kwargs):
         
         msg.set_content(f"Application: {instance.app}\nBotflow: {instance.botflow}\nTrigger: {instance.trigger}\n\nComputer Name: {instance.computer_name}\nUsername: {instance.user_name}\n\nStatus: {instance.status}\n\nTime Start: {instance.time_start}\nTime End: {instance.time_end}")
 
-        with smtplib.SMTP(smtp_account.server, smtp_account.port) as server:
+        with SMTP(smtp_account.server, smtp_account.port) as server:
             if smtp_account.tls:
                 server.starttls()
             server.login(smtp_account.email, smtp_account.password)
             server.send_message(msg)
             
     except:
-        pass
+        if smtp_account.tls:
+            try:
+                msg = EmailMessage()
+                msg['Subject'] = subject
+                msg['From'] = smtp_account.email
+                
+                if not smtp_account.email in to:
+                    to.append(smtp_account.email)
+                
+                msg['To'] = ", ".join(to)
+                
+                msg.set_content(f"Application: {instance.app}\nBotflow: {instance.botflow}\nTrigger: {instance.trigger}\n\nComputer Name: {instance.computer_name}\nUsername: {instance.user_name}\n\nStatus: {instance.status}\n\nTime Start: {instance.time_start}\nTime End: {instance.time_end}")
+                
+                with SMTP_SSL(smtp_account.server, smtp_account.port) as server:
+                    server.login(smtp_account.email, smtp_account.password)
+                    server.send_message(msg)
+                    
+            except:
+                pass

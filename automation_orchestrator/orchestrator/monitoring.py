@@ -1,27 +1,57 @@
+import re
 import os
 import glob
 import pytz
+import email
 import shutil
 import datetime
 import calendar
 import traceback
 import subprocess
-import pythoncom
 import time as t
 import win32com.client as win32
-from .models import Bot, App, Botflow, FileTrigger, ScheduleTrigger, EmailOutlookTrigger, Execution
+from imaplib import IMAP4, IMAP4_SSL
+from .models import Bot, App, Botflow, FileTrigger, ScheduleTrigger, EmailImapTrigger, EmailOutlookTrigger, Execution
 from django.db.models import Q
 from dateutil.relativedelta import relativedelta
+from pythoncom import CoInitialize, CoUninitialize
 
 
-trigger_sleep = 2
-outlook_sleep = 2
-queue_sleep = 3
+trigger_sleep = 5
+email_imap_sleep = 10
+email_outlook_sleep = 10
+queue_sleep = 5
 
 
-class OutlookDispatchException(Exception):
-    # Exception to be used when the connection to the dispatched Outlook object is lost.
+class EmailOutlookDispatchException(Exception):
+    # Exception to be used when the connection to the dispatched Email Outlook object is lost.
     pass
+
+
+def add_execution_object(item, trigger):
+    bot_object = Bot.objects.get(pk=item.bot.pk)
+    app_object = App.objects.get(pk=item.app.pk)
+    botflow_object = Botflow.objects.get(pk=item.botflow.pk)
+    
+    execution = Execution(app=app_object.path,
+                          botflow=botflow_object.path,
+                          trigger=trigger[:250],
+                          close_bot_automatically=botflow_object.close_bot_automatically,
+                          timeout_minutes=botflow_object.timeout_minutes,
+                          timeout_kill_processes=botflow_object.timeout_kill_processes,
+                          computer_name=bot_object.computer_name,
+                          user_name=bot_object.user_name,
+                          priority=botflow_object.priority,
+                          status="Pending",
+                          queued_notification = botflow_object.queued_notification,
+                          started_notification = botflow_object.started_notification,
+                          completed_notification = botflow_object.completed_notification,
+                          error_notification = botflow_object.error_notification)
+    execution.save()
+    
+    bot_object, app_object, botflow_object = None, None, None
+    del bot_object, app_object, botflow_object
+    
 
 
 def calculate_next_execution(run_start, frequency, run_every, run_after, run_until, run_on_week_days, run_on_weekend_days):    
@@ -217,25 +247,7 @@ def file_trigger_monitor_evaluate():
                 add_execution = True
                 
             if add_execution:
-                bot_object = Bot.objects.get(pk=item.bot.pk)
-                app_object = App.objects.get(pk=item.app.pk)
-                botflow_object = Botflow.objects.get(pk=item.botflow.pk)
-                
-                execution = Execution(app=app_object.path,
-                                    botflow=botflow_object.path,
-                                    trigger=f"File Trigger: {path_destination}",
-                                    close_bot_automatically=botflow_object.close_bot_automatically,
-                                    timeout_minutes=botflow_object.timeout_minutes,
-                                    timeout_kill_processes=botflow_object.timeout_kill_processes,
-                                    computer_name=bot_object.computer_name,
-                                    user_name=bot_object.user_name,
-                                    priority=botflow_object.priority,
-                                    status="Pending",
-                                    queued_notification = botflow_object.queued_notification,
-                                    started_notification = botflow_object.started_notification,
-                                    completed_notification = botflow_object.completed_notification,
-                                    error_notification = botflow_object.error_notification)
-                execution.save()
+                add_execution_object(item, f"File Trigger: {path_destination}")
         
     items = None
     del items
@@ -302,28 +314,10 @@ def schedule_trigger_monitor_evaluate():
             else:
                 add_execution = True
             
-            if add_execution:
-                bot_object = Bot.objects.get(pk=item.bot.pk)
-                app_object = App.objects.get(pk=item.app.pk)
-                botflow_object = Botflow.objects.get(pk=item.botflow.pk)
-                
+            if add_execution:                
                 time_trigger = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime("%Y-%m-%d %H:%M")
                 
-                execution = Execution(app=app_object.path,
-                                    botflow=botflow_object.path,
-                                    trigger=f"Schedule Trigger: {time_trigger}",
-                                    close_bot_automatically=botflow_object.close_bot_automatically,
-                                    timeout_minutes=botflow_object.timeout_minutes,
-                                    timeout_kill_processes=botflow_object.timeout_kill_processes,
-                                    computer_name=bot_object.computer_name,
-                                    user_name=bot_object.user_name,
-                                    priority=botflow_object.priority,
-                                    status="Pending",
-                                    queued_notification = botflow_object.queued_notification,
-                                    started_notification = botflow_object.started_notification,
-                                    completed_notification = botflow_object.completed_notification,
-                                    error_notification = botflow_object.error_notification)
-                execution.save()
+                add_execution_object(item, f"Schedule Trigger: {time_trigger}")
             
             run_start = now.replace(tzinfo=pytz.timezone('UTC'))
             item.next_execution = calculate_next_execution(run_start, item.frequency, item.run_every, run_after, run_until, item.run_on_week_days, item.run_on_weekend_days)
@@ -340,41 +334,17 @@ def schedule_trigger_monitor_evaluate():
     del items
 
 
-def outlook_trigger_monitor():    
+def email_imap_trigger_monitor():
     while True:
         range(10000)
-        t.sleep(outlook_sleep)
-        
-        if EmailOutlookTrigger.objects.filter(activated=True).exists():
-            break
-    
-    
-    pythoncom.CoInitialize()
-    outlook = win32.dynamic.Dispatch('Outlook.Application')
-    
-    while True:
-        range(10000)
-        t.sleep(outlook_sleep)
+        t.sleep(email_imap_sleep)
         
         if os.path.exists("logs\\error_log.txt"):
             break
         
         try:
-            outlook_trigger_monitor_evaluate(outlook)
+            email_imap_trigger_monitor_evaluate()
             
-        except OutlookDispatchException:
-            print("Connection to Outlook lost, attempting to restart monitoring...")
-            
-            try:
-                outlook.Application.Quit()
-            except:
-                pass
-            outlook = None
-            del outlook
-            pythoncom.CoUninitialize()
-    
-            outlook_trigger_monitor()
-        
         except:
             with open("logs\\error_log.txt", 'a') as f:
                 try:
@@ -383,61 +353,14 @@ def outlook_trigger_monitor():
                 except:
                     pass
             break
-        
-        if not EmailOutlookTrigger.objects.filter(activated=True).exists():
-            try:
-                outlook.Application.Quit()
-            except:
-                pass
-            outlook = None
-            del outlook
-            pythoncom.CoUninitialize()
-            
-            outlook_trigger_monitor()
-
-    try:
-        outlook.Application.Quit()
-    except:
-        pass
-    outlook = None
-    del outlook
-    pythoncom.CoUninitialize()
 
 
-def outlook_trigger_monitor_evaluate(outlook):
-    items = EmailOutlookTrigger.objects.filter(activated=True)
+def email_imap_trigger_monitor_evaluate():
+    pattern_uid = re.compile(r'\d+ \(UID (?P<uid>\d+)\)')
     
-    for item in items:        
-        try:
-            accounts = outlook.Session.Accounts
-            accounts_list = [account.DisplayName for account in accounts]
-            
-            if item.email == "Default":
-                namespace = outlook.GetNamespace("MAPI")
-            else:
-                if not item.email in accounts_list:
-                    continue
-                namespace = None
-                for account in accounts:
-                    if str(item.email).upper() == str(account.DisplayName).upper():
-                        namespace = account.DeliveryStore
-                        break
-            
-            inbox = namespace.GetDefaultFolder(6)
-            
-        except:
-            items, accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None, None, None, None
-            del items
-            del accounts
-            del accounts_list
-            del namespace
-            del inbox
-            del folder_in
-            del folder_out
-            del emails
-            
-            raise OutlookDispatchException
+    items = EmailImapTrigger.objects.filter(activated=True)
     
+    for item in items:
         if not item.run_on_week_days:
             if 0 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 4:
                 continue
@@ -468,13 +391,204 @@ def outlook_trigger_monitor_evaluate(outlook):
             else:
                 continue
         
+        try:
+            if item.tls:
+                server = IMAP4_SSL(item.server, item.port)                    
+            else:
+                server = IMAP4(item.server, item.port)
+                
+            server.login(item.email, item.password)
+            
+            server.select('INBOX')
+            server.select('INBOX/' + item.folder_in)
+            server.select('INBOX/' + item.folder_out)
+        
+            server.select('INBOX/' + item.folder_in)
+            _, emails = server.search(None, 'All')
+            emails = emails[0].split()
+            email_id = emails[-1]
+            
+            email_data = server.fetch(email_id, '(RFC822)')
+            
+            email_subject = ""
+            for email_data_part in email_data[1]:
+                if isinstance(email_data_part, tuple):
+                    email_subject = email.message_from_string(email_data_part[1].decode())['subject']
+                    break
+            
+            email_uid = server.fetch(email_id, '(UID)')
+            email_uid = str(email_uid[-1][0], 'utf-8', 'ignore')
+            email_uid = pattern_uid.match(email_uid).group('uid')            
+            
+            email_copy_response = server.uid('COPY', email_uid, 'INBOX/' + item.folder_out)
+            
+            if email_copy_response[0] == 'OK':            
+                server.uid('STORE', email_uid , '+FLAGS', r'(\Deleted)')
+                server.expunge()
+            
+            if not Botflow.objects.get(pk=item.botflow.pk).queue_if_already_running:
+                if Execution.objects.filter(Q(status="Pending") | Q(status="Running"), botflow=Botflow.objects.get(pk=item.botflow.pk).path).exists():
+                    add_execution = False
+                else:
+                    add_execution = True
+            else:
+                add_execution = True
+                
+            if add_execution:
+                add_execution_object(item, f"Email IMAP Trigger: {email_subject}")
+                    
+        except:
+            pass
+        
+        finally:
+            try:
+                server.logout()
+            except:
+                pass
+            
+            server = None
+            del server
+        
+    items, pattern_uid = None, None
+    del items, pattern_uid
+
+
+def email_outlook_trigger_monitor():    
+    while True:
+        range(10000)
+        t.sleep(email_outlook_sleep)
+        
+        if EmailOutlookTrigger.objects.filter(activated=True).exists():
+            break
+    
+    CoInitialize()
+    email_outlook = win32.dynamic.Dispatch('Outlook.Application')
+    
+    while True:
+        range(10000)
+        t.sleep(email_outlook_sleep)
+        
+        if os.path.exists("logs\\error_log.txt"):
+            break
+        
+        try:
+            email_outlook_trigger_monitor_evaluate(email_outlook)
+            
+        except EmailOutlookDispatchException:
+            print("Connection to Outlook lost, attempting to restart monitoring...")
+            
+            try:
+                email_outlook.Application.Quit()
+            except:
+                pass
+            
+            email_outlook = None
+            del email_outlook
+            
+            CoUninitialize()
+    
+            email_outlook_trigger_monitor()
+        
+        except:
+            with open("logs\\error_log.txt", 'a') as f:
+                try:
+                    f.write(traceback.format_exc())
+                    print(traceback.format_exc())
+                except:
+                    pass
+            break
+        
+        if not EmailOutlookTrigger.objects.filter(activated=True).exists():
+            try:
+                email_outlook.Application.Quit()
+            except:
+                pass
+            
+            email_outlook = None
+            del email_outlook
+            
+            CoUninitialize()
+            
+            email_outlook_trigger_monitor()
+
+    try:
+        email_outlook.Application.Quit()
+    except:
+        pass
+    
+    email_outlook = None
+    del email_outlook
+    
+    CoUninitialize()
+
+
+def email_outlook_trigger_monitor_evaluate(email_outlook):
+    items = EmailOutlookTrigger.objects.filter(activated=True)
+    
+    for item in items:    
+        if not item.run_on_week_days:
+            if 0 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 4:
+                continue
+        if not item.run_on_weekend_days:
+            if 5 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 6:
+                continue
+        
+        if item.run_after is not None:
+            run_after = datetime.timedelta(hours=item.run_after.hour, minutes=item.run_after.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
+        else:
+            run_after = datetime.timedelta(hours=0, minutes=0)
+            
+        if item.run_until is not None:
+            run_until = datetime.timedelta(hours=item.run_until.hour, minutes=item.run_until.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
+        else:
+            run_until = datetime.timedelta(hours=0, minutes=0)
+            
+        time_timedelta = datetime.timedelta(hours=datetime.datetime.now(pytz.timezone('UTC')).hour, minutes=datetime.datetime.now(pytz.timezone('UTC')).minute)
+            
+        if run_after < run_until:
+            if time_timedelta < run_after:
+                continue
+            if time_timedelta >= run_until:
+                continue
+            
+        else:
+            if time_timedelta >= run_after or time_timedelta < run_until:
+                pass
+            else:
+                continue
+        try:
+            accounts = email_outlook.Session.Accounts
+            accounts_list = [account.DisplayName for account in accounts]
+            
+            if item.email == "Default":
+                namespace = email_outlook.GetNamespace("MAPI")
+                
+            else:
+                if not item.email in accounts_list:
+                    continue
+                
+                namespace = None
+                
+                for account in accounts:
+                    if str(item.email).upper() == str(account.DisplayName).upper():
+                        namespace = account.DeliveryStore
+                        break
+            
+            inbox = namespace.GetDefaultFolder(6)
+            
+        except:
+            items, accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None, None, None, None
+            del items, accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails
+            
+            raise EmailOutlookDispatchException
+        
         folder_in = inbox
         folder_out = inbox
         
-        for folder in item.folder_in.split("\\"):
+        for folder in item.folder_in.split("/"):
             folder_in = folder_in.Folders[folder]
         
-        for folder in item.folder_out.split("\\"):
+        for folder in item.folder_out.split("/"):
             folder_out = folder_out.Folders[folder]
             
         emails = folder_in.Items
@@ -491,34 +605,10 @@ def outlook_trigger_monitor_evaluate(outlook):
                 add_execution = True
                 
             if add_execution:
-                bot_object = Bot.objects.get(pk=item.bot.pk)
-                app_object = App.objects.get(pk=item.app.pk)
-                botflow_object = Botflow.objects.get(pk=item.botflow.pk)
-                
-                execution = Execution(app=app_object.path,
-                                    botflow=botflow_object.path,
-                                    trigger=f"Outlook Trigger: {email.Subject}",
-                                    close_bot_automatically=botflow_object.close_bot_automatically,
-                                    timeout_minutes=botflow_object.timeout_minutes,
-                                    timeout_kill_processes=botflow_object.timeout_kill_processes,
-                                    computer_name=bot_object.computer_name,
-                                    user_name=bot_object.user_name,
-                                    priority=botflow_object.priority,
-                                    status="Pending",
-                                    queued_notification = botflow_object.queued_notification,
-                                    started_notification = botflow_object.started_notification,
-                                    completed_notification = botflow_object.completed_notification,
-                                    error_notification = botflow_object.error_notification)
-                execution.save()
+                add_execution_object(item, f"'Email Outlook Trigger: {email.Subject}")
             
         accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None, None, None
-        del accounts
-        del accounts_list
-        del namespace
-        del inbox
-        del folder_in
-        del folder_out
-        del emails
+        del accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails
 
     items = None
     del items

@@ -66,4 +66,8 @@ You are now ready to access the Automation Orchestrator via a browser and get st
   <img src="/images/home%20page.png">
 </p>
 
-<i>More documentation is underway...</i>
+## Copyrights
+
+Starting from 0.0.17 Basico P/S - Automation Orchestrator is distributed under the BSD 3-clause license. Basico P/S - Automation Orchestrator 0.0.16 and before was distributed under the MIT license.
+
+(c) Basico P/S, Mathias Balsløw 2019

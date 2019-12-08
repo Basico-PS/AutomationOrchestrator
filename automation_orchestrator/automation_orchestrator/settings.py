@@ -38,20 +38,12 @@ def generate_secret_key(env_var_name):
     secret_key = get_random_secret_key()
     
     subprocess.run(['setx', env_var_name, secret_key], stdout=subprocess.PIPE)
-    
-    path = os.path.dirname(os.path.abspath(__file__)) + "\\secret_key.txt"
-    
-    with open(path, "w") as f:
-        f.write(secret_key)
         
     print(f"""
 ***
 
 A secret key for encrypting data in the database has been generated.
-This key is securily stored as an environment variable but also in the following file as a backup.
-You may delete this file to make sure that no one else can get to the secret key.
-
-Path: {path}
+This key is securily stored as an environment variable with the name: {env_var_name}
 
 ***
 """)

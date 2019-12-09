@@ -9,6 +9,8 @@ import os
 
 
 admin.site.site_header = 'Basico P/S - Automation Orchestrator'
+admin.site.site_title = 'Basico P/S - Automation Orchestrator'
+admin.site.index_title = 'Orchestrate amazing automation'
 
 
 def queue_item(item, trigger):

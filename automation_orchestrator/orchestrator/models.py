@@ -29,6 +29,10 @@ class Bot(models.Model):
     name = models.CharField(max_length=255, help_text="Specify the name of the bot.")
     computer_name = models.CharField(max_length=255, default=get_computer_name, help_text="Specify the computer name of the bot.")
     user_name = models.CharField(max_length=255, default=get_user_name, help_text="Specify the username of the bot.")
+    
+    nintex_rpa_license_path = models.CharField(max_length=255, default="", blank=True, help_text="Specify the Nintex RPA license path of the bot. If the field is blank there will be no check to ensure the availability of licenses. IMPORTANT: Only applies to the Concurrent Edition license model.")
+    nintex_rpa_available_foxtrot_licenses = models.PositiveIntegerField(default=0, help_text="Specify the total number of available Foxtrot licenses in the path. IMPORTANT: Only applies to the Concurrent Edition license model.")
+    nintex_rpa_available_foxbot_licenses = models.PositiveIntegerField(default=0, help_text="Specify the total number of available FoxBot licenses in the path. IMPORTANT: Only applies to the Concurrent Edition license model.")
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
@@ -37,8 +41,8 @@ class Bot(models.Model):
         return self.name
 
     def clean(self):        
-        if Bot.objects.filter(computer_name=self.computer_name).filter(user_name=self.user_name).exists():
-            raise ValidationError('A bot with the same computer name and username already exist!')
+        if Bot.objects.filter(computer_name=self.computer_name).filter(user_name=self.user_name).exclude(id=self.id).exists():
+            raise ValidationError('A bot with the same computer name and username already exists!')
 
 
 class App(models.Model):
@@ -95,6 +99,10 @@ class FileTrigger(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
 
+    def clean(self):        
+        if self.folder_in == self.folder_out:
+            raise ValidationError('The incoming and outgoing folders cannot be the same!')
+
 
 class ScheduleTrigger(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, help_text="Select the bot for this trigger.")
@@ -148,6 +156,10 @@ class EmailImapTrigger(models.Model):
         verbose_name = 'Email IMAP trigger'
         verbose_name_plural = 'Email IMAP triggers'
 
+    def clean(self):        
+        if self.folder_in == self.folder_out:
+            raise ValidationError('The incoming and outgoing folders cannot be the same!')
+
 
 class EmailOutlookTrigger(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, help_text="Select the bot for this trigger.")
@@ -173,6 +185,10 @@ class EmailOutlookTrigger(models.Model):
         verbose_name = 'Email Outlook trigger'
         verbose_name_plural = 'Email Outlook triggers'
 
+    def clean(self):        
+        if self.folder_in == self.folder_out:
+            raise ValidationError('The incoming and outgoing folders cannot be the same!')
+
 
 class Execution(models.Model):
     time_queued = models.DateTimeField(auto_now_add=True)
@@ -196,6 +212,10 @@ class Execution(models.Model):
 
     close_bot_automatically = models.BooleanField(default=False)
     
+    nintex_rpa_license_path = models.CharField(max_length=255)
+    nintex_rpa_available_foxtrot_licenses = models.PositiveIntegerField()
+    nintex_rpa_available_foxbot_licenses = models.PositiveIntegerField()
+    
     time_start = models.DateTimeField(null=True, blank=True)
     time_end = models.DateTimeField(null=True, blank=True)
     
@@ -216,5 +236,5 @@ class SmtpAccount(models.Model):
         return self.email
 
     def clean(self):        
-        if self.activated and SmtpAccount.objects.filter(activated=True).exists():
+        if self.activated and SmtpAccount.objects.filter(activated=True).exclude(id=self.id).exists():
             raise ValidationError('An activated SMTP account already exists! Make sure to not activate this account or deactivate the activated account.')

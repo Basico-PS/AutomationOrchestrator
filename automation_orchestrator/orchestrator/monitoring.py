@@ -46,7 +46,10 @@ def add_execution_object(item, trigger):
                           queued_notification = botflow_object.queued_notification,
                           started_notification = botflow_object.started_notification,
                           completed_notification = botflow_object.completed_notification,
-                          error_notification = botflow_object.error_notification)
+                          error_notification = botflow_object.error_notification,
+                          nintex_rpa_license_path = bot_object.nintex_rpa_license_path,
+                          nintex_rpa_available_foxtrot_licenses = bot_object.nintex_rpa_available_foxtrot_licenses,
+                          nintex_rpa_available_foxbot_licenses = bot_object.nintex_rpa_available_foxbot_licenses)
     execution.save()
     
     bot_object, app_object, botflow_object = None, None, None
@@ -648,6 +651,21 @@ def execution_monitor_evaluate():
             
             if any(str(f'\tuser = "{username}";') in user.lower() for user in processes):
                 continue
+            
+            if item.nintex_rpa_license_path != "":
+                nintex_rpa_license_path = item.nintex_rpa_license_path
+                
+                if os.path.exists(nintex_rpa_license_path):
+                    nintex_rpa_license_path = os.path.join(item.nintex_rpa_license_path, "System")
+                    
+                    if os.path.exists(nintex_rpa_license_path):
+                        if app == "foxbot.exe":
+                            if item.nintex_rpa_available_foxbot_licenses <= len([file for file in os.listdir(nintex_rpa_license_path) if file.startswith("RPA") and file.endswith(".net")]):
+                                continue
+
+                        elif app == "foxtrot.exe":
+                            if item.nintex_rpa_available_foxtrot_licenses <= len([file for file in os.listdir(nintex_rpa_license_path) if file.startswith("FTE") and file.endswith(".net")]):
+                                continue
             
         item.time_start = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))}00")
         item.status = "Running"

@@ -145,6 +145,29 @@ def export_selected_executions(modeladmin, request, queryset):
     return response
     
 
+def test_selected_file_triggers_triggers(modeladmin, request, queryset):
+    import glob
+    
+    for item in queryset:
+        try:
+            if not os.path.isdir(item.folder_in):
+                messages.error(request, f"Failed to find the incoming folder: {item.folder_in}")
+                continue
+            
+            elif not os.path.isdir(item.folder_out):
+                messages.error(request, f"Failed to find the outgoing folder: {item.folder_out}")
+                continue
+        
+            files = []
+            for filter in item.filter.split(","):
+                files = files + [file for file in glob.glob(item.folder_in + "\\" + filter.strip()) if os.path.isfile(file)]
+                
+            messages.success(request, f"Successfully retrieved {str(len(files))} file(s) in the incoming folder: {item.folder_in}")
+                
+        except:
+            messages.error(request, f"Failed to retrieve files from the incoming folder: {item.folder_in}")
+    
+
 def test_selected_email_imap_triggers(modeladmin, request, queryset):
     from imaplib import IMAP4, IMAP4_SSL
     
@@ -273,27 +296,14 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
             messages.error(request, f"Failed to send email with {item.email}!")
 
 
-class BotForm(forms.ModelForm):
-    class Meta:
-        model = Bot
-        fields = '__all__'
-
-    def clean(self):
-        computer_name = self.cleaned_data.get('computer_name')
-        user_name = self.cleaned_data.get('user_name')
-        
-        if Bot.objects.filter(computer_name=computer_name).filter(user_name=user_name).exists():
-            raise forms.ValidationError('A bot with the same computer name and username already exist!')
-        
-        return self.cleaned_data
-
-
 class BotAdmin(admin.ModelAdmin):
-    form = BotForm
-    
     fieldsets = (
         ('General', {
             'fields': ('name', 'computer_name', 'user_name',),
+        }),
+        ('Nintex RPA', {
+            'classes': ('collapse',),
+            'fields': ('nintex_rpa_license_path', 'nintex_rpa_available_foxtrot_licenses', 'nintex_rpa_available_foxbot_licenses',),
         }),
     )
     list_display = ('pk', 'name', 'computer_name', 'user_name',)
@@ -404,7 +414,7 @@ class FileTriggerAdmin(admin.ModelAdmin):
                     'folder_in', 'folder_out', 'filter', 'activated')
     list_display_links = ['pk']
     
-    actions = [export_selected_file_triggers, activate_selected_file_triggers,]
+    actions = [activate_selected_file_triggers, export_selected_file_triggers, test_selected_file_triggers_triggers]
 
 
 class ScheduleTriggerAdmin(admin.ModelAdmin):
@@ -436,7 +446,7 @@ class ScheduleTriggerAdmin(admin.ModelAdmin):
     exclude = ('past_settings',)
     readonly_fields = ('next_execution',)
     
-    actions = [export_selected_schedule_triggers, activate_selected_schedule_triggers,]
+    actions = [activate_selected_schedule_triggers, export_selected_schedule_triggers,]
 
 
 class EmailImapTriggerForm(forms.ModelForm):    
@@ -481,7 +491,7 @@ class EmailImapTriggerAdmin(admin.ModelAdmin):
                      'folder_in', 'folder_out', 'activated')
     list_display_links = ['pk']
     
-    actions = [test_selected_email_imap_triggers, export_selected_email_imap_triggers, activate_selected_email_imap_triggers,]
+    actions = [activate_selected_email_imap_triggers, export_selected_email_imap_triggers, test_selected_email_imap_triggers,]
 
 
 class EmailOutlookTriggerAdmin(admin.ModelAdmin):
@@ -512,7 +522,7 @@ class EmailOutlookTriggerAdmin(admin.ModelAdmin):
                      'folder_in', 'folder_out', 'activated')
     list_display_links = ['pk']
     
-    actions = [test_selected_email_outlook_triggers, export_selected_email_outlook_triggers, activate_selected_email_outlook_triggers,]
+    actions = [activate_selected_email_outlook_triggers, export_selected_email_outlook_triggers, test_selected_email_outlook_triggers,]
 
 
 class ExecutionAdmin(admin.ModelAdmin):
@@ -520,12 +530,14 @@ class ExecutionAdmin(admin.ModelAdmin):
                     'computer_name', 'user_name',
                     'app', 'botflow',
                     'trigger', 
-                    'priority', 'timeout_minutes',
-                    'status', 'time_start', 'time_end',)
+                    'priority',
+                    'status', 
+                    'time_start', 'time_end',)
     list_display_links = ['pk']
     list_filter = ('computer_name', 'user_name', 'app', 'botflow', 'status',)
+    readonly_fields = [field.name for field in Execution._meta.get_fields() if field.name != 'status']
     
-    actions = [export_selected_executions, ]
+    actions = [export_selected_executions,]
 
     def get_ordering(self, request):
         return ['-time_queued']
@@ -538,14 +550,6 @@ class SmtpAccountForm(forms.ModelForm):
         widgets = {
             'password': forms.PasswordInput(),
         }
-
-    def clean(self):
-        activated = self.cleaned_data.get('activated')
-        
-        if activated and SmtpAccount.objects.filter(activated=True).exists():
-            raise forms.ValidationError("An activated SMTP account already exists! Make sure to not activate this account or deactivate the activated account.")
-        
-        return self.cleaned_data
         
 
 class SmtpAccountAdmin(admin.ModelAdmin):

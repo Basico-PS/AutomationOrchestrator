@@ -8,13 +8,16 @@ For support, please contact us: robotics@basico.dk
   <img src="/images/login%20page.png">
 </p>
 
-The Automation Orchestrator allows you to run a local [Django Web Application](https://www.djangoproject.com/) to administrate and orchestrate automation scripts such as Nintex RPA botflows. Feature highlights out-of-the-box:
+The Automation Orchestrator allows you to run a local [Django Web Application](https://www.djangoproject.com/) to administrate and orchestrate automation scripts such as Nintex RPA botflows but you may also orchestrate other automation such as Python scripts, batch files, and other RPA tools.
+The Automation Orchestrator is tested with and supports Nintex RPA version <= 15.1.
+
+Feature highlights out-of-the-box:
 - Groups and User Setup
 - File Triggers
 - Schedule Triggers
 - Email IMAP Triggers
 - Email Outlook Triggers
-- Queue Functionality
+- Queue Functionality with License Awareness and Botflow Priorities
 - Execution Log
 - Email SMTP Notifications
 

@@ -81,9 +81,9 @@ class Botflow(models.Model):
 
 
 class FileTrigger(models.Model):
-    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, help_text="Select the bot for this trigger.")
-    app = models.ForeignKey(App, on_delete=models.CASCADE, help_text="Select the application for this trigger.")
-    botflow = models.ForeignKey(Botflow, on_delete=models.CASCADE, help_text="Select the botflow for this trigger.")
+    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, help_text="Select the bot for this trigger.")
+    app = models.ForeignKey(App, on_delete=models.PROTECT, help_text="Select the application for this trigger.")
+    botflow = models.ForeignKey(Botflow, on_delete=models.PROTECT, help_text="Select the botflow for this trigger.")
     
     folder_in = models.CharField(max_length=255, help_text="Specify the folder for incoming files. When a file is detected in this folder, the trigger will be activated.")
     folder_out = models.CharField(max_length=255, help_text="Specify the folder that the files should be moved to. When the trigger is activated, the file will be moved to this folder.")
@@ -105,9 +105,9 @@ class FileTrigger(models.Model):
 
 
 class ScheduleTrigger(models.Model):
-    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, help_text="Select the bot for this trigger.")
-    app = models.ForeignKey(App, on_delete=models.CASCADE, help_text="Select the application for this trigger.")
-    botflow = models.ForeignKey(Botflow, on_delete=models.CASCADE, help_text="Select the botflow for this trigger.")
+    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, help_text="Select the bot for this trigger.")
+    app = models.ForeignKey(App, on_delete=models.PROTECT, help_text="Select the application for this trigger.")
+    botflow = models.ForeignKey(Botflow, on_delete=models.PROTECT, help_text="Select the botflow for this trigger.")
 
     frequency = models.CharField(max_length=3, choices=[('MIN', 'Minute'),('HOU', 'Hour'),('DAY', 'Day'),('WEE', 'Week'),('MON', 'Month'),
                                                         ('FWK', 'First Week Day'),('FWD', 'First Weekend Day'), ('LWK', 'Last Week Day'),('LWD', 'Last Weekend Day')], help_text="Specify the frequency of the trigger.")
@@ -129,9 +129,9 @@ class ScheduleTrigger(models.Model):
 
 
 class EmailImapTrigger(models.Model):
-    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, help_text="Select the bot for this trigger.")
-    app = models.ForeignKey(App, on_delete=models.CASCADE, help_text="Select the application for this trigger.")
-    botflow = models.ForeignKey(Botflow, on_delete=models.CASCADE, help_text="Select the botflow for this trigger.")
+    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, help_text="Select the bot for this trigger.")
+    app = models.ForeignKey(App, on_delete=models.PROTECT, help_text="Select the application for this trigger.")
+    botflow = models.ForeignKey(Botflow, on_delete=models.PROTECT, help_text="Select the botflow for this trigger.")
     
     email = models.EmailField(help_text="Specify the email of the IMAP account.")
     password = EncryptedCharField(max_length=255, help_text="Specify the password of the IMAP account.")
@@ -156,15 +156,15 @@ class EmailImapTrigger(models.Model):
         verbose_name = 'Email IMAP trigger'
         verbose_name_plural = 'Email IMAP triggers'
 
-    def clean(self):        
+    def clean(self):
         if self.folder_in == self.folder_out:
             raise ValidationError('The incoming and outgoing folders cannot be the same!')
 
 
 class EmailOutlookTrigger(models.Model):
-    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, help_text="Select the bot for this trigger.")
-    app = models.ForeignKey(App, on_delete=models.CASCADE, help_text="Select the application for this trigger.")
-    botflow = models.ForeignKey(Botflow, on_delete=models.CASCADE, help_text="Select the botflow for this trigger.")
+    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, help_text="Select the bot for this trigger.")
+    app = models.ForeignKey(App, on_delete=models.PROTECT, help_text="Select the application for this trigger.")
+    botflow = models.ForeignKey(Botflow, on_delete=models.PROTECT, help_text="Select the botflow for this trigger.")
     
     email = models.CharField(max_length=255, default="Default", help_text="Specify the email of the account to monitor. IMPORTANT: If you wish to monitor the primary Outlook account, the email should be set to 'Default'.")
     

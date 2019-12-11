@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib import admin, messages
-from django.contrib.auth.models import Group
 from django.http import HttpResponse
+from simple_history.admin import SimpleHistoryAdmin
 from .models import Bot, App, Botflow, FileTrigger, ScheduleTrigger, EmailImapTrigger, EmailOutlookTrigger, Execution, SmtpAccount
 from .monitoring import add_execution_object
 import csv
@@ -298,7 +298,7 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
             messages.error(request, f"Failed to send email with {item.email}!")
 
 
-class BotAdmin(admin.ModelAdmin):
+class BotAdmin(SimpleHistoryAdmin):
     fieldsets = (
         ('General', {
             'fields': ('name', 'computer_name', 'user_name',),
@@ -327,7 +327,7 @@ class AppForm(forms.ModelForm):
         return self.cleaned_data
 
 
-class AppAdmin(admin.ModelAdmin):
+class AppAdmin(SimpleHistoryAdmin):
     # form = AppForm
     
     fieldsets = (
@@ -354,7 +354,7 @@ class BotflowForm(forms.ModelForm):
         return self.cleaned_data
 
 
-class BotflowAdmin(admin.ModelAdmin):
+class BotflowAdmin(SimpleHistoryAdmin):
     # form = BotflowForm
     
     fieldsets = (
@@ -390,7 +390,7 @@ class BotflowAdmin(admin.ModelAdmin):
     list_display_links = ['pk']
 
 
-class FileTriggerAdmin(admin.ModelAdmin):
+class FileTriggerAdmin(SimpleHistoryAdmin):
     fieldsets = (
         ('General', {
             'fields': ('bot', 'app', 'botflow',),
@@ -419,7 +419,7 @@ class FileTriggerAdmin(admin.ModelAdmin):
     actions = [activate_selected_file_triggers, export_selected_file_triggers, test_selected_file_triggers_triggers]
 
 
-class ScheduleTriggerAdmin(admin.ModelAdmin):
+class ScheduleTriggerAdmin(SimpleHistoryAdmin):
     fieldsets = (
         ('General', {
             'fields': ('bot', 'app', 'botflow'),
@@ -460,7 +460,7 @@ class EmailImapTriggerForm(forms.ModelForm):
         }
 
 
-class EmailImapTriggerAdmin(admin.ModelAdmin):
+class EmailImapTriggerAdmin(SimpleHistoryAdmin):
     form = EmailImapTriggerForm
     
     fieldsets = (
@@ -496,7 +496,7 @@ class EmailImapTriggerAdmin(admin.ModelAdmin):
     actions = [activate_selected_email_imap_triggers, export_selected_email_imap_triggers, test_selected_email_imap_triggers,]
 
 
-class EmailOutlookTriggerAdmin(admin.ModelAdmin):
+class EmailOutlookTriggerAdmin(SimpleHistoryAdmin):
     fieldsets = (
         ('General', {
             'fields': ('bot', 'app', 'botflow',),
@@ -527,7 +527,7 @@ class EmailOutlookTriggerAdmin(admin.ModelAdmin):
     actions = [activate_selected_email_outlook_triggers, export_selected_email_outlook_triggers, test_selected_email_outlook_triggers,]
 
 
-class ExecutionAdmin(admin.ModelAdmin):
+class ExecutionAdmin(SimpleHistoryAdmin):
     list_display = ('pk', 'time_queued',
                     'computer_name', 'user_name',
                     'app', 'botflow',
@@ -557,7 +557,7 @@ class SmtpAccountForm(forms.ModelForm):
         }
         
 
-class SmtpAccountAdmin(admin.ModelAdmin):
+class SmtpAccountAdmin(SimpleHistoryAdmin):
     form = SmtpAccountForm
     
     fieldsets = (

@@ -3,6 +3,7 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
 from fernet_fields import EncryptedCharField
+from simple_history.models import HistoricalRecords
 
 
 def get_computer_name():
@@ -37,6 +38,8 @@ class Bot(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
     
+    history = HistoricalRecords()
+    
     def __str__(self):
         return self.name
 
@@ -51,6 +54,8 @@ class App(models.Model):
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
+    
+    history = HistoricalRecords()
     
     def __str__(self):
         return self.name
@@ -76,6 +81,8 @@ class Botflow(models.Model):
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
     
+    history = HistoricalRecords()
+    
     def __str__(self):
         return self.name
 
@@ -98,6 +105,8 @@ class FileTrigger(models.Model):
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
+    
+    history = HistoricalRecords()
 
     def clean(self):        
         if self.folder_in == self.folder_out:
@@ -126,6 +135,8 @@ class ScheduleTrigger(models.Model):
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
+    
+    history = HistoricalRecords()
 
 
 class EmailImapTrigger(models.Model):
@@ -151,6 +162,8 @@ class EmailImapTrigger(models.Model):
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
+    
+    history = HistoricalRecords()
     
     class Meta:
         verbose_name = 'Email IMAP trigger'
@@ -180,6 +193,8 @@ class EmailOutlookTrigger(models.Model):
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
+    
+    history = HistoricalRecords()
     
     class Meta:
         verbose_name = 'Email Outlook trigger'
@@ -219,6 +234,8 @@ class Execution(models.Model):
     time_start = models.DateTimeField(null=True, blank=True)
     time_end = models.DateTimeField(null=True, blank=True)
     
+    # Intentionally not adding 'history = HistoricalRecords()' to this model.
+    
     
 class SmtpAccount(models.Model):
     email = models.EmailField(help_text="Specify the email of the SMTP account.")
@@ -227,6 +244,8 @@ class SmtpAccount(models.Model):
     port = models.PositiveIntegerField(help_text="Specify the port of the SMTP account. For example: 587")
     tls = models.BooleanField("SSL/TLS", default=True, help_text="Specify whether the SMTP account requires 'SSL/TLS'.")
     activated = models.BooleanField(default=False, help_text="Specify whether the SMTP account should be active.")
+    
+    history = HistoricalRecords()
     
     class Meta:
         verbose_name = 'SMTP account'

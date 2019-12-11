@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'admin_reorder',
     'simple_history',
 ]
 
@@ -89,6 +90,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'admin_reorder.middleware.ModelAdminReorder',
     'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
@@ -172,3 +174,23 @@ REST_FRAMEWORK = {'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsA
                       },
                   'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
                   }
+
+ADMIN_REORDER = (    
+    'auth',
+    
+    {'app': 'orchestrator',
+     'label': 'Setup',
+     'models': ('orchestrator.Bot', 'orchestrator.App', 'orchestrator.Botflow',)},
+    
+    {'app': 'orchestrator',
+     'label': 'Notifications',
+     'models': ('orchestrator.SmtpAccount',)},
+    
+    {'app': 'orchestrator',
+     'label': 'Triggers',
+     'models': ('orchestrator.EmailImapTrigger', 'orchestrator.EmailOutlookTrigger', 'orchestrator.FileTrigger', 'orchestrator.ScheduleTrigger',)},
+    
+    {'app': 'orchestrator',
+     'label': 'Execution Log',
+     'models': ('orchestrator.Execution',)}
+)

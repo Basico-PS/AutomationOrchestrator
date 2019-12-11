@@ -1,1 +1,28 @@
 {% extends 'admin/base_site.html' %}
+
+{% load static %}
+
+{% block branding %}
+<div id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <img src="{% static 'admin/logo.png' %}" height="75px"/>
+    </a>
+</div>
+{% endblock %}
+
+{% block extrahead %}
+<link rel="shortcut icon" type="image/png" href="{% static 'admin/favicon.ico' %}"/>
+{% endblock %}
+
+{% block extrastyle %}
+<style>
+    #header {
+        background: #2e2e2d;
+    }
+
+    div.breadcrumbs {
+        background: #2e2e2d;
+    }
+
+</style>
+{% endblock %}

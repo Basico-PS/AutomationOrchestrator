@@ -543,6 +543,9 @@ class ExecutionAdmin(admin.ModelAdmin):
 
     def get_ordering(self, request):
         return ['-time_queued']
+    
+    def has_add_permission(self, request, obj=None):
+        return False
 
 
 class SmtpAccountForm(forms.ModelForm):    

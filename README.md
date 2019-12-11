@@ -157,7 +157,7 @@ The Automation Orchestrator runs with the ["DEBUG" flag set to "True"](https://d
 
 ## Copyrights
 
-Starting from 0.0.17 Basico P/S - Automation Orchestrator is distributed under the BSD 3-clause license. Basico P/S - Automation Orchestrator 0.0.16 and before was distributed under the MIT license.
+Starting from 0.0.17 Basico P/S - Automation Orchestrator is distributed under the [BSD 3-clause license](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/LICENSE). Basico P/S - Automation Orchestrator 0.0.16 and before was distributed under the MIT license.
 
 (c) Basico P/S, Mathias Balsløw 2019
 

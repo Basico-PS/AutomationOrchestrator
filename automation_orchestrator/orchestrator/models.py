@@ -150,8 +150,8 @@ class EmailImapTrigger(models.Model):
     port = models.PositiveIntegerField(help_text="Specify the port of the IMAP account. For example: 993")
     tls = models.BooleanField("SSL/TLS", default=True, help_text="Specify whether the IMAP account requires 'SSL/TLS'.")
     
-    folder_in = models.CharField(max_length=255, help_text="Specify the folder for incoming emails. When an email is detected in this folder, the trigger will be activated. The folder must be a folder must be in the 'INBOX'. To specify subfolders, use slash to separate the folder names like this: Invoices/Incoming")
-    folder_out = models.CharField(max_length=255, help_text="Specify the folder that the emails should be moved to. When the trigger is activated, the email will be moved to this folder. The folder must be a folder must be in the 'INBOX'. To specify subfolders, use slash to separate the folder names like this: Invoices/Incoming/Handled")
+    folder_in = models.CharField(max_length=255, help_text="Specify the folder for incoming emails. When an email is detected in this folder, the trigger will be activated. The folder must be in the 'INBOX'. To specify subfolders, use slash to separate the folder names like this: Invoices/Incoming")
+    folder_out = models.CharField(max_length=255, help_text="Specify the folder that the emails should be moved to. When the trigger is activated, the email will be moved to this folder. The folder must be in the 'INBOX'. To specify subfolders, use slash to separate the folder names like this: Invoices/Incoming/Handled")
     
     activated = models.BooleanField(default=False, help_text="Specify whether the trigger should be active.")
     
@@ -181,8 +181,8 @@ class EmailOutlookTrigger(models.Model):
     
     email = models.CharField(max_length=255, default="Default", help_text="Specify the email of the account to monitor. IMPORTANT: If you wish to monitor the primary Outlook account, the email should be set to 'Default'.")
     
-    folder_in = models.CharField(max_length=255, help_text="Specify the folder for incoming emails. When an email is detected in this folder, the trigger will be activated. The folder must be a folder must be in the 'INBOX'. To specify subfolders, use slash to separate the folder names like this: Invoices/Incoming")
-    folder_out = models.CharField(max_length=255, help_text="Specify the folder that the emails should be moved to. When the trigger is activated, the email will be moved to this folder. The folder must be a folder must be in the 'INBOX'. To specify subfolders, use slash to separate the folder names like this: Invoices/Incoming/Handled")
+    folder_in = models.CharField(max_length=255, help_text="Specify the folder for incoming emails. When an email is detected in this folder, the trigger will be activated. The folder must be in the 'INBOX'. To specify subfolders, use slash to separate the folder names like this: Invoices/Incoming")
+    folder_out = models.CharField(max_length=255, help_text="Specify the folder that the emails should be moved to. When the trigger is activated, the email will be moved to this folder. The folder must be in the 'INBOX'. To specify subfolders, use slash to separate the folder names like this: Invoices/Incoming/Handled")
     
     activated = models.BooleanField(default=False, help_text="Specify whether the trigger should be active.")
     

@@ -149,7 +149,7 @@ You have now set up the Automation Orchestrator!
 
 ## Notes
 
-Out-of-the-box, the Automation Orchestrator can trigger and schedule scripts on the same machine and user running the server. In case you wish to do either of the two things below, you need to utilize the Automation Orchestrator Executor add-on:
+Out-of-the-box, the Automation Orchestrator can trigger and schedule scripts on the same machine and user running the server. In case you wish to do either of the two things below, you need to utilize the [Automation Orchestrator Executor](https://github.com/Basico-PS/AutomationOrchestratorExecutor) add-on:
 - Run the Automation Orchestrator on one machine but execute the scripts on a different machine, or
 - Run the Automation Orchestrator on a machine (for example, a Windows Terminal Server) with multiple users that are supposed to execute scripts
 

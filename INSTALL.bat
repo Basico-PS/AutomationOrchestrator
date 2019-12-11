@@ -1,7 +1,7 @@
-call cd %~dp0
-call python -m venv venv
-call venv\scripts\activate
-call pip install -r requirements.txt --no-cache-dir
-call python automation_orchestrator/manage.py makemigrations
-call python automation_orchestrator/manage.py migrate
-call python automation_orchestrator/manage.py createsuperuser
+CALL CD %~dp0
+CALL python -m venv venv
+CALL venv\scripts\activate
+CALL pip install -r requirements.txt --no-cache-dir
+CALL python automation_orchestrator/manage.py makemigrations
+CALL python automation_orchestrator/manage.py migrate
+CALL python automation_orchestrator/manage.py createsuperuser

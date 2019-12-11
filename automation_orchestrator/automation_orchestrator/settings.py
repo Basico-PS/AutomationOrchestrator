@@ -118,10 +118,21 @@ WSGI_APPLICATION = 'automation_orchestrator.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
+def generate_database_folder_structure(folder):
+    if not os.path.exists(folder):
+        os.mkdir(folder)
+    
+    if not os.path.exists(os.path.join(folder, 'backup')):
+        os.mkdir(os.path.join(folder, 'backup'))
+        
+    return os.path.join(folder, DATABASE_NAME)
+
+DATABASE_DIR = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'AutomationOrchestratorDatabase')
+DATABASE_NAME = 'db.sqlite3'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': generate_database_folder_structure(DATABASE_DIR),
     }
 }
 

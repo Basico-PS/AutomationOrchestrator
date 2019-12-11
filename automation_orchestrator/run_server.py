@@ -2,11 +2,13 @@ import os
 import sys
 import django
 import requests
+import sqlite3
 from socket import gethostname, gethostbyname_ex
 from django.db.models import Q
 from subprocess import Popen, PIPE
 from time import sleep
 from datetime import datetime
+from automation_orchestrator.settings import DATABASE_DIR, DATABASE_NAME
 
 
 sys.path.append('automation_orchestrator')
@@ -17,7 +19,36 @@ django.setup()
 from orchestrator.models import Execution
 
 
+def database_backup():
+    try:
+        print(f"{datetime.now()}: Performing a backup of the database...")
+        
+        db = sqlite3.connect(os.path.join(DATABASE_DIR, DATABASE_NAME))
+        db_backup = sqlite3.connect(os.path.join(DATABASE_DIR, "backup", datetime.now().strftime("%Y%m%d%H%M%S ") + DATABASE_NAME))
+        
+        with db_backup:
+            db.backup(db_backup)
+            
+        print(f"{datetime.now()}: Backup of database complete!")
+        
+    except:
+        print(f"{datetime.now()}: ERROR! Failed to perform a backup of the database...")
+        
+    finally:
+        try:
+            db.close()
+        except:
+            pass
+        
+        try:
+            db_backup.close()
+        except:
+            pass
+
+
 def main():
+    database_backup()
+    
     start_time_main = datetime.now()
     
     max_runtime = 10800

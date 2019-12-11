@@ -608,7 +608,7 @@ def email_outlook_trigger_monitor_evaluate(email_outlook):
                 add_execution = True
                 
             if add_execution:
-                add_execution_object(item, f"'Email Outlook Trigger: {email.Subject}")
+                add_execution_object(item, f"Email Outlook Trigger: {email.Subject}")
             
         accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None, None, None
         del accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails

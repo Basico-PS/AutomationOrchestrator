@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib import admin, messages
 from django.http import HttpResponse
+from django.utils.html import format_html
 from simple_history.admin import SimpleHistoryAdmin
 from .models import Bot, App, Botflow, FileTrigger, ScheduleTrigger, EmailImapTrigger, EmailOutlookTrigger, Execution, SmtpAccount
 from .monitoring import add_execution_object
@@ -308,55 +309,33 @@ class BotAdmin(SimpleHistoryAdmin):
             'fields': ('nintex_rpa_license_path', 'nintex_rpa_available_foxtrot_licenses', 'nintex_rpa_available_foxbot_licenses',),
         }),
     )
-    list_display = ('pk', 'name', 'computer_name', 'user_name',)
+    
+    list_display = ('pk', 'name', 'computer_name', 'user_name', 'update_record',)
     list_editable = ('name', 'computer_name', 'user_name',)
     list_display_links = ['pk']
-
-
-class AppForm(forms.ModelForm):
-    class Meta:
-        model = App
-        fields = '__all__'
-
-    def clean(self):
-        path = self.cleaned_data.get('path')
-        
-        if not os.path.isfile(path):
-            raise forms.ValidationError("The specified file in the path field does not exist!")
-        
-        return self.cleaned_data
-
-
-class AppAdmin(SimpleHistoryAdmin):
-    # form = AppForm
     
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/bot/{}/change/">EDIT</a>', obj.id)
+
+
+class AppAdmin(SimpleHistoryAdmin):    
     fieldsets = (
         ('General', {
             'fields': ('name', 'path',),
         }),
     )
-    list_display = ('pk', 'name', 'path',)
+    
+    list_display = ('pk', 'name', 'path', 'update_record')
     list_editable = ('name', 'path',)
     list_display_links = ['pk']
-
-
-class BotflowForm(forms.ModelForm):    
-    class Meta:
-        model = Botflow
-        fields = '__all__'
-
-    def clean(self):
-        path = self.cleaned_data.get('path')
-        
-        if not os.path.isfile(path):
-            raise forms.ValidationError("The specified file in the path field does not exist!")
-        
-        return self.cleaned_data
-
-
-class BotflowAdmin(SimpleHistoryAdmin):
-    # form = BotflowForm
     
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/app/{}/change/">EDIT</a>', obj.id)
+
+
+
+
+class BotflowAdmin(SimpleHistoryAdmin):    
     fieldsets = (
         ('General', {
             'fields': ('name', 'path',),
@@ -381,13 +360,17 @@ class BotflowAdmin(SimpleHistoryAdmin):
             'fields': ('close_bot_automatically',),
         }),
     )
+    
     list_display = ('pk', 'name', 'path',
                     'queue_if_already_running',
-                    'priority',)
+                    'priority', 'update_record',)
     list_editable = ('name', 'path',
                      'queue_if_already_running',
                      'priority',)
     list_display_links = ['pk']
+    
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/botflow/{}/change/">EDIT</a>', obj.id)
 
 
 class FileTriggerAdmin(SimpleHistoryAdmin):
@@ -411,12 +394,15 @@ class FileTriggerAdmin(SimpleHistoryAdmin):
     )
     
     list_display = ('pk', 'bot', 'app', 'botflow', 
-                    'folder_in', 'folder_out', 'filter', 'activated')
+                    'folder_in', 'folder_out', 'filter', 'activated', 'update_record',)
     list_editable = ('bot', 'app', 'botflow', 
-                    'folder_in', 'folder_out', 'filter', 'activated')
+                    'folder_in', 'folder_out', 'filter', 'activated',)
     list_display_links = ['pk']
     
     actions = [activate_selected_file_triggers, export_selected_file_triggers, test_selected_file_triggers_triggers]
+    
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/filetrigger/{}/change/">EDIT</a>', obj.id)
 
 
 class ScheduleTriggerAdmin(SimpleHistoryAdmin):
@@ -441,7 +427,7 @@ class ScheduleTriggerAdmin(SimpleHistoryAdmin):
     )
     
     list_display = ('pk', 'bot', 'app', 'botflow', 
-                    'frequency', 'run_every', 'run_start', 'activated',)
+                    'frequency', 'run_every', 'run_start', 'activated', 'update_record',)
     list_editable = ('bot', 'app', 'botflow', 
                     'frequency', 'run_every', 'run_start', 'activated',)
     list_display_links = ['pk']
@@ -449,6 +435,9 @@ class ScheduleTriggerAdmin(SimpleHistoryAdmin):
     readonly_fields = ('next_execution',)
     
     actions = [activate_selected_schedule_triggers, export_selected_schedule_triggers,]
+    
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/scheduletrigger/{}/change/">EDIT</a>', obj.id)
 
 
 class EmailImapTriggerForm(forms.ModelForm):    
@@ -487,13 +476,20 @@ class EmailImapTriggerAdmin(SimpleHistoryAdmin):
     
     list_display = ('pk', 'bot', 'app', 'botflow', 
                     'email',
-                    'folder_in', 'folder_out', 'activated')
+                    'folder_in', 'folder_out', 'activated', 'update_record',)
     list_editable = ('bot', 'app', 'botflow', 
                      'email',
-                     'folder_in', 'folder_out', 'activated')
+                     'folder_in', 'folder_out', 'activated',)
     list_display_links = ['pk']
     
+    activate_selected_email_imap_triggers.short_description = "Activate selected email IMAP triggers"
+    export_selected_email_imap_triggers.short_description = "Export selected email IMAP triggers"
+    test_selected_email_imap_triggers.short_description = "Test selected email IMAP triggers"
+    
     actions = [activate_selected_email_imap_triggers, export_selected_email_imap_triggers, test_selected_email_imap_triggers,]
+    
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/emailimaptrigger/{}/change/">EDIT</a>', obj.id)
 
 
 class EmailOutlookTriggerAdmin(SimpleHistoryAdmin):
@@ -518,13 +514,20 @@ class EmailOutlookTriggerAdmin(SimpleHistoryAdmin):
     
     list_display = ('pk', 'bot', 'app', 'botflow', 
                     'email',
-                    'folder_in', 'folder_out', 'activated')
+                    'folder_in', 'folder_out', 'activated', 'update_record',)
     list_editable = ('bot', 'app', 'botflow', 
                      'email',
-                     'folder_in', 'folder_out', 'activated')
+                     'folder_in', 'folder_out', 'activated',)
     list_display_links = ['pk']
     
+    activate_selected_email_outlook_triggers.short_description = "Activate selected email Outlook triggers"
+    export_selected_email_outlook_triggers.short_description = "Export selected email Outlook triggers"
+    test_selected_email_outlook_triggers.short_description = "Test selected email Outlook triggers"
+    
     actions = [activate_selected_email_outlook_triggers, export_selected_email_outlook_triggers, test_selected_email_outlook_triggers,]
+    
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/emailoutlooktrigger/{}/change/">EDIT</a>', obj.id)
 
 
 class ExecutionAdmin(SimpleHistoryAdmin):
@@ -574,15 +577,20 @@ class SmtpAccountAdmin(SimpleHistoryAdmin):
     
     list_display = ('pk', 'email',
                     'server', 'port', 'tls',
-                    'activated',)
+                    'activated', 'update_record',)
     list_editable = ('server', 'port', 'tls',
                      'activated',)
     list_display_links = ['pk']
+    
+    test_selected_smtp_accounts.short_description = "Test selected SMTP accounts"
     
     actions = [test_selected_smtp_accounts, ]
 
     def get_ordering(self, request):
         return ['-activated']
+    
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/smtpaccount/{}/change/">EDIT</a>', obj.id)
 
 
 admin.site.register(Bot, BotAdmin)

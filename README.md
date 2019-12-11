@@ -26,14 +26,22 @@ Some of the biggest web platforms and brands like [Instagram and Pinterest use t
 The purpose of the Automation Orchestrator is to offer a well-functioning, fully customizable web server application to trigger and schedule scripts. The Automation Orchestrator can run as a fully local server only available on the local host accessible via a browser or as a server available in your protected internal network accessible via a browser.
 
 Feature highlights out-of-the-box:
-- Groups and User Setup
-- File Triggers
-- Schedule Triggers
-- Email IMAP Triggers
-- Email Outlook Triggers
-- Queue Functionality with License Awareness and Botflow Priorities
+- Authentication & Authorization
+  - Groups
+  - Users
+- Setup
+  - Bots
+  - Apps
+  - Botflows
+- Notifications
+  - SMTP accounts
+- Triggers
+  - Email IMAP Triggers
+  - Email Outlook Triggers
+  - File Triggers
+  - Schedule Triggers
 - Execution Log
-- Email SMTP Notifications
+  - Queue Functionality with License Awareness and Botflow Priorities
 
 ## Installation
 

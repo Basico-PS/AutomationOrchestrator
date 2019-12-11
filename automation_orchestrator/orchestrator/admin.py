@@ -524,7 +524,7 @@ class EmailOutlookTriggerAdmin(SimpleHistoryAdmin):
     export_selected_email_outlook_triggers.short_description = "Export selected email Outlook triggers"
     test_selected_email_outlook_triggers.short_description = "Test selected email Outlook triggers"
     
-    actions = [activate_selected_email_outlook_triggers, export_selected_email_outlook_triggers, test_selected_email_outlook_triggers,]
+    actions = [activate_selected_email_outlook_triggers, export_selected_email_outlook_triggers,]
     
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/emailoutlooktrigger/{}/change/">EDIT</a>', obj.id)

@@ -45,6 +45,8 @@ Feature highlights out-of-the-box:
 
 ## Installation
 
+We highly recommend that the Automation Orchestrator is installed and setup only by people experienced with both Python and Nintex RPA. You are always welcome to contact us for assistance via: robotics@basico.dk
+
 For the Automation Orchestrator to work, you need to install [Python](https://www.python.org/downloads/windows/). The Automation Orchestrator is tested with [![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/windows/) and [![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/windows/). If you are in any doubts on how to correctly install Python, follow [this guide](https://www.mbalslow.com/blog/article/how-to-install-python/).
 
 After installing Python, you are now ready to install the Automation Orchestrator. Follow these steps precisely:

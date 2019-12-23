@@ -148,7 +148,7 @@ def export_selected_executions(modeladmin, request, queryset):
     return response
     
 
-def test_selected_file_triggers_triggers(modeladmin, request, queryset):
+def test_selected_file_triggers(modeladmin, request, queryset):
     import glob
     
     for item in queryset:
@@ -399,7 +399,7 @@ class FileTriggerAdmin(SimpleHistoryAdmin):
                     'folder_in', 'folder_out', 'filter', 'activated',)
     list_display_links = ['pk']
     
-    actions = [activate_selected_file_triggers, export_selected_file_triggers, test_selected_file_triggers_triggers]
+    actions = [activate_selected_file_triggers, export_selected_file_triggers, test_selected_file_triggers]
     
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/filetrigger/{}/change/">EDIT</a>', obj.id)

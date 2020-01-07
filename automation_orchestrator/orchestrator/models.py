@@ -2,7 +2,7 @@ import os
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
-from fernet_fields import EncryptedCharField
+from fernet_fields import EncryptedCharField, EncryptedTextField
 from simple_history.models import HistoricalRecords
 
 
@@ -26,8 +26,33 @@ def get_user_name():
         return ""
 
 
+def python_function_default_code():
+    return """## This is some descriptive code to help you use the Python function.
+## Simple calculation example :
+# x = int(input)
+# y = 5
+# output = x * 5
+## The returned response for this function will be:
+# '{"output": X}'
+## -----------------------------------------------------------------------------------------------------------
+## Simple SMTP example:
+# from smtplib import SMTP, SMTP_SSL
+# from email.message import EmailMessage
+# msg = EmailMessage()
+# msg['Subject'] = "Testing SMTP"
+# msg['From'] = input
+# msg['To'] = input
+# with SMTP("smtp.office365.com", 587) as server:
+#   server.starttls()
+#   server.login(input, encrypted_value_1)
+#   server.send_message(msg)
+# output = "Email sent successfully!"
+## The returned response for this function will be:
+# '{"output": "Email sent successfully!"}'"""
+
+
 class Bot(models.Model):
-    name = models.CharField(max_length=255, help_text="Specify the name of the bot.")
+    name = models.CharField(max_length=255, unique=True, help_text="Specify the name of the bot.")
     computer_name = models.CharField(max_length=255, default=get_computer_name, help_text="Specify the computer name of the bot.")
     user_name = models.CharField(max_length=255, default=get_user_name, help_text="Specify the username of the bot.")
 
@@ -49,7 +74,7 @@ class Bot(models.Model):
 
 
 class App(models.Model):
-    name = models.CharField(max_length=255, help_text="Specify the name of the application.")
+    name = models.CharField(max_length=255, unique=True, help_text="Specify the name of the application.")
     path = models.CharField(max_length=255, help_text="Specify the path to the application.")
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
@@ -62,7 +87,7 @@ class App(models.Model):
 
 
 class Botflow(models.Model):
-    name = models.CharField(max_length=255, help_text="Specify the name of the botflow/script/file.")
+    name = models.CharField(max_length=255, unique=True, help_text="Specify the name of the botflow/script/file.")
     path = models.CharField(max_length=255, help_text="Specify the path to the botflow/script/file.")
     queue_if_already_running = models.BooleanField(default=True, help_text="Specify whether the botflow should be added to the queue if this botflow is already in the queue as either 'Pending' or 'Running'.")
 
@@ -103,6 +128,8 @@ class FileTrigger(models.Model):
     run_on_week_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on week days.")
     run_on_weekend_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on weekend days.")
 
+    status = models.CharField(max_length=255, default="Working", editable=False, help_text="Indicates the status of the trigger.")
+
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
 
@@ -133,6 +160,8 @@ class ScheduleTrigger(models.Model):
     next_execution = models.CharField(max_length=255, blank=True, editable=False, help_text="This field specifies the scheduled time for the next execution. IMPORTANT: This date and time field is in UTC timezone, therefore, an offset is expected!")
     past_settings = models.CharField(max_length=255, blank=True)
 
+    status = models.CharField(max_length=255, default="Working", editable=False, help_text="Indicates the status of the trigger.")
+
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
 
@@ -159,6 +188,8 @@ class EmailImapTrigger(models.Model):
     run_until = models.TimeField(null=True, blank=True, help_text="Specify a time to limit the trigger to only be active before this time.")
     run_on_week_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on week days.")
     run_on_weekend_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on weekend days.")
+
+    status = models.CharField(max_length=255, default="Working", editable=False, help_text="Indicates the status of the trigger.")
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
@@ -191,6 +222,8 @@ class EmailOutlookTrigger(models.Model):
     run_on_week_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on week days.")
     run_on_weekend_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on weekend days.")
 
+    status = models.CharField(max_length=255, default="Working", editable=False, help_text="Indicates the status of the trigger.")
+
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
 
@@ -205,7 +238,26 @@ class EmailOutlookTrigger(models.Model):
             raise ValidationError('The incoming and outgoing folders cannot be the same!')
 
 
-class Execution(models.Model):
+class ApiTrigger(models.Model):
+    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, help_text="Select the bot for this trigger.")
+    app = models.ForeignKey(App, on_delete=models.PROTECT, help_text="Select the application for this trigger.")
+    botflow = models.ForeignKey(Botflow, on_delete=models.PROTECT, help_text="Select the botflow for this trigger.")
+
+    activated = models.BooleanField(default=False, help_text="Specify whether the trigger should be active.")
+
+    status = models.CharField(max_length=255, default="Working", editable=False, help_text="Indicates the status of the trigger.")
+
+    date_created = models.DateTimeField(auto_now_add=True, editable=False)
+    date_updated = models.DateTimeField(auto_now=True, editable=False)
+
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = 'API trigger'
+        verbose_name_plural = 'API triggers'
+
+
+class BotflowExecution(models.Model):
     time_queued = models.DateTimeField(auto_now_add=True)
 
     app = models.CharField(max_length=255)
@@ -238,12 +290,17 @@ class Execution(models.Model):
 
 
 class SmtpAccount(models.Model):
-    email = models.EmailField(help_text="Specify the email of the SMTP account.")
+    email = models.EmailField(unique=True, help_text="Specify the email of the SMTP account.")
     password = EncryptedCharField(max_length=255, help_text="Specify the password of the SMTP account.")
     server = models.CharField(max_length=255, help_text="Specify the server of the SMTP account. For example: smtp.office365.com")
     port = models.PositiveIntegerField(help_text="Specify the port of the SMTP account. For example: 587")
     tls = models.BooleanField("SSL/TLS", default=True, help_text="Specify whether the SMTP account requires 'SSL/TLS'.")
     activated = models.BooleanField(default=False, help_text="Specify whether the SMTP account should be active.")
+
+    status = models.CharField(max_length=255, default="Working", editable=False, help_text="Indicates the status of the SMTP account.")
+
+    date_created = models.DateTimeField(auto_now_add=True, editable=False)
+    date_updated = models.DateTimeField(auto_now=True, editable=False)
 
     history = HistoricalRecords()
 
@@ -257,3 +314,41 @@ class SmtpAccount(models.Model):
     def clean(self):
         if self.activated and SmtpAccount.objects.filter(activated=True).exclude(id=self.id).exists():
             raise ValidationError('An activated SMTP account already exists! Make sure to not activate this account or deactivate the activated account.')
+
+
+class PythonFunction(models.Model):
+    name = models.CharField(max_length=255, unique=True, help_text="Specify the name of the Python function.")
+    description = EncryptedTextField(help_text="Specify a description of the Python function.")
+
+    encrypted_value_1 = EncryptedCharField(max_length=255, blank=True, help_text="Specify an optional encrypted value to use in the Python function. To retrieve the value in the code, reference the 'encrypted_value_1' variable.")
+    encrypted_value_2 = EncryptedCharField(max_length=255, blank=True, help_text="Specify an optional encrypted value to use in the Python function. To retrieve the value in the code, reference the 'encrypted_value_2' variable.")
+    encrypted_value_3 = EncryptedCharField(max_length=255, blank=True, help_text="Specify an optional encrypted value to use in the Python function. To retrieve the value in the code, reference the 'encrypted_value_3' variable.")
+    encrypted_value_4 = EncryptedCharField(max_length=255, blank=True, help_text="Specify an optional encrypted value to use in the Python function. To retrieve the value in the code, reference the 'encrypted_value_4' variable.")
+    encrypted_value_5 = EncryptedCharField(max_length=255, blank=True, help_text="Specify an optional encrypted value to use in the Python function. To retrieve the value in the code, reference the 'encrypted_value_5' variable.")
+
+    code = EncryptedTextField(default=python_function_default_code(), help_text="Specify the code of the Python function. To retrieve the input served by the API call, reference the 'input' variable. The value of the variable 'output' will be returned in the API response.")
+
+    activated = models.BooleanField(default=False, help_text="Specify whether the trigger should be active.")
+
+    date_created = models.DateTimeField(auto_now_add=True, editable=False)
+    date_updated = models.DateTimeField(auto_now=True, editable=False)
+
+    history = HistoricalRecords()
+
+    def __str__(self):
+        return self.name
+
+
+class PythonFunctionExecution(models.Model):
+    python_function = models.ForeignKey(PythonFunction, null=True, on_delete=models.SET_NULL)
+    request_user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    request_ip = EncryptedCharField(max_length=255)
+
+    input = EncryptedTextField()
+    output = EncryptedTextField()
+    code = EncryptedTextField()
+
+    time_start = models.DateTimeField(null=True, blank=True)
+    time_end = models.DateTimeField(null=True, blank=True)
+
+    # Intentionally not adding 'history = HistoricalRecords()' to this model.

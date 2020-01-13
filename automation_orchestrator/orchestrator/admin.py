@@ -176,7 +176,7 @@ def test_selected_botflows(modeladmin, request, queryset):
         if os.path.isfile(item.path):
             messages.success(request, f"Successfully located the '{item.name}' Botflow file: {item.path}")
         else:
-            messages.success(request, f"Failed to locate the '{item.name}' Botflow file: {item.path}")
+            messages.error(request, f"Failed to locate the '{item.name}' Botflow file: {item.path}")
 
 
 def test_selected_file_triggers(modeladmin, request, queryset):

@@ -237,7 +237,7 @@ def test_selected_email_imap_triggers(modeladmin, request, queryset):
                 item.save()
                 
             else:
-                messages.success(request, f"Successfully connected to email {item.email}! Number of messages detected in the 'INBOX/{item.folder_in}' folder: {emails}")
+                messages.success(request, f"Successfully connected to email {item.email}! Number of messages detected in the 'INBOX/{item.folder_in}' folder: {emails_folder_in}")
 
                 if item.status != "Working":
                     item.status = "Working"

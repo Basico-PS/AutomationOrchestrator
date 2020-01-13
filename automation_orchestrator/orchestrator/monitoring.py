@@ -23,6 +23,11 @@ email_outlook_sleep = 15
 queue_sleep = 10
 
 
+class EmailImapFolderException(Exception):
+    # Exception to be used when a IMAP folder does not exist.
+    pass
+
+
 class EmailOutlookDispatchException(Exception):
     # Exception to be used when the connection to the dispatched Email Outlook object is lost.
     pass
@@ -411,16 +416,21 @@ def email_imap_trigger_monitor_evaluate():
             server.login(item.email, item.password)
 
             server.select('INBOX')
+            
             server.select('INBOX/' + item.folder_in)
+            emails = server.select('INBOX/' + item.folder_in, readonly=True)[-1][-1]
+            emails = str(emails, 'utf-8', 'ignore')
+            if "doesn't exist" in emails:
+                raise EmailImapFolderException
+
             server.select('INBOX/' + item.folder_out)
-
-            if item.status != "Working":
-                item.status = "Working"
-                item.save()
-
-            server.select('INBOX/' + item.folder_in)
+            emails = server.select('INBOX/' + item.folder_out, readonly=True)[-1][-1]
+            emails = str(emails, 'utf-8', 'ignore')
+            if "doesn't exist" in emails:
+                raise EmailImapFolderException
 
             try:
+                server.select('INBOX/' + item.folder_in)
                 _, emails = server.search(None, 'All')
                 emails = emails[0].split()
                 email_id = emails[-1]

@@ -124,7 +124,7 @@ After signing in, you can begin to set up the Automation Orchestrator. This is t
   <img src="/images/test_trigger.png">
 </p>
 
-5. Follow the Botflow Executions: When Triggers are activated, a record is added to BotflowExecutions. The different statusses are:
+5. Follow the Botflow Executions: When Triggers are activated, a record is added to Botflow Executions. The different statusses are:
     * Pending
     * Running
     * Completed

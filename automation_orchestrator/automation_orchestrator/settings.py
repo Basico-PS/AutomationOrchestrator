@@ -17,16 +17,16 @@ import socket
 # Retrieve the secret key for the server.
 def get_secret_key():
     env_var_name = "BASICO_AUTOMATIONORCHESTRATOR_SECRET_KEY"
-    
+
     if not env_var_name in os.environ:
         secret_key = generate_secret_key(env_var_name)
-        
+
     else:
         try:
             secret_key = os.environ[env_var_name]
         except:
             secret_key = generate_secret_key(env_var_name)
-            
+
     return secret_key
 
 
@@ -34,11 +34,11 @@ def get_secret_key():
 def generate_secret_key(env_var_name):
     import subprocess
     from django.core.management.utils import get_random_secret_key
-    
+
     secret_key = get_random_secret_key()
-    
+
     subprocess.run(['setx', env_var_name, secret_key], stdout=subprocess.PIPE)
-        
+
     print(f"""
 ***
 
@@ -47,7 +47,7 @@ This key is securily stored as an environment variable with the name: {env_var_n
 
 ***
 """)
-        
+
     return secret_key
 
 
@@ -121,10 +121,10 @@ WSGI_APPLICATION = 'automation_orchestrator.wsgi.application'
 def generate_database_folder_structure(folder):
     if not os.path.exists(folder):
         os.mkdir(folder)
-    
+
     if not os.path.exists(os.path.join(folder, 'backup')):
         os.mkdir(os.path.join(folder, 'backup'))
-        
+
     return os.path.join(folder, DATABASE_NAME)
 
 DATABASE_DIR = os.path.join(os.path.dirname(os.path.dirname(BASE_DIR)), 'AutomationOrchestratorDatabase')
@@ -176,33 +176,40 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
-REST_FRAMEWORK = {'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated', ), 
+REST_FRAMEWORK = {'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated', ),
                   'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework.authentication.BasicAuthentication', ),
                   'DEFAULT_THROTTLE_CLASSES': [
                       'rest_framework.throttling.ScopedRateThrottle',
                       ],
                   'DEFAULT_THROTTLE_RATES': {
-                      'execution': '1/second',
+                      'apitrigger': '1/second',
+                      'botflowexecution': '1/second',
+                      'pythonfunction': '1/second',
+                      'pythonfunctionexecution': '1/second'
                       },
                   'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
                   }
 
-ADMIN_REORDER = (    
+ADMIN_REORDER = (
     'auth',
-    
+
     {'app': 'orchestrator',
      'label': 'Setup',
      'models': ('orchestrator.Bot', 'orchestrator.App', 'orchestrator.Botflow',)},
-    
+
     {'app': 'orchestrator',
      'label': 'Notifications',
      'models': ('orchestrator.SmtpAccount',)},
-    
+
     {'app': 'orchestrator',
      'label': 'Triggers',
-     'models': ('orchestrator.EmailImapTrigger', 'orchestrator.EmailOutlookTrigger', 'orchestrator.FileTrigger', 'orchestrator.ScheduleTrigger',)},
-    
+     'models': ('orchestrator.EmailImapTrigger', 'orchestrator.EmailOutlookTrigger', 'orchestrator.FileTrigger', 'orchestrator.ScheduleTrigger', 'orchestrator.ApiTrigger',)},
+
     {'app': 'orchestrator',
-     'label': 'Execution Log',
-     'models': ('orchestrator.Execution',)}
+     'label': 'Botflow Execution Log',
+     'models': ('orchestrator.BotflowExecution',)},
+
+    {'app': 'orchestrator',
+     'label': 'Python',
+     'models': ('orchestrator.PythonFunction', 'orchestrator.PythonFunctionExecution',)}
 )

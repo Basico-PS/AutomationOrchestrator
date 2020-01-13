@@ -40,7 +40,7 @@ Feature highlights out-of-the-box:
   - Email Outlook Triggers
   - File Triggers
   - Schedule Triggers
-- Execution Log
+- Botflow Execution Log
   - Queue Functionality with License Awareness and Botflow Priorities
 
 ## Installation
@@ -119,17 +119,17 @@ After signing in, you can begin to set up the Automation Orchestrator. This is t
 </p>
 
 - For testing purposes, and if you ever need to start an automation manually, you can always manually activate the Triggers by selecting them in the list and use the action in the dropdown to activate them.
-    
+
 <p align="center">
   <img src="/images/test_trigger.png">
 </p>
 
-5. Follow the Executions: When Triggers are activated, a record is added to Executions. The different statusses are:
+5. Follow the Botflow Executions: When Triggers are activated, a record is added to Botflow Executions. The different statusses are:
     * Pending
     * Running
     * Completed
     * Error
-    
+
 <p align="center">
   <img src="/images/executions.png">
 </p>
@@ -140,16 +140,16 @@ After signing in, you can begin to set up the Automation Orchestrator. This is t
   <img src="/images/add_smtp_account.png">
 </p>
 
-- After setting up the SMTP Account, you can test it to make sure that the settings are correct by selecting it in the list and use the action in the dropdown to test it. 
-    
+- After setting up the SMTP Account, you can test it to make sure that the settings are correct by selecting it in the list and use the action in the dropdown to test it.
+
 <p align="center">
   <img src="/images/test_smtp_account_1.png">
 </p>
 <p align="center">
   <img src="/images/test_smtp_account_2.png">
 </p>
-    
-- Now, go to your Botflows and add the recipients for each of the Execution events.
+
+- Now, go to your Botflows and add the recipients for each of the Botflow Execution events.
 
 <p align="center">
   <img src="/images/add_botflow_3.png">

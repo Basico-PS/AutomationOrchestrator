@@ -414,39 +414,48 @@ def email_imap_trigger_monitor_evaluate():
             server.select('INBOX/' + item.folder_in)
             server.select('INBOX/' + item.folder_out)
 
+            if item.status != "Working":
+                item.status = "Working"
+                item.save()
+
             server.select('INBOX/' + item.folder_in)
-            _, emails = server.search(None, 'All')
-            emails = emails[0].split()
-            email_id = emails[-1]
 
-            email_data = server.fetch(email_id, '(RFC822)')
+            try:
+                _, emails = server.search(None, 'All')
+                emails = emails[0].split()
+                email_id = emails[-1]
 
-            email_subject = ""
-            for email_data_part in email_data[1]:
-                if isinstance(email_data_part, tuple):
-                    email_subject = email.message_from_string(email_data_part[1].decode())['subject']
-                    break
+                email_data = server.fetch(email_id, '(RFC822)')
 
-            email_uid = server.fetch(email_id, '(UID)')
-            email_uid = str(email_uid[-1][0], 'utf-8', 'ignore')
-            email_uid = pattern_uid.match(email_uid).group('uid')
+                email_subject = ""
+                for email_data_part in email_data[1]:
+                    if isinstance(email_data_part, tuple):
+                        email_subject = email.message_from_string(email_data_part[1].decode())['subject']
+                        break
 
-            email_copy_response = server.uid('COPY', email_uid, 'INBOX/' + item.folder_out)
+                email_uid = server.fetch(email_id, '(UID)')
+                email_uid = str(email_uid[-1][0], 'utf-8', 'ignore')
+                email_uid = pattern_uid.match(email_uid).group('uid')
 
-            if email_copy_response[0] == 'OK':
-                server.uid('STORE', email_uid , '+FLAGS', r'(\Deleted)')
-                server.expunge()
+                email_copy_response = server.uid('COPY', email_uid, 'INBOX/' + item.folder_out)
 
-            if not Botflow.objects.get(pk=item.botflow.pk).queue_if_already_running:
-                if BotflowExecution.objects.filter(Q(status="Pending") | Q(status="Running"), botflow=Botflow.objects.get(pk=item.botflow.pk).path).exists():
-                    add_botflow_execution = False
+                if email_copy_response[0] == 'OK':
+                    server.uid('STORE', email_uid , '+FLAGS', r'(\Deleted)')
+                    server.expunge()
+
+                if not Botflow.objects.get(pk=item.botflow.pk).queue_if_already_running:
+                    if BotflowExecution.objects.filter(Q(status="Pending") | Q(status="Running"), botflow=Botflow.objects.get(pk=item.botflow.pk).path).exists():
+                        add_botflow_execution = False
+                    else:
+                        add_botflow_execution = True
                 else:
                     add_botflow_execution = True
-            else:
-                add_botflow_execution = True
 
-            if add_botflow_execution:
-                add_botflow_execution_object(bot_pk=item.bot.pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=f"Email IMAP Trigger: {email_subject}")
+                if add_botflow_execution:
+                    add_botflow_execution_object(bot_pk=item.bot.pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=f"Email IMAP Trigger: {email_subject}")
+
+            except:
+                pass
 
         except:
             item.status = "ERROR"

@@ -225,14 +225,17 @@ def test_selected_email_imap_triggers(modeladmin, request, queryset):
             server.select('INBOX/' + item.folder_in)
             server.select('INBOX/' + item.folder_out)
 
-            emails = server.select('INBOX/' + item.folder_in, readonly=True)[-1][-1]
-            emails = str(emails, 'utf-8', 'ignore')
+            emails_folder_in = server.select('INBOX/' + item.folder_in, readonly=True)[-1][-1]
+            emails_folder_in = str(emails_folder_in, 'utf-8', 'ignore')
+            emails_folder_out = server.select('INBOX/' + item.folder_out, readonly=True)[-1][-1]
+            emails_folder_out = str(emails_folder_out, 'utf-8', 'ignore')
             
-            if "doesn't exist" in emails:
+            if "doesn't exist" in emails_folder_in or "doesn't exist" in emails_folder_out:
                 messages.error(request, f"Failed to connect to email {item.email}!")
 
                 item.status = "ERROR"
                 item.save()
+                
             else:
                 messages.success(request, f"Successfully connected to email {item.email}! Number of messages detected in the 'INBOX/{item.folder_in}' folder: {emails}")
 

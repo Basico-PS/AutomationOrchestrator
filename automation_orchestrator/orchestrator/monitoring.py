@@ -429,6 +429,10 @@ def email_imap_trigger_monitor_evaluate():
             if "doesn't exist" in emails:
                 raise EmailImapFolderException
 
+            if item.status != "Working":
+                item.status = "Working"
+                item.save()
+
             try:
                 server.select('INBOX/' + item.folder_in)
                 _, emails = server.search(None, 'All')

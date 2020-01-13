@@ -673,7 +673,8 @@ class SmtpAccountAdmin(SimpleHistoryAdmin):
 
     list_display = ('pk', 'email',
                     'server', 'port', 'tls',
-                    'activated', 'update_record',)
+                    'activated', 'status',
+                    'update_record',)
     list_editable = ('server', 'port', 'tls',
                      'activated',)
     list_display_links = ['pk']

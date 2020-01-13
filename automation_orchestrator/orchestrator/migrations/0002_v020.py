@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('orchestrator', '0001_v0.1.2'),
+        ('orchestrator', '0001_v012'),
     ]
 
     operations = [

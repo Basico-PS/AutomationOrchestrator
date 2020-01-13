@@ -197,9 +197,16 @@ def test_selected_file_triggers(modeladmin, request, queryset):
                 files = files + [file for file in glob.glob(item.folder_in + "\\" + filter.strip()) if os.path.isfile(file)]
 
             messages.success(request, f"Successfully retrieved {str(len(files))} file(s) in the incoming folder: {item.folder_in}")
+            
+            if item.status != "Working":
+                item.status = "Working"
+                item.save()
 
         except:
             messages.error(request, f"Failed to retrieve files from the incoming folder: {item.folder_in}")
+
+            item.status = "ERROR"
+            item.save()
 
 
 def test_selected_email_imap_triggers(modeladmin, request, queryset):
@@ -222,8 +229,15 @@ def test_selected_email_imap_triggers(modeladmin, request, queryset):
 
             messages.success(request, f"Successfully connected to email {item.email}! Number of messages detected in the 'INBOX/{item.folder_in}' folder: {str(emails, 'utf-8', 'ignore')}")
 
+            if item.status != "Working":
+                item.status = "Working"
+                item.save()
+
         except:
             messages.error(request, f"Failed to connect to email {item.email}!")
+
+            item.status = "ERROR"
+            item.save()
 
         finally:
             try:
@@ -274,8 +288,13 @@ def test_selected_email_outlook_triggers(modeladmin, request, queryset):
 
             messages.success(request, f"Successfully connected to email {item.email}! Number of messages detected in the 'INBOX/{item.folder_in}' folder: {str(len(emails))}")
 
+            if item.status != "Working":
+                item.status = "Working"
+                item.save()
+
         except:
-            pass
+            item.status = "ERROR"
+            item.save()
 
         finally:
             accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None, None, None
@@ -309,6 +328,10 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
 
             messages.success(request, f"Successfully sent an email with {item.email}!")
 
+            if item.status != "Working":
+                item.status = "Working"
+                item.save()
+
         except:
             if item.tls:
                 try:
@@ -328,6 +351,9 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
                     pass
 
             messages.error(request, f"Failed to send email with {item.email}!")
+
+            item.status = "ERROR"
+            item.save()
 
 
 class BotAdmin(SimpleHistoryAdmin):

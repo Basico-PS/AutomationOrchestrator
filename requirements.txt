@@ -1,4 +1,4 @@
-Django==3.0
+Django==3.0.2
 djangorestframework==3.10
 django-fernet-fields==0.6
 django-modeladmin-reorder==0.3.1

@@ -146,8 +146,10 @@ class ScheduleTrigger(models.Model):
     app = models.ForeignKey(App, on_delete=models.PROTECT, help_text="Select the application for this trigger.")
     botflow = models.ForeignKey(Botflow, on_delete=models.PROTECT, help_text="Select the botflow for this trigger.")
 
-    frequency = models.CharField(max_length=3, choices=[('MIN', 'Minute'),('HOU', 'Hour'),('DAY', 'Day'),('WEE', 'Week'),('MON', 'Month'),
-                                                        ('FWK', 'First Week Day'),('FWD', 'First Weekend Day'), ('LWK', 'Last Week Day'),('LWD', 'Last Weekend Day')], help_text="Specify the frequency of the trigger.")
+    frequency = models.CharField(max_length=3, choices=[('MIN', 'Minute'), ('HOU', 'Hour'), ('DAY', 'Day'), ('WEE', 'Week'), ('MON', 'Month'),
+                                                        ('FDD', 'First Day'), ('FWK', 'First Week Day'), ('FWD', 'First Weekend Day'),
+                                                        ('LDD', 'Last Day'), ('LWK', 'Last Week Day'), ('LWD', 'Last Weekend Day')],
+                                 help_text="Specify the frequency of the trigger.")
     run_every = models.PositiveIntegerField(validators=[MinValueValidator(1)], help_text="Specify how often to run every minute/hour/day/week.")
     run_start = models.DateTimeField(help_text="Specify the start date and time for the trigger. This will be the starting point of the trigger.")
 

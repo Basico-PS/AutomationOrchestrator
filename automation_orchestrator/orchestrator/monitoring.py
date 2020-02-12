@@ -78,6 +78,10 @@ def calculate_next_botflow_execution(run_start, frequency, run_every, run_after,
         elif frequency == "MON":
             time = run_start + relativedelta(months=int(run_every) * i)
 
+        elif frequency == "FDD":
+            time = run_start + relativedelta(months=int(run_every) * i)
+            time = time.replace(day=1)
+
         elif frequency == "FWK":
             time = run_start + relativedelta(months=int(run_every) * i)
             time = time.replace(day=1)
@@ -101,6 +105,10 @@ def calculate_next_botflow_execution(run_start, frequency, run_every, run_after,
                     time = time_temp + datetime.timedelta(days=ii)
                 else:
                     break
+
+        elif frequency == "LDD":
+            time = run_start + relativedelta(months=int(run_every) * i)
+            time = time.replace(day=calendar.monthrange(time.year, time.month)[1])
 
         elif frequency == "LWK":
             time = run_start + relativedelta(months=int(run_every) * i)

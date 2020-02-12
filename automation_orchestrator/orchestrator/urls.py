@@ -6,9 +6,9 @@ from . import views
 
 
 router = routers.DefaultRouter()
-router.register('apitrigger', views.ApiTriggerView, base_name='api_trigger')
+router.register('apitrigger', views.ApiTriggerView, basename='api_trigger')
 router.register('botflowexecution', views.BotflowExecutionView)
-router.register('pythonfunction', views.PythonFunctionView, base_name='python_function')
+router.register('pythonfunction', views.PythonFunctionView, basename='python_function')
 router.register('pythonfunctionexecution', views.PythonFunctionExecutionView)
 
 urlpatterns = [

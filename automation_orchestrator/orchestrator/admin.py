@@ -6,6 +6,7 @@ from django.utils.html import format_html
 from simple_history.admin import SimpleHistoryAdmin
 from .models import Bot, App, Botflow, FileTrigger, PythonFunction, ScheduleTrigger, EmailImapTrigger, EmailOutlookTrigger, ApiTrigger, BotflowExecution, SmtpAccount, PythonFunction, PythonFunctionExecution
 from .monitoring import add_botflow_execution_object
+import subprocess
 import csv
 import os
 
@@ -169,6 +170,43 @@ def export_selected_botflow_executions(modeladmin, request, queryset):
         writer.writerow(botflow_execution)
 
     return response
+
+
+def test_selected_bots(modeladmin, request, queryset):
+    for item in queryset:
+        try:
+            computer_name = item.computer_name
+            user_name = item.user_name
+
+            if str(computer_name).lower() != os.environ['COMPUTERNAME'].lower():
+                psexec_path = os.path.abspath(".\\automation_orchestrator\\tools\\psexec\\psexec.exe")
+
+                if not os.path.isfile(psexec_path):
+                    messages.error(request, f"Unable to test the bot as the psexec tool cannot be located: {psexec_path}")
+                    continue
+
+                sessions = subprocess.run([psexec_path, f"\\\\{computer_name}", "query", "session"], stdout=subprocess.PIPE, text=True).stdout.split("\n")
+
+            else:
+                sessions = subprocess.run(["query", "session"], stdout=subprocess.PIPE, text=True).stdout.split("\n")
+
+            if not "SESSIONNAME" in str(sessions):
+                messages.error(request, f"Failed to connect to computer: {computer_name}")
+                continue
+
+            active = False
+            for session in sessions:
+                if f" {user_name.lower()} " in session.lower() and " Active " in session:
+                    active = True
+                    break
+
+            if active:
+                messages.success(request, f"Successfully connected to computer '{computer_name}' and identified an active session for user: {user_name}")
+            else:
+                messages.error(request, f"Successfully connected to computer '{computer_name}', however, no active session identified for user: {user_name}")
+
+        except:
+            messages.error(request, f"Fatal error when attempting to test computer '{computer_name}' and user: {user_name}")
 
 
 def test_selected_botflows(modeladmin, request, queryset):
@@ -381,6 +419,8 @@ class BotAdmin(SimpleHistoryAdmin):
                     'update_record',)
     list_editable = ('name', 'computer_name', 'user_name',)
     list_display_links = ['pk']
+
+    actions = [test_selected_bots,]
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/bot/{}/change/">EDIT</a>', obj.id)

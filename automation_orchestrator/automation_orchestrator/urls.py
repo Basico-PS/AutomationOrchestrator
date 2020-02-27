@@ -15,9 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from orchestrator.monitoring import file_trigger_monitor, schedule_trigger_monitor, email_imap_trigger_monitor, email_outlook_trigger_monitor, botflow_execution_monitor
+from orchestrator.monitoring import bot_status_monitor, file_trigger_monitor, schedule_trigger_monitor, email_imap_trigger_monitor, email_outlook_trigger_monitor, botflow_execution_monitor
 import os
 import threading
+
+
+def start_bot_status_monitor():
+    t = threading.Thread(target=bot_status_monitor)
+    t.setDaemon(True)
+    t.start()
 
 
 def start_file_trigger_monitor():
@@ -58,6 +64,7 @@ urlpatterns = [
 if os.path.exists('logs\\error_log.txt'):
     os.remove('logs\\error_log.txt')
 
+start_bot_status_monitor()
 start_file_trigger_monitor()
 start_schedule_trigger_monitor()
 start_email_imap_trigger_monitor()

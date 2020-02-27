@@ -17,6 +17,7 @@ from dateutil.relativedelta import relativedelta
 from pythoncom import CoInitialize, CoUninitialize
 
 
+bot_status_sleep = 60
 trigger_sleep = 10
 email_imap_sleep = 15
 email_outlook_sleep = 15
@@ -161,6 +162,73 @@ def calculate_next_botflow_execution(run_start, frequency, run_every, run_after,
             return time.strftime("%Y-%m-%d %H:%M")
 
     return ""
+
+
+def bot_status_monitor():
+    while True:
+        range(10000)
+        t.sleep(bot_status_sleep)
+
+        for item in Bot.objects.all():
+            range(10000)
+            t.sleep(10)
+            bot_status(item)
+
+
+def bot_status(item):
+    try:
+        computer_name = item.computer_name
+        user_name = item.user_name
+
+        if str(computer_name).lower() != os.environ['COMPUTERNAME'].lower():
+            psexec_path = os.path.abspath(".\\automation_orchestrator\\tools\\psexec\\psexec.exe")
+
+            if not os.path.isfile(psexec_path):
+                if item.status != "Unknown":
+                    item.status = "Unknown"
+                    item.save()
+
+                return
+
+            sessions = subprocess.run([psexec_path, f"\\\\{computer_name}", "query", "session"], stdout=subprocess.PIPE, text=True).stdout.split("\n")
+
+        else:
+            sessions = subprocess.run(["query", "session"], stdout=subprocess.PIPE, text=True).stdout.split("\n")
+
+        if not "SESSIONNAME" in str(sessions):
+            if item.status != "ERROR":
+                item.status = "ERROR"
+                item.save()
+
+            return
+
+        active = False
+        for session in sessions:
+            if f" {user_name.lower()} " in session.lower() and " Active " in session:
+                active = True
+                break
+
+        if active:
+            if item.status != "Working":
+                item.status = "Working"
+                item.save()
+
+        else:
+            if item.status != "ERROR":
+                item.status = "ERROR"
+                item.save()
+
+    except:
+        with open("logs\\error_log.txt", 'a') as f:
+            try:
+                f.write(traceback.format_exc())
+                print(traceback.format_exc())
+            except:
+                pass
+
+        if item.status != "Unknown":
+            item.status = "Unknown"
+            item.save()
 
 
 def file_trigger_monitor():

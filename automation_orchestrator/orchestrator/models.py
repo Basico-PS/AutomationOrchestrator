@@ -61,6 +61,8 @@ class Bot(models.Model):
     nintex_rpa_available_foxtrot_licenses = models.PositiveIntegerField(default=0, verbose_name="Available Foxtrot licenses", help_text="Specify the total number of available Foxtrot licenses in the path. IMPORTANT: Only applies to the Concurrent Edition license model.")
     nintex_rpa_available_foxbot_licenses = models.PositiveIntegerField(default=0, verbose_name="Available FoxBot licenses", help_text="Specify the total number of available FoxBot licenses in the path. IMPORTANT: Only applies to the Concurrent Edition license model.")
 
+    status = models.CharField(max_length=255, default="Unknown", editable=False, help_text="Indicates the status of the bot.")
+
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
 

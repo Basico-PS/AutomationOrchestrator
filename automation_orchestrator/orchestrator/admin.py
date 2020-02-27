@@ -437,6 +437,10 @@ class BotAdmin(SimpleHistoryAdmin):
         ('General', {
             'fields': ('name', 'computer_name', 'user_name',),
         }),
+        ('Time Filter', {
+            'classes': ('collapse',),
+            'fields': ('run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days'),
+        }),
         ('Nintex RPA', {
             'classes': ('collapse',),
             'fields': ('nintex_rpa_license_path', 'nintex_rpa_available_foxtrot_licenses', 'nintex_rpa_available_foxbot_licenses',),

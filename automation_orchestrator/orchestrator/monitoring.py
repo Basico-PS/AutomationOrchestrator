@@ -44,7 +44,8 @@ def determine_execution_bot(trigger):
             user_name=bot.user_name,
         ).exists():
             if Bot.objects.get(pk=bot.pk).status == "Active":
-                return bot
+                if time_filter_evalution(bot):
+                    return bot
 
     for bot in trigger.bots.all():
         if not BotflowExecution.objects.filter(
@@ -53,16 +54,52 @@ def determine_execution_bot(trigger):
             user_name=bot.user_name,
         ).exists():
             if not "ERROR" in Bot.objects.get(pk=bot.pk).status:
-                return bot
+                if time_filter_evalution(bot):
+                    return bot
 
     for bot in trigger.bots.all():
         if not "ERROR" in Bot.objects.get(pk=bot.pk).status:
-            return bot
+            if time_filter_evalution(bot):
+                return bot
 
     for bot in trigger.bots.all():
         return bot
 
     return trigger.bot
+
+
+def time_filter_evalution(item):
+    if not item.run_on_week_days:
+        if 0 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 4:
+            return False
+    if not item.run_on_weekend_days:
+        if 5 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 6:
+            return False
+
+    if item.run_after is not None:
+        run_after = datetime.timedelta(hours=item.run_after.hour, minutes=item.run_after.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
+    else:
+        run_after = datetime.timedelta(hours=0, minutes=0)
+
+    if item.run_until is not None:
+        run_until = datetime.timedelta(hours=item.run_until.hour, minutes=item.run_until.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
+    else:
+        run_until = datetime.timedelta(hours=0, minutes=0)
+
+    time_timedelta = datetime.timedelta(hours=datetime.datetime.now(pytz.timezone('UTC')).hour, minutes=datetime.datetime.now(pytz.timezone('UTC')).minute)
+
+    if run_after < run_until:
+        if time_timedelta < run_after:
+            return False
+        if time_timedelta >= run_until:
+            return False
+    else:
+        if time_timedelta >= run_after or time_timedelta < run_until:
+            pass
+        else:
+            return False
+
+    return True
 
 
 def add_botflow_execution_object(bot_pk, app_pk, botflow_pk, trigger):
@@ -293,35 +330,8 @@ def file_trigger_monitor_evaluate():
                 item.save()
                 continue
 
-        if not item.run_on_week_days:
-            if 0 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 4:
-                continue
-        if not item.run_on_weekend_days:
-            if 5 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 6:
-                continue
-
-        if item.run_after is not None:
-            run_after = datetime.timedelta(hours=item.run_after.hour, minutes=item.run_after.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
-        else:
-            run_after = datetime.timedelta(hours=0, minutes=0)
-
-        if item.run_until is not None:
-            run_until = datetime.timedelta(hours=item.run_until.hour, minutes=item.run_until.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
-        else:
-            run_until = datetime.timedelta(hours=0, minutes=0)
-
-        time_timedelta = datetime.timedelta(hours=datetime.datetime.now(pytz.timezone('UTC')).hour, minutes=datetime.datetime.now(pytz.timezone('UTC')).minute)
-
-        if run_after < run_until:
-            if time_timedelta < run_after:
-                continue
-            if time_timedelta >= run_until:
-                continue
-        else:
-            if time_timedelta >= run_after or time_timedelta < run_until:
-                pass
-            else:
-                continue
+        if not time_filter_evalution(item):
+            continue
 
         files = []
         for filter in item.filter.split(","):
@@ -485,35 +495,8 @@ def email_imap_trigger_monitor_evaluate():
     items = EmailImapTrigger.objects.filter(activated=True)
 
     for item in items:
-        if not item.run_on_week_days:
-            if 0 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 4:
-                continue
-        if not item.run_on_weekend_days:
-            if 5 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 6:
-                continue
-
-        if item.run_after is not None:
-            run_after = datetime.timedelta(hours=item.run_after.hour, minutes=item.run_after.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
-        else:
-            run_after = datetime.timedelta(hours=0, minutes=0)
-
-        if item.run_until is not None:
-            run_until = datetime.timedelta(hours=item.run_until.hour, minutes=item.run_until.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
-        else:
-            run_until = datetime.timedelta(hours=0, minutes=0)
-
-        time_timedelta = datetime.timedelta(hours=datetime.datetime.now(pytz.timezone('UTC')).hour, minutes=datetime.datetime.now(pytz.timezone('UTC')).minute)
-
-        if run_after < run_until:
-            if time_timedelta < run_after:
-                continue
-            if time_timedelta >= run_until:
-                continue
-        else:
-            if time_timedelta >= run_after or time_timedelta < run_until:
-                pass
-            else:
-                continue
+        if not time_filter_evalution(item):
+            continue
 
         try:
             if item.tls:
@@ -670,36 +653,9 @@ def email_outlook_trigger_monitor_evaluate(email_outlook):
     items = EmailOutlookTrigger.objects.filter(activated=True)
 
     for item in items:
-        if not item.run_on_week_days:
-            if 0 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 4:
-                continue
-        if not item.run_on_weekend_days:
-            if 5 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 6:
-                continue
+        if not time_filter_evalution(item):
+            continue
 
-        if item.run_after is not None:
-            run_after = datetime.timedelta(hours=item.run_after.hour, minutes=item.run_after.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
-        else:
-            run_after = datetime.timedelta(hours=0, minutes=0)
-
-        if item.run_until is not None:
-            run_until = datetime.timedelta(hours=item.run_until.hour, minutes=item.run_until.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
-        else:
-            run_until = datetime.timedelta(hours=0, minutes=0)
-
-        time_timedelta = datetime.timedelta(hours=datetime.datetime.now(pytz.timezone('UTC')).hour, minutes=datetime.datetime.now(pytz.timezone('UTC')).minute)
-
-        if run_after < run_until:
-            if time_timedelta < run_after:
-                continue
-            if time_timedelta >= run_until:
-                continue
-
-        else:
-            if time_timedelta >= run_after or time_timedelta < run_until:
-                pass
-            else:
-                continue
         try:
             accounts = email_outlook.Session.Accounts
             accounts_list = [account.DisplayName for account in accounts]

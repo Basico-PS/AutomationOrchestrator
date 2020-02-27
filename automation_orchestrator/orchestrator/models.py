@@ -58,6 +58,11 @@ class Bot(models.Model):
     computer_name = models.CharField(max_length=255, default=get_computer_name, help_text="Specify the computer name of the bot.")
     user_name = models.CharField(max_length=255, default=get_user_name, help_text="Specify the username of the bot.")
 
+    run_after = models.TimeField(null=True, blank=True, help_text="Specify a time to limit the bot to only be active after this time.")
+    run_until = models.TimeField(null=True, blank=True, help_text="Specify a time to limit the bot to only be active before this time.")
+    run_on_week_days = models.BooleanField(default=True, help_text="Specify whether the bot should be active on week days.")
+    run_on_weekend_days = models.BooleanField(default=True, help_text="Specify whether the bot should be active on weekend days.")
+
     nintex_rpa_license_path = models.CharField(max_length=255, default="", verbose_name="License path", blank=True, help_text="Specify the Nintex RPA license path of the bot. If the field is blank there will be no check to ensure the availability of licenses. IMPORTANT: Only applies to the Concurrent Edition license model.")
     nintex_rpa_available_foxtrot_licenses = models.PositiveIntegerField(default=0, verbose_name="Available Foxtrot licenses", help_text="Specify the total number of available Foxtrot licenses in the path. IMPORTANT: Only applies to the Concurrent Edition license model.")
     nintex_rpa_available_foxbot_licenses = models.PositiveIntegerField(default=0, verbose_name="Available FoxBot licenses", help_text="Specify the total number of available FoxBot licenses in the path. IMPORTANT: Only applies to the Concurrent Edition license model.")

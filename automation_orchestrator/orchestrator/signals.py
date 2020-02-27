@@ -3,6 +3,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 from smtplib import SMTP, SMTP_SSL
 from email.message import EmailMessage
+from os.path import basename
 
 
 @receiver(post_save, sender=BotflowExecution)
@@ -43,7 +44,7 @@ def botflow_execution_notification(sender, instance, **kwargs):
 
     if instance.status == "Pending":
         if "@" in instance.queued_notification:
-            email_subject = f"[{instance.pk}] Botflow queued: '{instance.botflow}'"
+            email_subject = f"[{instance.pk}] Botflow queued: '{basename(instance.botflow)}'"
             email_to = [
                 email for email in instance.queued_notification.split(",")
             ]
@@ -52,7 +53,7 @@ def botflow_execution_notification(sender, instance, **kwargs):
 
     elif instance.status == "Running":
         if "@" in instance.started_notification:
-            email_subject = f"[{instance.pk}] Botflow started: '{instance.botflow}'"
+            email_subject = f"[{instance.pk}] Botflow started: '{basename(instance.botflow)}'"
             email_to = [
                 email for email in instance.started_notification.split(",")
             ]
@@ -61,7 +62,7 @@ def botflow_execution_notification(sender, instance, **kwargs):
 
     elif instance.status == "Completed":
         if "@" in instance.completed_notification:
-            email_subject = f"[{instance.pk}] Botflow completed: '{instance.botflow}'"
+            email_subject = f"[{instance.pk}] Botflow completed: '{basename(instance.botflow)}'"
             email_to = [
                 email for email in instance.completed_notification.split(",")
             ]
@@ -70,7 +71,7 @@ def botflow_execution_notification(sender, instance, **kwargs):
 
     elif "ERROR" in instance.status.upper():
         if "@" in instance.error_notification:
-            email_subject = f"[{instance.pk}] Botflow failed: '{instance.botflow}'"
+            email_subject = f"[{instance.pk}] Botflow failed: '{basename(instance.botflow)}'"
             email_to = [
                 email for email in instance.error_notification.split(",")
             ]

@@ -227,8 +227,8 @@ def bot_status(item):
             sessions = subprocess.run(["query", "session"], stdout=subprocess.PIPE, text=True).stdout.split("\n")
 
         if not "SESSIONNAME" in str(sessions):
-            if item.status != "ERROR":
-                item.status = "ERROR"
+            if item.status != "Unknown":
+                item.status = "Unknown"
                 item.save()
 
             return

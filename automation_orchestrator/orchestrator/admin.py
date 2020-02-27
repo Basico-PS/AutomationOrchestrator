@@ -198,8 +198,8 @@ def test_selected_bots(modeladmin, request, queryset):
             if not "SESSIONNAME" in str(sessions):
                 messages.error(request, f"Failed to connect to computer: {computer_name}")
 
-                if item.status != "ERROR":
-                    item.status = "ERROR"
+                if item.status != "Unknown":
+                    item.status = "Unknown"
                     item.save()
 
                 continue

@@ -34,6 +34,37 @@ class EmailOutlookDispatchException(Exception):
     pass
 
 
+def determine_execution_bot(trigger):
+    for bot in trigger.bots.all():
+        bot_status(bot)
+
+        if not BotflowExecution.objects.filter(
+            Q(status="Pending") | Q(status="Running"),
+            computer_name=bot.computer_name,
+            user_name=bot.user_name,
+        ).exists():
+            if Bot.objects.get(pk=bot.pk).status == "Active":
+                return bot
+
+    for bot in trigger.bots.all():
+        if not BotflowExecution.objects.filter(
+            Q(status="Pending") | Q(status="Running"),
+            computer_name=bot.computer_name,
+            user_name=bot.user_name,
+        ).exists():
+            if not "ERROR" in Bot.objects.get(pk=bot.pk).status:
+                return bot
+
+    for bot in trigger.bots.all():
+        if not "ERROR" in Bot.objects.get(pk=bot.pk).status:
+            return bot
+
+    for bot in trigger.bots.all():
+        return bot
+
+    return trigger.bot
+
+
 def add_botflow_execution_object(bot_pk, app_pk, botflow_pk, trigger):
     bot_object = Bot.objects.get(pk=bot_pk)
     app_object = App.objects.get(pk=app_pk)
@@ -209,8 +240,8 @@ def bot_status(item):
                 break
 
         if active:
-            if item.status != "Working":
-                item.status = "Working"
+            if item.status != "Active":
+                item.status = "Active"
                 item.save()
 
         else:
@@ -257,9 +288,10 @@ def file_trigger_monitor_evaluate():
 
     for item in items:
         if not os.path.isdir(item.folder_in) or not os.path.isdir(item.folder_out):
-            item.status = "ERROR"
-            item.save()
-            continue
+            if item.status != "ERROR":
+                item.status = "ERROR"
+                item.save()
+                continue
 
         if not item.run_on_week_days:
             if 0 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 4:
@@ -332,10 +364,10 @@ def file_trigger_monitor_evaluate():
                 add_botflow_execution = True
 
             if add_botflow_execution:
-                add_botflow_execution_object(bot_pk=item.bot.pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=f"File Trigger: {path_destination}")
+                add_botflow_execution_object(bot_pk=determine_execution_bot(item).pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=f"File Trigger: {path_destination}")
 
-        if item.status != "Working":
-            item.status = "Working"
+        if item.status != "Active":
+            item.status = "Active"
             item.save()
 
     items = None
@@ -405,7 +437,7 @@ def schedule_trigger_monitor_evaluate():
 
             if add_botflow_execution:
                 time_trigger = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime("%Y-%m-%d %H:%M")
-                add_botflow_execution_object(bot_pk=item.bot.pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=f"Schedule Trigger: {time_trigger}")
+                add_botflow_execution_object(bot_pk=determine_execution_bot(item).pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=f"Schedule Trigger: {time_trigger}")
 
             run_start = now.replace(tzinfo=pytz.timezone('UTC'))
             item.next_execution = calculate_next_botflow_execution(run_start, item.frequency, item.run_every, run_after, run_until, item.run_on_week_days, item.run_on_weekend_days)
@@ -418,8 +450,8 @@ def schedule_trigger_monitor_evaluate():
             item.past_settings = settings
             item.save()
 
-        if item.status != "Working":
-            item.status = "Working"
+        if item.status != "Active":
+            item.status = "Active"
             item.save()
 
     items = None
@@ -492,7 +524,7 @@ def email_imap_trigger_monitor_evaluate():
             server.login(item.email, item.password)
 
             server.select('INBOX')
-            
+
             server.select('INBOX/' + item.folder_in)
             emails = server.select('INBOX/' + item.folder_in, readonly=True)[-1][-1]
             emails = str(emails, 'utf-8', 'ignore')
@@ -505,8 +537,8 @@ def email_imap_trigger_monitor_evaluate():
             if "doesn't exist" in emails:
                 raise EmailImapFolderException
 
-            if item.status != "Working":
-                item.status = "Working"
+            if item.status != "Active":
+                item.status = "Active"
                 item.save()
 
             try:
@@ -542,14 +574,15 @@ def email_imap_trigger_monitor_evaluate():
                     add_botflow_execution = True
 
                 if add_botflow_execution:
-                    add_botflow_execution_object(bot_pk=item.bot.pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=f"Email IMAP Trigger: {email_subject}")
+                    add_botflow_execution_object(bot_pk=determine_execution_bot(item).pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=f"Email IMAP Trigger: {email_subject}")
 
             except:
                 pass
 
         except:
-            item.status = "ERROR"
-            item.save()
+            if item.status != "ERROR":
+                item.status = "ERROR"
+                item.save()
 
         finally:
             try:
@@ -676,9 +709,10 @@ def email_outlook_trigger_monitor_evaluate(email_outlook):
 
             else:
                 if not item.email in accounts_list:
-                    item.status = "ERROR"
-                    item.save()
-                    continue
+                    if item.status != "ERROR":
+                        item.status = "ERROR"
+                        item.save()
+                        continue
 
                 namespace = None
 
@@ -690,8 +724,9 @@ def email_outlook_trigger_monitor_evaluate(email_outlook):
             inbox = namespace.GetDefaultFolder(6)
 
         except:
-            item.status = "ERROR"
-            item.save()
+            if item.status != "ERROR":
+                item.status = "ERROR"
+                item.save()
 
             items, accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None, None, None, None
             del items, accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails
@@ -721,10 +756,10 @@ def email_outlook_trigger_monitor_evaluate(email_outlook):
                 add_botflow_execution = True
 
             if add_botflow_execution:
-                add_botflow_execution_object(bot_pk=item.bot.pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=f"Email Outlook Trigger: {email.Subject}")
+                add_botflow_execution_object(bot_pk=determine_execution_bot(item).pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=f"Email Outlook Trigger: {email.Subject}")
 
-        if item.status != "Working":
-            item.status = "Working"
+        if item.status != "Active":
+            item.status = "Active"
             item.save()
 
         accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None, None, None

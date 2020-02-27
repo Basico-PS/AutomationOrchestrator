@@ -80,8 +80,8 @@ def botflow_execution_notification(sender, instance, **kwargs):
             server.login(email_from, smtp_account.password)
             server.send_message(msg)
 
-        if smtp_account.status != "Working":
-            smtp_account.status = "Working"
+        if smtp_account.status != "Active":
+            smtp_account.status = "Active"
             smtp_account.save()
 
     except:
@@ -105,10 +105,11 @@ def botflow_execution_notification(sender, instance, **kwargs):
                     server.login(email_from, smtp_account.password)
                     server.send_message(msg)
 
-                if smtp_account.status != "Working":
-                    smtp_account.status = "Working"
+                if smtp_account.status != "Active":
+                    smtp_account.status = "Active"
                     smtp_account.save()
 
             except:
-                smtp_account.status = "ERROR"
-                smtp_account.save()
+                if smtp_account.status != "ERROR":
+                    smtp_account.status = "ERROR"
+                    smtp_account.save()

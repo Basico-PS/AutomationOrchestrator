@@ -133,7 +133,7 @@ class FileTrigger(models.Model):
     run_on_week_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on week days.")
     run_on_weekend_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on weekend days.")
 
-    status = models.CharField(max_length=255, default="Working", editable=False, help_text="Indicates the status of the trigger.")
+    status = models.CharField(max_length=255, default="Active", editable=False, help_text="Indicates the status of the trigger.")
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
@@ -145,7 +145,7 @@ class FileTrigger(models.Model):
             raise ValidationError('The incoming and outgoing folders cannot be the same!')
 
     def assigned_bots(self):
-        return ", ".join([trigger.name for trigger in self.bots.all()])
+        return ", ".join([bot.name for bot in self.bots.all()])
 
 
 class ScheduleTrigger(models.Model):
@@ -171,7 +171,7 @@ class ScheduleTrigger(models.Model):
     next_execution = models.CharField(max_length=255, blank=True, editable=False, help_text="This field specifies the scheduled time for the next execution. IMPORTANT: This date and time field is in UTC timezone, therefore, an offset is expected!")
     past_settings = models.CharField(max_length=255, blank=True)
 
-    status = models.CharField(max_length=255, default="Working", editable=False, help_text="Indicates the status of the trigger.")
+    status = models.CharField(max_length=255, default="Active", editable=False, help_text="Indicates the status of the trigger.")
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
@@ -179,7 +179,7 @@ class ScheduleTrigger(models.Model):
     history = HistoricalRecords()
 
     def assigned_bots(self):
-        return ", ".join([trigger.name for trigger in self.bots.all()])
+        return ", ".join([bot.name for bot in self.bots.all()])
 
 
 class EmailImapTrigger(models.Model):
@@ -204,7 +204,7 @@ class EmailImapTrigger(models.Model):
     run_on_week_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on week days.")
     run_on_weekend_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on weekend days.")
 
-    status = models.CharField(max_length=255, default="Working", editable=False, help_text="Indicates the status of the trigger.")
+    status = models.CharField(max_length=255, default="Active", editable=False, help_text="Indicates the status of the trigger.")
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
@@ -220,7 +220,7 @@ class EmailImapTrigger(models.Model):
             raise ValidationError('The incoming and outgoing folders cannot be the same!')
 
     def assigned_bots(self):
-        return ", ".join([trigger.name for trigger in self.bots.all()])
+        return ", ".join([bot.name for bot in self.bots.all()])
 
 
 class EmailOutlookTrigger(models.Model):
@@ -241,7 +241,7 @@ class EmailOutlookTrigger(models.Model):
     run_on_week_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on week days.")
     run_on_weekend_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on weekend days.")
 
-    status = models.CharField(max_length=255, default="Working", editable=False, help_text="Indicates the status of the trigger.")
+    status = models.CharField(max_length=255, default="Active", editable=False, help_text="Indicates the status of the trigger.")
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
@@ -257,7 +257,7 @@ class EmailOutlookTrigger(models.Model):
             raise ValidationError('The incoming and outgoing folders cannot be the same!')
 
     def assigned_bots(self):
-        return ", ".join([trigger.name for trigger in self.bots.all()])
+        return ", ".join([bot.name for bot in self.bots.all()])
 
 
 class ApiTrigger(models.Model):
@@ -268,7 +268,7 @@ class ApiTrigger(models.Model):
 
     activated = models.BooleanField(default=False, help_text="Specify whether the trigger should be active.")
 
-    status = models.CharField(max_length=255, default="Working", editable=False, help_text="Indicates the status of the trigger.")
+    status = models.CharField(max_length=255, default="Active", editable=False, help_text="Indicates the status of the trigger.")
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
@@ -280,7 +280,7 @@ class ApiTrigger(models.Model):
         verbose_name_plural = 'API triggers'
 
     def assigned_bots(self):
-        return ", ".join([trigger.name for trigger in self.bots.all()])
+        return ", ".join([bot.name for bot in self.bots.all()])
 
 
 class BotflowExecution(models.Model):
@@ -323,7 +323,7 @@ class SmtpAccount(models.Model):
     tls = models.BooleanField("SSL/TLS", default=True, help_text="Specify whether the SMTP account requires 'SSL/TLS'.")
     activated = models.BooleanField(default=False, help_text="Specify whether the SMTP account should be active.")
 
-    status = models.CharField(max_length=255, default="Working", editable=False, help_text="Indicates the status of the SMTP account.")
+    status = models.CharField(max_length=255, default="Active", editable=False, help_text="Indicates the status of the SMTP account.")
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)

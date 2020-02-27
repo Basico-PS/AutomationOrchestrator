@@ -213,8 +213,8 @@ def test_selected_bots(modeladmin, request, queryset):
             if active:
                 messages.success(request, f"Successfully connected to computer '{computer_name}' and identified an active session for user: {user_name}")
 
-                if item.status != "Working":
-                    item.status = "Working"
+                if item.status != "Active":
+                    item.status = "Active"
                     item.save()
 
             else:
@@ -259,8 +259,8 @@ def test_selected_file_triggers(modeladmin, request, queryset):
 
             messages.success(request, f"Successfully retrieved {str(len(files))} file(s) in the incoming folder: {item.folder_in}")
 
-            if item.status != "Working":
-                item.status = "Working"
+            if item.status != "Active":
+                item.status = "Active"
                 item.save()
 
         except:
@@ -302,8 +302,8 @@ def test_selected_email_imap_triggers(modeladmin, request, queryset):
             else:
                 messages.success(request, f"Successfully connected to email {item.email}! Number of messages detected in the 'INBOX/{item.folder_in}' folder: {emails_folder_in}")
 
-                if item.status != "Working":
-                    item.status = "Working"
+                if item.status != "Active":
+                    item.status = "Active"
                     item.save()
 
         except:
@@ -362,8 +362,8 @@ def test_selected_email_outlook_triggers(modeladmin, request, queryset):
 
             messages.success(request, f"Successfully connected to email {item.email}! Number of messages detected in the 'INBOX/{item.folder_in}' folder: {str(len(emails))}")
 
-            if item.status != "Working":
-                item.status = "Working"
+            if item.status != "Active":
+                item.status = "Active"
                 item.save()
 
         except:
@@ -403,8 +403,8 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
 
             messages.success(request, f"Successfully sent an email with {item.email}!")
 
-            if item.status != "Working":
-                item.status = "Working"
+            if item.status != "Active":
+                item.status = "Active"
                 item.save()
 
         except:

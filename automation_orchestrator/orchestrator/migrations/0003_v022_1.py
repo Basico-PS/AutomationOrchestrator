@@ -13,11 +13,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='bot',
             name='status',
-            field=models.CharField(default='Working', editable=False, help_text='Indicates the status of the bot.', max_length=255),
+            field=models.CharField(default='Unknown', editable=False, help_text='Indicates the status of the bot.', max_length=255),
         ),
         migrations.AddField(
             model_name='historicalbot',
             name='status',
-            field=models.CharField(default='Working', editable=False, help_text='Indicates the status of the bot.', max_length=255),
+            field=models.CharField(default='Unknown', editable=False, help_text='Indicates the status of the bot.', max_length=255),
         ),
     ]

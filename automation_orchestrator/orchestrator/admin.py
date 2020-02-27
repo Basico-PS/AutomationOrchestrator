@@ -213,7 +213,7 @@ def test_selected_bots(modeladmin, request, queryset):
             if active:
                 messages.success(request, f"Successfully connected to computer '{computer_name}' and identified an active session for user: {user_name}")
 
-                if item.status != "Active":
+                if item.status != "Active" and item.status != "Running":
                     item.status = "Active"
                     item.save()
 

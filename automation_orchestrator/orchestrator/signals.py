@@ -1,8 +1,37 @@
-from .models import BotflowExecution, SmtpAccount
+from .models import Bot, BotflowExecution, SmtpAccount
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from smtplib import SMTP, SMTP_SSL
 from email.message import EmailMessage
+
+
+@receiver(post_save, sender=BotflowExecution)
+def botflow_execution_bot_status(sender, instance, **kwargs):
+    if instance.status == "Running":
+        try:
+            bot = Bot.objects.filter(computer_name=instance.computer_name, user_name=instance.user_name)[0]
+        except:
+            return
+
+        if bot.status != "Running":
+            bot.status = "Running"
+            bot.save()
+
+    elif instance.status != "Pending":
+        try:
+            bot = Bot.objects.filter(computer_name=instance.computer_name, user_name=instance.user_name)[0]
+        except:
+            return
+
+        if instance.status == "Completed":
+            if bot.status != "Active":
+                bot.status = "Active"
+                bot.save()
+
+        else:
+            if bot.status != "Unknown":
+                bot.status = "Unknown"
+                bot.save()
 
 
 @receiver(post_save, sender=BotflowExecution)

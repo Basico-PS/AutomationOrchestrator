@@ -240,7 +240,7 @@ def bot_status(item):
                 break
 
         if active:
-            if item.status != "Active":
+            if item.status != "Active" and item.status != "Running":
                 item.status = "Active"
                 item.save()
 

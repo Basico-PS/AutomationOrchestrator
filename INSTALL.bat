@@ -10,5 +10,9 @@ IF %create_super_user% == Y (
 	CALL python automation_orchestrator/manage.py createsuperuser
 )
 
+IF %create_super_user% == y (
+	CALL python automation_orchestrator/manage.py createsuperuser
+)
+
 echo The installation is now complete!
 TIMEOUT 5

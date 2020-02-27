@@ -266,8 +266,9 @@ def test_selected_file_triggers(modeladmin, request, queryset):
         except:
             messages.error(request, f"Failed to retrieve files from the incoming folder: {item.folder_in}")
 
-            item.status = "ERROR"
-            item.save()
+            if item.status != "ERROR":
+                item.status = "ERROR"
+                item.save()
 
 
 def test_selected_email_imap_triggers(modeladmin, request, queryset):
@@ -290,13 +291,14 @@ def test_selected_email_imap_triggers(modeladmin, request, queryset):
             emails_folder_in = str(emails_folder_in, 'utf-8', 'ignore')
             emails_folder_out = server.select('INBOX/' + item.folder_out, readonly=True)[-1][-1]
             emails_folder_out = str(emails_folder_out, 'utf-8', 'ignore')
-            
+
             if "doesn't exist" in emails_folder_in or "doesn't exist" in emails_folder_out:
                 messages.error(request, f"Failed to connect to email {item.email}!")
 
-                item.status = "ERROR"
-                item.save()
-                
+                if item.status != "ERROR":
+                    item.status = "ERROR"
+                    item.save()
+
             else:
                 messages.success(request, f"Successfully connected to email {item.email}! Number of messages detected in the 'INBOX/{item.folder_in}' folder: {emails_folder_in}")
 
@@ -307,8 +309,9 @@ def test_selected_email_imap_triggers(modeladmin, request, queryset):
         except:
             messages.error(request, f"Failed to connect to email {item.email}!")
 
-            item.status = "ERROR"
-            item.save()
+            if item.status != "ERROR":
+                item.status = "ERROR"
+                item.save()
 
         finally:
             try:
@@ -364,8 +367,9 @@ def test_selected_email_outlook_triggers(modeladmin, request, queryset):
                 item.save()
 
         except:
-            item.status = "ERROR"
-            item.save()
+            if item.status != "ERROR":
+                item.status = "ERROR"
+                item.save()
 
         finally:
             accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None, None, None
@@ -423,8 +427,9 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
 
             messages.error(request, f"Failed to send email with {item.email}!")
 
-            item.status = "ERROR"
-            item.save()
+            if item.status != "ERROR":
+                item.status = "ERROR"
+                item.save()
 
 
 class BotAdmin(SimpleHistoryAdmin):
@@ -463,8 +468,6 @@ class AppAdmin(SimpleHistoryAdmin):
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/app/{}/change/">EDIT</a>', obj.id)
-
-
 
 
 class BotflowAdmin(SimpleHistoryAdmin):
@@ -511,7 +514,7 @@ class BotflowAdmin(SimpleHistoryAdmin):
 class FileTriggerAdmin(SimpleHistoryAdmin):
     fieldsets = (
         ('General', {
-            'fields': ('bot', 'app', 'botflow',),
+            'fields': ('bots', 'app', 'botflow',),
         }),
         ('Folders', {
             'fields': ('folder_in', 'folder_out',),
@@ -528,11 +531,11 @@ class FileTriggerAdmin(SimpleHistoryAdmin):
         }),
     )
 
-    list_display = ('pk', 'bot', 'app', 'botflow',
+    list_display = ('pk', 'assigned_bots', 'app', 'botflow',
                     'folder_in', 'folder_out', 'filter',
                     'activated', 'status',
                     'update_record',)
-    list_editable = ('bot', 'app', 'botflow',
+    list_editable = ('app', 'botflow',
                     'folder_in', 'folder_out', 'filter', 'activated',)
     list_display_links = ['pk']
 
@@ -545,7 +548,7 @@ class FileTriggerAdmin(SimpleHistoryAdmin):
 class ScheduleTriggerAdmin(SimpleHistoryAdmin):
     fieldsets = (
         ('General', {
-            'fields': ('bot', 'app', 'botflow'),
+            'fields': ('bots', 'app', 'botflow'),
         }),
         ('Recurrence', {
             'fields': ('frequency', 'run_every', 'run_start',),
@@ -563,11 +566,11 @@ class ScheduleTriggerAdmin(SimpleHistoryAdmin):
         }),
     )
 
-    list_display = ('pk', 'bot', 'app', 'botflow',
+    list_display = ('pk', 'assigned_bots', 'app', 'botflow',
                     'frequency', 'run_every', 'run_start',
                     'activated', 'status',
                     'update_record',)
-    list_editable = ('bot', 'app', 'botflow',
+    list_editable = ('app', 'botflow',
                     'frequency', 'run_every', 'run_start', 'activated',)
     list_display_links = ['pk']
     exclude = ('past_settings',)
@@ -593,7 +596,7 @@ class EmailImapTriggerAdmin(SimpleHistoryAdmin):
 
     fieldsets = (
         ('General', {
-            'fields': ('bot', 'app', 'botflow',),
+            'fields': ('bots', 'app', 'botflow',),
         }),
         ('Email', {
             'fields': ('email', 'password',),
@@ -613,12 +616,12 @@ class EmailImapTriggerAdmin(SimpleHistoryAdmin):
         }),
     )
 
-    list_display = ('pk', 'bot', 'app', 'botflow',
+    list_display = ('pk', 'assigned_bots', 'app', 'botflow',
                     'email',
                     'folder_in', 'folder_out',
                     'activated', 'status',
                     'update_record',)
-    list_editable = ('bot', 'app', 'botflow',
+    list_editable = ('app', 'botflow',
                      'email',
                      'folder_in', 'folder_out', 'activated',)
     list_display_links = ['pk']
@@ -636,7 +639,7 @@ class EmailImapTriggerAdmin(SimpleHistoryAdmin):
 class EmailOutlookTriggerAdmin(SimpleHistoryAdmin):
     fieldsets = (
         ('General', {
-            'fields': ('bot', 'app', 'botflow',),
+            'fields': ('bots', 'app', 'botflow',),
         }),
         ('Email', {
             'fields': ('email',),
@@ -653,12 +656,12 @@ class EmailOutlookTriggerAdmin(SimpleHistoryAdmin):
         }),
     )
 
-    list_display = ('pk', 'bot', 'app', 'botflow',
+    list_display = ('pk', 'assigned_bots', 'app', 'botflow',
                     'email',
                     'folder_in', 'folder_out',
                     'activated', 'status',
                     'update_record',)
-    list_editable = ('bot', 'app', 'botflow',
+    list_editable = ('app', 'botflow',
                      'email',
                      'folder_in', 'folder_out', 'activated',)
     list_display_links = ['pk']
@@ -676,17 +679,17 @@ class EmailOutlookTriggerAdmin(SimpleHistoryAdmin):
 class ApiTriggerAdmin(SimpleHistoryAdmin):
     fieldsets = (
         ('General', {
-            'fields': ('bot', 'app', 'botflow',),
+            'fields': ('bots', 'app', 'botflow',),
         }),
         ('Activate', {
             'fields': ('activated',),
         }),
     )
 
-    list_display = ('pk', 'bot', 'app', 'botflow',
+    list_display = ('pk', 'assigned_bots', 'app', 'botflow',
                     'activated', 'status',
                     'update_record',)
-    list_editable = ('bot', 'app', 'botflow',
+    list_editable = ('app', 'botflow',
                      'activated',)
     list_display_links = ['pk']
 

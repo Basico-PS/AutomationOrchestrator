@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'admin_reorder',
     'simple_history',
+    'sortedm2m',
 ]
 
 MIDDLEWARE = [

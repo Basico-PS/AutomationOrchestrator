@@ -5,6 +5,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
 from fernet_fields import EncryptedCharField, EncryptedTextField
 from simple_history.models import HistoricalRecords
+from sortedm2m.fields import SortedManyToManyField
 
 
 def get_computer_name():
@@ -116,7 +117,8 @@ class Botflow(models.Model):
 
 
 class FileTrigger(models.Model):
-    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, help_text="Select the bot for this trigger.")
+    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, null=True, help_text="Select the bot for this trigger.")
+    bots = SortedManyToManyField(Bot, related_name='file_trigger_bot', help_text="Select the bots for this trigger.")
     app = models.ForeignKey(App, on_delete=models.PROTECT, help_text="Select the application for this trigger.")
     botflow = models.ForeignKey(Botflow, on_delete=models.PROTECT, help_text="Select the botflow for this trigger.")
 
@@ -142,9 +144,13 @@ class FileTrigger(models.Model):
         if self.folder_in == self.folder_out:
             raise ValidationError('The incoming and outgoing folders cannot be the same!')
 
+    def assigned_bots(self):
+        return ", ".join([trigger.name for trigger in self.bots.all()])
+
 
 class ScheduleTrigger(models.Model):
-    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, help_text="Select the bot for this trigger.")
+    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, null=True, help_text="Select the bot for this trigger.")
+    bots = SortedManyToManyField(Bot, related_name='schedule_trigger_bot', help_text="Select the bots for this trigger.")
     app = models.ForeignKey(App, on_delete=models.PROTECT, help_text="Select the application for this trigger.")
     botflow = models.ForeignKey(Botflow, on_delete=models.PROTECT, help_text="Select the botflow for this trigger.")
 
@@ -172,9 +178,13 @@ class ScheduleTrigger(models.Model):
 
     history = HistoricalRecords()
 
+    def assigned_bots(self):
+        return ", ".join([trigger.name for trigger in self.bots.all()])
+
 
 class EmailImapTrigger(models.Model):
-    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, help_text="Select the bot for this trigger.")
+    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, null=True, help_text="Select the bot for this trigger.")
+    bots = SortedManyToManyField(Bot, related_name='email_imap_trigger_bot', help_text="Select the bots for this trigger.")
     app = models.ForeignKey(App, on_delete=models.PROTECT, help_text="Select the application for this trigger.")
     botflow = models.ForeignKey(Botflow, on_delete=models.PROTECT, help_text="Select the botflow for this trigger.")
 
@@ -209,9 +219,13 @@ class EmailImapTrigger(models.Model):
         if self.folder_in == self.folder_out:
             raise ValidationError('The incoming and outgoing folders cannot be the same!')
 
+    def assigned_bots(self):
+        return ", ".join([trigger.name for trigger in self.bots.all()])
+
 
 class EmailOutlookTrigger(models.Model):
-    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, help_text="Select the bot for this trigger.")
+    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, null=True, help_text="Select the bot for this trigger.")
+    bots = SortedManyToManyField(Bot, related_name='email_outlook_trigger_bot', help_text="Select the bots for this trigger.")
     app = models.ForeignKey(App, on_delete=models.PROTECT, help_text="Select the application for this trigger.")
     botflow = models.ForeignKey(Botflow, on_delete=models.PROTECT, help_text="Select the botflow for this trigger.")
 
@@ -242,9 +256,13 @@ class EmailOutlookTrigger(models.Model):
         if self.folder_in == self.folder_out:
             raise ValidationError('The incoming and outgoing folders cannot be the same!')
 
+    def assigned_bots(self):
+        return ", ".join([trigger.name for trigger in self.bots.all()])
+
 
 class ApiTrigger(models.Model):
-    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, help_text="Select the bot for this trigger.")
+    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, null=True, help_text="Select the bot for this trigger.")
+    bots = SortedManyToManyField(Bot, related_name='api_trigger_bot', help_text="Select the bots for this trigger.")
     app = models.ForeignKey(App, on_delete=models.PROTECT, help_text="Select the application for this trigger.")
     botflow = models.ForeignKey(Botflow, on_delete=models.PROTECT, help_text="Select the botflow for this trigger.")
 
@@ -260,6 +278,9 @@ class ApiTrigger(models.Model):
     class Meta:
         verbose_name = 'API trigger'
         verbose_name_plural = 'API triggers'
+
+    def assigned_bots(self):
+        return ", ".join([trigger.name for trigger in self.bots.all()])
 
 
 class BotflowExecution(models.Model):

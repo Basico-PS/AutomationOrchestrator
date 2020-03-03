@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.utils.html import format_html
 from simple_history.admin import SimpleHistoryAdmin
 from .models import Bot, App, Botflow, FileTrigger, PythonFunction, ScheduleTrigger, EmailImapTrigger, EmailOutlookTrigger, ApiTrigger, BotflowExecution, SmtpAccount, PythonFunction, PythonFunctionExecution
-from .monitoring import add_botflow_execution_object
+from .monitoring import add_botflow_execution_object, determine_execution_bot
 import subprocess
 import csv
 import os
@@ -17,7 +17,7 @@ admin.site.index_title = 'Orchestrate amazing automation'
 
 
 def queue_item(item, trigger):
-    add_botflow_execution_object(bot_pk=item.bot.pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=trigger)
+    add_botflow_execution_object(bot_pk=determine_execution_bot(item).pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=trigger)
 
 
 def activate_selected_file_triggers(modeladmin, request, queryset):
@@ -43,6 +43,12 @@ def activate_selected_email_outlook_triggers(modeladmin, request, queryset):
 def activate_selected_api_triggers(modeladmin, request, queryset):
     for item in queryset:
         queue_item(item, "API Trigger: Activated Manually")
+
+
+def cancel_selected_botflow_executions(modeladmin, request, queryset):
+    for item in queryset:
+        item.status = "Cancelled"
+        item.save()
 
 
 def export_selected_file_triggers(modeladmin, request, queryset):
@@ -718,7 +724,7 @@ class BotflowExecutionAdmin(SimpleHistoryAdmin):
     list_filter = ('computer_name', 'user_name', 'app', 'botflow', 'status',)
     readonly_fields = [field.name for field in BotflowExecution._meta.get_fields() if field.name != 'status']
 
-    actions = [export_selected_botflow_executions,]
+    actions = [cancel_selected_botflow_executions, export_selected_botflow_executions,]
 
     def get_ordering(self, request):
         return ['-time_queued']

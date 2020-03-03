@@ -1,9 +1,12 @@
+import os
+import pytz
 from .models import Bot, BotflowExecution, SmtpAccount
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from smtplib import SMTP, SMTP_SSL
 from email.message import EmailMessage
 from os.path import basename
+from datetime import datetime
 
 
 @receiver(post_save, sender=BotflowExecution)
@@ -30,6 +33,17 @@ def botflow_execution_bot_status(sender, instance, **kwargs):
                 bot.save()
 
         else:
+            latest_execution = BotflowExecution.objects.filter(status="Running", computer_name__iexact=os.environ['COMPUTERNAME'], user_name__iexact=os.environ['USERNAME']).order_by('-time_start')
+
+            if len(latest_execution) > 0:
+                latest_execution = latest_execution[0]
+
+                difference = datetime.now(pytz.timezone('UTC')) - latest_execution.time_start
+                difference = difference.seconds / 60
+
+                if difference < latest_execution.timeout_minutes:
+                    return
+
             if bot.status != "Unknown":
                 bot.status = "Unknown"
                 bot.save()

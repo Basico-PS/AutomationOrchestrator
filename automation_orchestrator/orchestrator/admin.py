@@ -45,6 +45,12 @@ def activate_selected_api_triggers(modeladmin, request, queryset):
         queue_item(item, "API Trigger: Activated Manually")
 
 
+def cancel_selected_botflow_executions(modeladmin, request, queryset):
+    for item in queryset:
+        item.status = "Cancelled"
+        item.save()
+
+
 def export_selected_file_triggers(modeladmin, request, queryset):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="file_triggers.csv"'
@@ -718,7 +724,7 @@ class BotflowExecutionAdmin(SimpleHistoryAdmin):
     list_filter = ('computer_name', 'user_name', 'app', 'botflow', 'status',)
     readonly_fields = [field.name for field in BotflowExecution._meta.get_fields() if field.name != 'status']
 
-    actions = [export_selected_botflow_executions,]
+    actions = [cancel_selected_botflow_executions, export_selected_botflow_executions,]
 
     def get_ordering(self, request):
         return ['-time_queued']

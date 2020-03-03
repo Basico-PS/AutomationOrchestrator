@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.utils.html import format_html
 from simple_history.admin import SimpleHistoryAdmin
 from .models import Bot, App, Botflow, FileTrigger, PythonFunction, ScheduleTrigger, EmailImapTrigger, EmailOutlookTrigger, ApiTrigger, BotflowExecution, SmtpAccount, PythonFunction, PythonFunctionExecution
-from .monitoring import add_botflow_execution_object
+from .monitoring import add_botflow_execution_object, determine_execution_bot
 import subprocess
 import csv
 import os
@@ -17,7 +17,7 @@ admin.site.index_title = 'Orchestrate amazing automation'
 
 
 def queue_item(item, trigger):
-    add_botflow_execution_object(bot_pk=item.bot.pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=trigger)
+    add_botflow_execution_object(bot_pk=determine_execution_bot(item).pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=trigger)
 
 
 def activate_selected_file_triggers(modeladmin, request, queryset):

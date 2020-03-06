@@ -789,6 +789,10 @@ def botflow_execution_monitor_evaluate():
                             subprocess.run([item.app, '/Open', item.botflow, '/Run', '/Close', '/Exit'], timeout=(item.timeout_minutes * 60))
                         else:
                             subprocess.run([item.app, '/Open', item.botflow, '/Run'], timeout=(item.timeout_minutes * 60))
+
+                    elif app == "uirobot.exe":
+                        subprocess.run([item.app, "execute", "--file", item.botflow, "--input", str({'aoTrigger': item.trigger})], timeout=(item.timeout_minutes * 60))
+
                     else:
                         subprocess.run([item.app, item.botflow], timeout=(item.timeout_minutes * 60))
 

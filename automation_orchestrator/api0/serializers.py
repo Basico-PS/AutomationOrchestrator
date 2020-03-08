@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ApiTrigger, BotflowExecution, PythonFunction, PythonFunctionExecution
+from orchestrator.models import ApiTrigger, BotflowExecution, PythonFunction, PythonFunctionExecution
 
 
 class ApiTriggerSerializer(serializers.ModelSerializer):

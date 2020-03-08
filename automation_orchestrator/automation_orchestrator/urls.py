@@ -1,23 +1,10 @@
-"""automation_orchestrator URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/2.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-from django.contrib import admin
-from django.urls import path, include
-from orchestrator.monitoring import bot_status_monitor, file_trigger_monitor, schedule_trigger_monitor, email_imap_trigger_monitor, email_outlook_trigger_monitor, botflow_execution_monitor
 import os
 import threading
+from django.contrib import admin
+from django.urls import path, include
+from django.views.generic.base import TemplateView
+from django.contrib.auth.decorators import login_required
+from orchestrator.monitoring import bot_status_monitor, file_trigger_monitor, schedule_trigger_monitor, email_imap_trigger_monitor, email_outlook_trigger_monitor, botflow_execution_monitor
 
 
 def start_bot_status_monitor():
@@ -58,8 +45,9 @@ def start_botflow_execution_monitor():
 
 urlpatterns = [
     path('', admin.site.urls),
-    path('api/0/', include('orchestrator.urls')),
-    ]
+    path('api/0/', include('api0.urls')),
+    path('dashboard/', include('dashboard.urls')),
+]
 
 if os.path.exists('logs\\error_log.txt'):
     os.remove('logs\\error_log.txt')

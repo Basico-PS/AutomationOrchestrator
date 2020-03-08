@@ -70,6 +70,8 @@ ALLOWED_HOSTS = ['127.0.0.1',
 # Application definition
 
 INSTALLED_APPS = [
+    'api0.apps.Api0Config',
+    'dashboard.apps.DashboardConfig',
     'orchestrator.apps.OrchestratorConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -112,6 +114,10 @@ TEMPLATES = [
         },
     },
 ]
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = None
+LOGOUT_REDIRECT_URL = None
 
 WSGI_APPLICATION = 'automation_orchestrator.wsgi.application'
 

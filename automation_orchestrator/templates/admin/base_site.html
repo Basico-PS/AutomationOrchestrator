@@ -5,13 +5,13 @@
 {% block branding %}
 <div id="site-name">
     <a href="{% url 'admin:index' %}">
-        <img src="{% static 'admin/logo.png' %}" height="75px"/>
+        <img src="{% static 'admin/logo.png' %}" height="75px" />
     </a>
 </div>
 {% endblock %}
 
 {% block extrahead %}
-<link rel="shortcut icon" type="image/png" href="{% static 'admin/favicon.ico' %}"/>
+<link rel="shortcut icon" type="image/png" href="{% static 'admin/favicon.ico' %}" />
 {% endblock %}
 
 {% block extrastyle %}
@@ -23,6 +23,5 @@
     div.breadcrumbs {
         background: #2e2e2d;
     }
-
 </style>
 {% endblock %}

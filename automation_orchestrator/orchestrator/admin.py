@@ -1,3 +1,8 @@
+import os
+import csv
+import pytz
+import datetime
+import subprocess
 from django import forms
 from django.db import models
 from django.contrib import admin, messages
@@ -6,9 +11,6 @@ from django.utils.html import format_html
 from simple_history.admin import SimpleHistoryAdmin
 from .models import Bot, App, Botflow, FileTrigger, PythonFunction, ScheduleTrigger, EmailImapTrigger, EmailOutlookTrigger, ApiTrigger, BotflowExecution, SmtpAccount, PythonFunction, PythonFunctionExecution
 from .monitoring import add_botflow_execution_object, determine_execution_bot
-import subprocess
-import csv
-import os
 
 
 admin.site.site_header = 'Basico P/S - Automation Orchestrator'
@@ -48,6 +50,7 @@ def activate_selected_api_triggers(modeladmin, request, queryset):
 def cancel_selected_botflow_executions(modeladmin, request, queryset):
     for item in queryset:
         item.status = "Cancelled"
+        item.time_end = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))}00")
         item.save()
 
 

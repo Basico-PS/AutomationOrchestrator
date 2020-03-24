@@ -11,14 +11,98 @@ def redirect_overview(request):
     return redirect('dashboard-overview')
 
 
-@login_required
-def overview(request):
+def format_botflow_executions(botflow_executions):
+    botflow_executions_overview = []
+    botflow_executions_calendar = []
 
+    for element in botflow_executions:
+        record_overview = {}
+        record_calendar = {}
+
+        record_overview['id'] = element.id
+
+        record_overview['time_queued'] = element.time_queued
+
+        record_overview['computer_name'] = element.computer_name
+        record_overview['user_name'] = element.user_name
+
+        record_overview['app'] = element.app
+        if '\\' in record_overview['app']:
+            record_overview['app_formatted'] = record_overview['app'].split("\\")[-1]
+        else:
+            record_overview['app_formatted'] = record_overview['app']
+
+        record_overview['botflow'] = element.botflow
+        if '\\' in record_overview['botflow']:
+            record_overview['botflow_formatted'] = record_overview['botflow'].split("\\")[-1]
+        else:
+            record_overview['botflow_formatted'] = record_overview['botflow']
+
+        record_overview['trigger'] = element.trigger
+        if '\\' in record_overview['trigger']:
+            record_overview['trigger_formatted'] = record_overview['trigger'][:(record_overview['trigger'].find(":")+2)] + record_overview['trigger'].split("\\")[-1]
+        else:
+            record_overview['trigger_formatted'] = record_overview['trigger']
+
+        record_overview['priority'] = element.priority
+        record_overview['status'] = element.status
+
+        record_overview['time_start'] = element.time_start
+
+        record_overview['time_end'] = element.time_end
+
+        record_calendar['computer_name'] = record_overview['computer_name']
+        record_calendar['user_name'] = record_overview['user_name']
+        record_calendar['botflow'] = record_overview['botflow']
+        record_calendar['botflow_formatted'] = record_overview['botflow_formatted']
+        record_calendar['status'] = record_overview['status']
+
+        try:
+            record_calendar['time_start'] = (record_overview['time_start'] + timedelta(hours=int(datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))).strftime(f"%Y-%m-%dT%H:%M:%S")
+        except:
+            record_calendar['time_start'] = ""
+
+        try:
+            record_calendar['time_end'] = (record_overview['time_end'] + timedelta(hours=int(datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))).strftime(f"%Y-%m-%dT%H:%M:%S")
+        except:
+            record_calendar['time_end'] = ""
+
+        botflow_executions_overview.append(record_overview)
+        botflow_executions_calendar.append(record_calendar)
+
+    return botflow_executions_overview, botflow_executions_calendar
+
+
+def get_context():
     today = datetime.now().date()
 
     bots = Bot.objects.all()
+    bots = [
+        {
+            'id': bot['id'],
+            'name': bot['name'],
+            'computer_name': bot['computer_name'],
+            'user_name': bot['user_name']
+        } for bot in list(bots.values())
+    ]
+
     apps = App.objects.all()
+    apps = [
+        {
+            'id': app['id'],
+            'name': app['name'],
+            'path': app['path'],
+        } for app in list(apps.values())
+    ]
+
     botflows = Botflow.objects.all()
+    botflows = [
+        {
+            'id': botflow['id'],
+            'name': botflow['name'],
+            'path': botflow['path'],
+        } for botflow in list(botflows.values())
+    ]
 
     botflow_executions = BotflowExecution.objects.all()
 
@@ -27,37 +111,17 @@ def overview(request):
     botflow_executions_completed_today = botflow_executions.filter(status='Completed', time_end__date=today)
     botflow_executions_failed_today = botflow_executions.filter(time_end__date=today).exclude(status='Completed')
 
-    botflow_executions = list(botflow_executions.values())
-    for element in botflow_executions:
-        element['time_queued'] = (element['time_queued'] + timedelta(hours=int(datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))).strftime(f"%Y-%m-%dT%H:%M:%S")
-
-        try:
-            element['time_start'] = (element['time_start'] + timedelta(hours=int(datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))).strftime(f"%Y-%m-%dT%H:%M:%S")
-        except:
-            element['time_start'] = ""
-
-        try:
-            element['time_end'] = (element['time_end'] + timedelta(hours=int(datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))).strftime(f"%Y-%m-%dT%H:%M:%S")
-        except:
-            element['time_end'] = ""
-
-        if '\\' in element['app']:
-            element['app'] = element['app'].split("\\")[-1]
-
-        if '\\' in element['botflow']:
-            element['botflow'] = element['botflow'].split("\\")[-1]
-
-    botflow_executions_json = json.dumps(botflow_executions)
-
     python_functions = PythonFunction.objects.all()
     python_function_executions = PythonFunctionExecution.objects.all()
 
+    botflow_executions_overview, botflow_executions_calendar = format_botflow_executions(botflow_executions)
+
     context = {
-        'bots': bots,
-        'apps': apps,
-        'botflows': botflows,
-        'botflow_executions': botflow_executions,
-        'botflow_executions_json': botflow_executions_json,
+        'bots': json.dumps(bots),
+        'apps': json.dumps(apps),
+        'botflows': json.dumps(botflows),
+        'botflow_executions_overview': botflow_executions_overview,
+        'botflow_executions_calendar': json.dumps(botflow_executions_calendar),
         'botflow_executions_running': botflow_executions_running,
         'botflow_executions_pending': botflow_executions_pending,
         'botflow_executions_completed_today': botflow_executions_completed_today,
@@ -66,4 +130,14 @@ def overview(request):
         'python_function_executions': python_function_executions,
     }
 
-    return render(request, 'dashboard/overview.html', context)
+    return context
+
+
+@login_required
+def overview(request):
+    return render(request, 'dashboard/overview.html', get_context())
+
+
+@login_required
+def calendar_view(request):
+    return render(request, 'dashboard/calendar_view.html', get_context())

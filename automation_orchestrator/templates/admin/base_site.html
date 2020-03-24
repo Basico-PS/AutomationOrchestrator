@@ -25,3 +25,36 @@
     }
 </style>
 {% endblock %}
+
+{% block usertools %}
+{% if has_permission %}
+<div id="user-tools">
+    {% block welcome-msg %}
+    Welcome <strong>{% firstof user.get_short_name user.get_username %}</strong>.
+    {% endblock %}
+
+    {% block userlinks %}
+    {% if site_url %}
+    <a href="{{ site_url }}">Home</a> /
+    {% endif %}
+
+    {% if site_url %}
+    <a href="{% url 'dashboard-overview' %}">Dashboard</a> /
+    {% endif %}
+
+    {% if user.is_active and user.is_staff %}
+    {% url 'django-admindocs-docroot' as docsroot %}
+    {% if docsroot %}
+    <a href="{{ docsroot }}">Documentation</a> /
+    {% endif %}
+    {% endif %}
+
+    {% if user.has_usable_password %}
+    <a href="{% url 'admin:password_change' %}">Change password</a> /
+    {% endif %}
+
+    <a href="{% url 'admin:logout' %}">Log out</a>
+    {% endblock %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,48 +1,24 @@
-{% extends 'admin/base_site.html' %}
+{% extends 'dashboard/base_site.html' %}
 
 {% load static %}
 
-{% block branding %}
-<div id="site-name">
-    <a href="{% url 'admin:index' %}">
-        <img src="{% static 'admin/logo.png' %}" height="75px" />
-    </a>
-</div>
+{% block title %}Dashboard Overview | Basico P/S - Automation Orchestrator{% endblock %}
+
+{% block nav-global %}
+<nav class="nav nav-pills">
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'dashboard-overview' %}">Overview</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'dashboard-calendar-view' %}">Calendar View</a>
+    </li>
+</nav>
 {% endblock %}
-
-{% block extrahead %}
-<link rel="shortcut icon" type="image/png" href="{% static 'admin/favicon.ico' %}" />
-
-<link href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css" rel="stylesheet">
-
-<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
-    integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-
-<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.1/fullcalendar.min.css" rel="stylesheet">
-{% endblock %}
-
-{% block extrastyle %}
-<style>
-    #header {
-        background: #2e2e2d;
-    }
-
-    div.breadcrumbs {
-        background: #2e2e2d;
-    }
-</style>
-{% endblock %}
-
-{% block title %}Dashboard Overview | Automation Orchestrator{% endblock %}
 
 {% block content %}
 
 <div class="container-fluid">
-
     <div class="row">
-
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card shadow h-100">
                 <div class="card-body">
@@ -109,7 +85,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="font-weight-bold text-danger text-uppercase mb-1">
-                                Botflows Cancelled/Failed (Today)
+                                Botflows Failed (Today)
                             </div>
                             <div class="h3 mb-0 font-weight-bold">
                                 {{ botflow_executions_failed_today.count }}
@@ -122,7 +98,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <div class="card shadow mb-4">
@@ -133,13 +108,12 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table id="dataTable" class="table table-bordered table-striped" width="100%" cellspacing="0">
+                <table id="dataTableExecutions" class="table table-bordered table-striped" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th>PK</th>
                             <th>Time Queued</th>
-                            <th>Computer Name</th>
-                            <th>User Name</th>
+                            <th>Bot</th>
                             <th>App</th>
                             <th>Botflow</th>
                             <th>Trigger</th>
@@ -150,19 +124,18 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for botflow_execution in botflow_executions %}
+                        {% for botflow_execution in botflow_executions_overview %}
                         <tr>
                             <td>{{ botflow_execution.id }}</td>
-                            <td>{{ botflow_execution.time_queued }}</td>
-                            <td>{{ botflow_execution.computer_name }}</td>
-                            <td>{{ botflow_execution.user_name }}</td>
-                            <td>{{ botflow_execution.app }}</td>
-                            <td>{{ botflow_execution.botflow }}</td>
-                            <td>{{ botflow_execution.trigger }}</td>
+                            <td>{{ botflow_execution.time_queued|date:"SHORT_DATETIME_FORMAT" }}</td>
+                            <td>{{ botflow_execution.computer_name }} - {{ botflow_execution.user_name }}</td>
+                            <td>{{ botflow_execution.app_formatted }}</td>
+                            <td>{{ botflow_execution.botflow_formatted }}</td>
+                            <td>{{ botflow_execution.trigger_formatted }}</td>
                             <td>{{ botflow_execution.priority }}</td>
                             <td>{{ botflow_execution.status }}</td>
-                            <td>{{ botflow_execution.time_start }}</td>
-                            <td>{{ botflow_execution.time_end }}</td>
+                            <td>{{ botflow_execution.time_start|date:"SHORT_DATETIME_FORMAT" }}</td>
+                            <td>{{ botflow_execution.time_end|date:"SHORT_DATETIME_FORMAT" }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -171,102 +144,406 @@
         </div>
     </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <div class="font-weight-bold text-primary text-uppercase mb-1">
-                Botflow Execution Calendar
+    <div class="row">
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h6 class="font-weight-bold text-primary text-uppercase mb-1">
+                                Completed executions per botflow
+                            </h6>
+                        </div>
+                        <div class="col-sm-6">
+                            <select id="barchartFilter" class="custom-select pull-right">
+                                <option value="7">Past 7 days</option>
+                                <option value="14">Past 14 days</option>
+                                <option value="30">Past 30 days</option>
+                                <option value="90">Past 90 days</option>
+                                <option value="-1">All executions</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-bar">
+                        <canvas id="barchartBotflows"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="card-body">
-            <div id='calendar'></div>
+
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h6 class="font-weight-bold text-primary text-uppercase mb-1">
+                                Minutes of runtime per bot
+                            </h6>
+                        </div>
+                        <div class="col-sm-6">
+                            <select id="piechartFilter" class="custom-select pull-right">
+                                <option value="7">Past 7 days</option>
+                                <option value="14">Past 14 days</option>
+                                <option value="30">Past 30 days</option>
+                                <option value="90">Past 90 days</option>
+                                <option value="-1">All executions</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie">
+                        <canvas id="piechartBotflows"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
 </div>
-<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.1/jquery.min.js"></script>
-
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-    crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"
-    integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm"
-    crossorigin="anonymous"></script>
-
-<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.1/fullcalendar.min.js"></script>
 
 <script>
-    var botflow_executions = '{{ botflow_executions_json }}';
-    var botflow_executions_arr = JSON.parse(botflow_executions.replace(/&quot;/g, '"').replace(/\\/g, '\\\\'))
+    $(document).ready(function () {
+        $("#dataTableExecutions").DataTable({
+            order: [[0, "desc"]],
+            lengthMenu: [2, 5, 10, 25, 100],
+            pageLength: 2,
+            pagingType: "full_numbers"
+        });
 
-    var botflow_executions_events = []
-    botflow_executions_arr.forEach(element => {
-        if (element.time_start !== element.time_end) {
-            var color = ''
-            if (element.status === "Completed") {
-                color = 'green'
-            } else if (element.status === "Running") {
-                color = 'blue'
-            } else (
-                color = 'red'
-            )
-            botflow_executions_events.push(
-                {
-                    'title': element.botflow + " (" + element.computer_name + ', ' + element.user_name + ")",
-                    'start': element.time_start,
-                    'end': element.time_end,
-                    'color': color,
-                    'textColor': 'white',
+        generateBarChartData()
+        generatePieChartData()
+    });
+
+    $("#barchartFilter").change(function () {
+        generateBarChartData()
+    });
+
+    function generateBarChartData() {
+        var e = document.getElementById("barchartFilter");
+        var days = e.options[e.selectedIndex].value;
+        var dateToday = new Date();
+
+        var newData = {
+            backgroundColor: colors,
+            hoverBackgroundColor: "#2e59d9",
+            hoverBorderColor: "#2e59d9",
+            data: botflowsArr.map(function (botflow) {
+                return executionsArr.filter(function (execution) {
+                    if (days === "-1") {
+                        if (execution.status == "Completed") {
+                            return execution.botflow.toLowerCase() == botflow.path.toLowerCase();
+                        } else {
+                            return false
+                        }
+                    } else {
+                        if (execution.status == "Completed") {
+                            return execution.botflow.toLowerCase() == botflow.path.toLowerCase() && calcDateDiff(execution.time_end, dateToday, days);
+                        } else {
+                            return false
+                        }
+                    }
+                }).length;
+            })
+        }
+        barchart.data.datasets = [];
+        barchart.data.datasets.push(newData);
+        barchart.update();
+    };
+
+    function calcDateDiff(date, dateToday, days) {
+        if (date != '') {
+            var dateParts = date.split('-');
+            var dateExecution = new Date(dateParts[0], dateParts[1] - 1, dateParts[2].split('T')[0]);
+
+            if (Math.floor((dateToday - dateExecution) / (1000 * 60 * 60 * 24)) <= days) {
+                return true
+            } else {
+                return false
+            }
+        } else {
+            return false
+        }
+    };
+
+    $("#piechartFilter").change(function () {
+        generatePieChartData()
+    });
+
+    function generatePieChartData() {
+        var e = document.getElementById("piechartFilter");
+        var days = e.options[e.selectedIndex].value;
+        var dateToday = new Date();
+
+        var newData = {
+            backgroundColor: colors,
+            hoverBackgroundColor: "#2e59d9",
+            hoverBorderColor: "#2e59d9",
+            data: calcBotRuntime(days, dateToday)
+        }
+
+        piechart.data.datasets = [];
+        piechart.data.datasets.push(newData);
+        piechart.update();
+    };
+
+    function calcBotRuntime(days, dateToday) {
+        var runtimeArr = []
+
+        botsArr.forEach(function (bot) {
+            runtimeInt = 0
+            executionsArr.filter(function (execution) {
+                if (days === "-1") {
+                    return (execution.computer_name.toLowerCase() == bot.computer_name.toLowerCase())
+                        && (execution.user_name.toLowerCase() == bot.user_name.toLowerCase())
+                } else {
+                    return (execution.computer_name.toLowerCase() == bot.computer_name.toLowerCase())
+                        && (execution.user_name.toLowerCase() == bot.user_name.toLowerCase())
+                        && ((calcDateDiff(execution.time_start, dateToday, days)) || (calcDateDiff(execution.time_end, dateToday, days)))
                 }
-            )
+            }).forEach(function (execution) {
+                if (execution.time_start != '') {
+                    var dateParts = [];
+                    var dateTimeParts = [];
+
+                    dateParts = execution.time_start.split('-');
+                    dateTimeParts = dateParts[2].split('T')[1].split(':');
+                    var dateStart = new Date(dateParts[0], dateParts[1] - 1, dateParts[2].split('T')[0], dateTimeParts[0], dateTimeParts[1], dateTimeParts[2]);
+
+                    if (execution.time_end == '') {
+                        var dateEnd = dateToday;
+                    } else {
+                        dateParts = execution.time_end.split('-');
+                        dateTimeParts = dateParts[2].split('T')[1].split(':');
+                        var dateEnd = new Date(dateParts[0], dateParts[1] - 1, dateParts[2].split('T')[0], dateTimeParts[0], dateTimeParts[1], dateTimeParts[2]);
+                    }
+
+                    if (calcDateDiff(execution.time_start, dateToday, days) || days == "-1") {
+                        runtimeInt = runtimeInt + ((dateEnd - dateStart) / (1000 * 60));
+                    } else {
+                        var dateFirst = new Date(new Date().setDate(new Date().getDate() - 5));
+                        runtimeInt = runtimeInt + ((dateEnd - dateFirst) / (1000 * 60));
+                    }
+                }
+            });
+            runtimeArr.push(Math.round(runtimeInt));
+        });
+        return runtimeArr
+    }
+
+    var bots = "{{ bots }}";
+    var botsArr = generateListArr(bots);
+
+    var apps = "{{ apps }}";
+    var appsArr = generateListArr(apps);
+
+    var botflows = "{{ botflows }}";
+    var botflowsArr = generateListArr(botflows);
+
+    var executionsTable = "{{ botflow_executions_calendar }}";
+    var executionsTableArr = generateListArr(executionsTable);
+
+    var executions = "{{ botflow_executions_calendar }}";
+    var executionsArr = generateListArr(executions);
+
+    function generateListArr(input) {
+        return JSON.parse(input.replace(/&quot;/g, '"').replace(/\\/g, "\\\\"));
+    };
+
+    var colors = [
+        "CadetBlue",
+        "Chocolate",
+        "CornflowerBlue",
+        "Cornsilk",
+        "Crimson",
+        "Cyan",
+        "DarkBlue",
+        "DarkCyan",
+        "DarkGoldenRod",
+        "DarkGray",
+        "DarkGrey",
+        "DarkGreen",
+        "DarkKhaki",
+        "DarkMagenta",
+        "DarkOliveGreen",
+        "DarkOrange",
+        "DarkOrchid",
+        "DarkRed",
+        "DarkSalmon",
+        "DarkSeaGreen",
+        "DarkSlateBlue",
+        "DarkSlateGray",
+        "DarkSlateGrey",
+        "DarkTurquoise",
+        "DarkViolet",
+        "DeepPink",
+        "DeepSkyBlue",
+        "DimGray",
+        "DimGrey",
+        "DodgerBlue",
+        "FireBrick",
+        "FloralWhite",
+        "ForestGreen",
+        "Fuchsia",
+        "Gainsboro",
+        "GhostWhite",
+        "Gold",
+        "GoldenRod",
+        "Gray",
+        "Grey",
+        "Green",
+        "GreenYellow",
+        "HoneyDew",
+        "HotPink",
+        "IndianRed",
+        "Indigo",
+        "Ivory",
+        "Khaki",
+        "Lavender",
+        "LavenderBlush",
+        "LawnGreen",
+        "LemonChiffon",
+        "LightBlue",
+        "LightCoral",
+        "LightCyan",
+        "LightGoldenRodYellow",
+        "LightGray",
+        "LightGrey",
+        "LightGreen",
+        "LightPink",
+        "LightSalmon",
+        "LightSeaGreen",
+        "LightSkyBlue",
+        "LightSlateGray",
+        "LightSlateGrey",
+        "LightSteelBlue",
+        "LightYellow",
+        "Lime",
+        "LimeGreen",
+        "Linen",
+        "Magenta",
+        "Maroon",
+        "MediumAquaMarine",
+        "MediumBlue",
+        "MediumOrchid",
+        "MediumPurple",
+        "MediumSeaGreen",
+        "MediumSlateBlue",
+        "MediumSpringGreen",
+        "MediumTurquoise",
+        "MediumVioletRed",
+        "MidnightBlue",
+        "MintCream",
+        "MistyRose",
+        "Moccasin",
+        "NavajoWhite",
+        "Navy",
+        "OldLace",
+        "Olive",
+        "OliveDrab",
+        "Orange",
+        "OrangeRed",
+        "Orchid",
+        "PaleGoldenRod",
+        "PaleGreen",
+        "PaleTurquoise",
+        "PaleVioletRed",
+        "PapayaWhip",
+        "PeachPuff",
+        "Peru",
+        "Pink",
+        "Plum",
+        "PowderBlue",
+        "Purple",
+        "RebeccaPurple",
+        "Red",
+        "RosyBrown",
+        "RoyalBlue",
+        "SaddleBrown",
+        "Salmon",
+        "SandyBrown",
+        "SeaGreen",
+        "SeaShell",
+        "Sienna",
+        "Silver",
+        "SkyBlue",
+        "SlateBlue",
+        "SlateGray",
+        "SlateGrey",
+        "Snow",
+        "SpringGreen",
+        "SteelBlue",
+        "Tan",
+        "Teal",
+        "Thistle",
+        "Tomato",
+        "Turquoise",
+        "Violet",
+        "Wheat",
+        "White",
+        "WhiteSmoke",
+        "Yellow",
+        "YellowGreen",
+    ];
+
+    var barchart = new Chart(document.getElementById("barchartBotflows"), {
+        type: "bar",
+        data: {
+            labels: botflowsArr.map(function (i) {
+                return i.name;
+            }),
+            datasets: []
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            layout: {
+                padding: {
+                    left: 25,
+                    right: 25,
+                    top: 25,
+                    bottom: 0
+                }
+            },
+            scales: {
+                xAxes: [
+                    {
+                        maxBarThickness: 40
+                    }
+                ],
+                yAxes: [
+                    {
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }
+                ]
+            },
+            legend: {
+                display: false
+            }
         }
     });
 
-    $(document).ready(function () {
-        $('#dataTable').DataTable(
-            {
-                "order": [[0, "desc"]],
-                "lengthMenu": [2, 5, 10, 25, 100, 500],
-                "pageLength": 2,
-                "pagingType": "full_numbers"
+    var piechart = new Chart(document.getElementById("piechartBotflows"), {
+        type: "doughnut",
+        data: {
+            labels: botsArr.map(function (i) {
+                return i.name;
+            }),
+            datasets: []
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            legend: {
+                display: true
             }
-        );
-        $('#calendar').fullCalendar(
-            {
-                'defaultView': 'listWeek',
-                'header': {
-                    'left': 'agendaDay, agendaWeek, listWeek',
-                    'center': 'title',
-                    'right': 'prev, next, today',
-                },
-                'displayEventEnd': {
-                    'month': true,
-                    'agendaDay': true,
-                    'agendaWeek': true,
-                    'listWeek': true,
-                    "default": true
-                },
-                'allDaySlot': false,
-                'nowIndicator': true,
-                'slutDuration': '00:05:00',
-                'slotLabelInterval': '00:05:00',
-                'slotEventOverlap': false,
-                'firstDay': 1,
-                'displayEventEnd': true,
-                'editable': false,
-                'themeSystem': 'bootstrap4',
-                'height': 500,
-                'events': botflow_executions_events,
-                eventRender: function (event, element) {
-                    $(element).tooltip({ title: event.title });
-                }
-            });
+        }
     });
 </script>
 
 {{ block.super }}
+
 {% endblock %}

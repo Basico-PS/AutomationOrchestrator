@@ -1,0 +1,107 @@
+{% extends 'dashboard/base_site.html' %}
+
+{% load static %}
+
+{% block title %}Dashboard Calendar View | Basico P/S - Automation Orchestrator{% endblock %}
+
+{% block nav-global %}
+<nav class="nav nav-pills">
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'dashboard-overview' %}">Overview</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'dashboard-calendar-view' %}">Calendar View</a>
+    </li>
+</nav>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div class="font-weight-bold text-primary text-uppercase mb-1">
+                Botflow Execution History
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="calendar"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var executions = "{{ botflow_executions_calendar }}";
+    var executionsArr = JSON.parse(executions.replace(/&quot;/g, '"').replace(/\\/g, "\\\\"));
+    var calendarArr = [];
+
+    executionsArr.forEach(element => {
+        if (element.time_start !== element.time_end) {
+            var color = "";
+
+            if (element.status === "Completed") {
+                color = "green";
+            } else if (element.status === "Running") {
+                color = "blue";
+            } else {
+                color = "red";
+            }
+
+            calendarArr.push({
+                title:
+                    element.botflow_formatted +
+                    " (" +
+                    element.computer_name +
+                    " - " +
+                    element.user_name +
+                    ")",
+                start: element.time_start,
+                end: element.time_end,
+                color: color,
+                textColor: "white"
+            });
+        }
+    });
+
+    $(document).ready(function () {
+        $("#dataTable").DataTable({
+            order: [[0, "desc"]],
+            lengthMenu: [2, 5, 10, 25, 100, 500],
+            pageLength: 2,
+            pagingType: "full_numbers"
+        });
+        $("#calendar").fullCalendar({
+            defaultView: "listWeek",
+            header: {
+                left: "agendaDay, agendaWeek, listWeek",
+                center: "title",
+                right: "prev, next, today"
+            },
+            displayEventEnd: {
+                month: true,
+                agendaDay: true,
+                agendaWeek: true,
+                listWeek: true,
+                default: true
+            },
+            allDaySlot: false,
+            nowIndicator: true,
+            slutDuration: "00:05:00",
+            slotLabelInterval: "00:05:00",
+            slotEventOverlap: false,
+            firstDay: 1,
+            displayEventEnd: true,
+            editable: false,
+            themeSystem: "bootstrap4",
+            events: calendarArr,
+            height: "auto",
+            eventRender: function (event, element) {
+                $(element).tooltip({ title: event.title });
+            }
+        });
+    });
+</script>
+
+{{ block.super }}
+
+{% endblock %}

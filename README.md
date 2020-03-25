@@ -61,7 +61,7 @@ Out-of-the-box, the Automation Orchestrator can trigger and schedule scripts on 
 - Run the Automation Orchestrator on one machine but execute the scripts on a different machine, or
 - Run the Automation Orchestrator on a machine (for example, a Windows Terminal Server) with multiple users that are supposed to execute scripts
 
-For the Automation Orchestrator to work, you need to install [Python](https://www.python.org/downloads/windows/). The Automation Orchestrator is tested with [![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/windows/) and [![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/windows/). If you are in any doubts on how to correctly install Python, follow [this guide](https://www.mbalslow.com/blog/article/how-to-install-python/).
+For the Automation Orchestrator to work, you need to install Python. Make sure to install the latest [![Python 3](https://img.shields.io/badge/python-3-blue.svg)](https://www.python.org/ftp/python/3.8.2/python-3.8.2-amd64.exe) 64-bit version. If you are in any doubts on how to correctly install Python, follow [this guide](https://www.mbalslow.com/blog/article/how-to-install-python/) or [contact us](#contact).
 
 After installing Python, you are now ready to install the Automation Orchestrator. Follow these steps precisely:
 

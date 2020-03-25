@@ -51,7 +51,7 @@ def cancel_selected_botflow_executions(modeladmin, request, queryset):
     time_now = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))}00")
 
     for item in queryset:
-        if item.time_start == None or item.time_end == None:
+        if item.time_start == None or item.time_end == None or item.status == "Running":
             item.status = "Cancelled"
             if item.time_start == None:
                 item.time_start = time_now

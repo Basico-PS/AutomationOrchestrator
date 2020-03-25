@@ -2,11 +2,17 @@ import os
 import pytz
 from .models import Bot, BotflowExecution, SmtpAccount
 from django.dispatch import receiver
-from django.db.models.signals import post_save
+from django.db.models.signals import pre_save, post_save
 from smtplib import SMTP, SMTP_SSL
 from email.message import EmailMessage
 from os.path import basename
 from datetime import datetime
+
+
+@receiver(pre_save, sender=BotflowExecution)
+def botflow_execution_update_progress(sender, instance, **kwargs):
+    if instance.time_end != None:
+        instance.custom_progress = 100
 
 
 @receiver(post_save, sender=BotflowExecution)

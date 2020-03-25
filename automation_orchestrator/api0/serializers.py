@@ -13,7 +13,14 @@ class BotflowExecutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = BotflowExecution
         fields = '__all__'
-        read_only_fields = [field.name for field in BotflowExecution._meta.get_fields() if field.name != 'status' and field.name != 'time_start' and field.name != 'time_end']
+        read_only_fields = [
+            field.name for field in BotflowExecution._meta.get_fields()
+            if field.name != 'status'
+            and field.name != 'time_start'
+            and field.name != 'time_end'
+            and field.name != 'custom_status'
+            and field.name != 'custom_progress'
+        ]
 
 
 class PythonFunctionSerializer(serializers.ModelSerializer):

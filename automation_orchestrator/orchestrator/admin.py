@@ -51,10 +51,13 @@ def cancel_selected_botflow_executions(modeladmin, request, queryset):
     time_now = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))}00")
 
     for item in queryset:
-        item.status = "Cancelled"
-        item.time_start = time_now
-        item.time_end = time_now
-        item.save()
+        if item.time_start == None or item.time_end == None:
+            item.status = "Cancelled"
+            if item.time_start == None:
+                item.time_start = time_now
+            if item.time_start == None:
+                item.time_end = time_now
+            item.save()
 
 
 def export_selected_file_triggers(modeladmin, request, queryset):
@@ -719,16 +722,22 @@ class ApiTriggerAdmin(SimpleHistoryAdmin):
 
 
 class BotflowExecutionAdmin(SimpleHistoryAdmin):
-    list_display = ('pk', 'time_queued',
-                    'computer_name', 'user_name',
-                    'app', 'botflow',
-                    'trigger',
+    list_display = ('pk',
+                    'time_queued_formatted',
+                    'bot_formatted',
+                    'app_formatted',
+                    'botflow_formatted',
+                    'trigger_formatted',
                     'priority',
                     'status',
-                    'time_start', 'time_end',)
+                    'custom_progress_formatted',
+                    'time_start_formatted',
+                    'time_end_formatted',
+                    'time_updated_formatted',
+                    'custom_status_formatted',)
     list_display_links = ['pk']
     list_filter = ('computer_name', 'user_name', 'app', 'botflow', 'status',)
-    readonly_fields = [field.name for field in BotflowExecution._meta.get_fields() if field.name != 'status']
+    readonly_fields = [field.name for field in BotflowExecution._meta.get_fields()]
 
     actions = [cancel_selected_botflow_executions, export_selected_botflow_executions,]
 
@@ -737,6 +746,64 @@ class BotflowExecutionAdmin(SimpleHistoryAdmin):
 
     def has_add_permission(self, request, obj=None):
         return False
+
+    def time_queued_formatted(self, obj):
+        return obj.time_queued.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+    time_queued_formatted.admin_order_field = 'time_queued'
+    time_queued_formatted.short_description = 'Time Queued'
+
+    def time_start_formatted(self, obj):
+        return obj.time_queued.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+    time_start_formatted.admin_order_field = 'time_start'
+    time_start_formatted.short_description = 'Time Start'
+
+    def time_end_formatted(self, obj):
+        return obj.time_queued.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+    time_end_formatted.admin_order_field = 'time_end'
+    time_end_formatted.short_description = 'Time End'
+
+    def time_updated_formatted(self, obj):
+        return obj.time_queued.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+    time_updated_formatted.admin_order_field = 'time_updated'
+    time_updated_formatted.short_description = 'Time Updated'
+
+    def app_formatted(self, obj):
+        return os.path.basename(obj.app)
+    app_formatted.admin_order_field = 'app'
+    app_formatted.short_description = 'App'
+
+    def bot_formatted(self, obj):
+        return f"{obj.computer_name} - {obj.user_name}"
+    bot_formatted.admin_order_field = 'computer_name'
+    bot_formatted.short_description = 'Bot'
+
+    def botflow_formatted(self, obj):
+        return os.path.basename(obj.botflow)
+    botflow_formatted.admin_order_field = 'botflow'
+    botflow_formatted.short_description = 'Botflow'
+
+    def trigger_formatted(self, obj):
+        trigger = obj.trigger
+        trigger_file = "File Trigger: "
+        if trigger.startswith(trigger_file):
+            if not "Activated Manually" in trigger:
+                return trigger_file + os.path.basename(trigger[len(trigger_file):])
+        return trigger
+    trigger_formatted.admin_order_field = 'trigger'
+    trigger_formatted.short_description = 'Trigger'
+
+    def custom_progress_formatted(self, obj):
+        progress = str(obj.custom_progress)
+        progress = progress.replace('.00', '') + "%"
+        return progress
+    custom_progress_formatted.admin_order_field = 'custom_progress'
+    custom_progress_formatted.short_description = 'Progress'
+
+    def custom_status_formatted(self, obj):
+        note = str(obj.custom_status)
+        return note
+    custom_status_formatted.admin_order_field = 'custom_status'
+    custom_status_formatted.short_description = 'Note'
 
 
 class SmtpAccountForm(forms.ModelForm):

@@ -300,6 +300,9 @@ class BotflowExecution(models.Model):
     priority = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     status = models.CharField(max_length=255)
 
+    custom_status = models.CharField(max_length=255, blank=True)
+    custom_progress = models.DecimalField(default=0, max_digits=5, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(100)])
+
     timeout_minutes = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     timeout_kill_processes = models.CharField(max_length=255, blank=True)
 
@@ -316,6 +319,7 @@ class BotflowExecution(models.Model):
 
     time_start = models.DateTimeField(null=True, blank=True)
     time_end = models.DateTimeField(null=True, blank=True)
+    time_updated = models.DateTimeField(auto_now=True, editable=False)
 
     # Intentionally not adding 'history = HistoricalRecords()' to this model.
 

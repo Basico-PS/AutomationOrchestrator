@@ -109,11 +109,6 @@ def botflow_execution_notification(sender, instance, **kwargs):
         msg = EmailMessage()
         msg['Subject'] = email_subject
         msg['From'] = email_from
-
-        if not email_from in email_to:
-            # email_to.append(email_from)
-            pass
-
         msg['To'] = ", ".join(email_to)
 
         msg.set_content(f"Application: {instance.app}\nBotflow: {instance.botflow}\nTrigger: {instance.trigger}\n\nComputer Name: {instance.computer_name}\nUsername: {instance.user_name}\n\nStatus: {instance.status}\n\nTime Start: {instance.time_start}\nTime End: {instance.time_end}")
@@ -134,11 +129,6 @@ def botflow_execution_notification(sender, instance, **kwargs):
                 msg = EmailMessage()
                 msg['Subject'] = email_subject
                 msg['From'] = email_from
-
-                if not email_from in email_to:
-                    # email_to.append(email_from)
-                    pass
-
                 msg['To'] = ", ".join(email_to)
 
                 msg.set_content(

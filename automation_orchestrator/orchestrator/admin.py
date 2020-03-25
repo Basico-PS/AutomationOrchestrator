@@ -55,7 +55,7 @@ def cancel_selected_botflow_executions(modeladmin, request, queryset):
             item.status = "Cancelled"
             if item.time_start == None:
                 item.time_start = time_now
-            if item.time_start == None:
+            if item.time_end == None:
                 item.time_end = time_now
             item.save()
 
@@ -462,15 +462,21 @@ class BotAdmin(SimpleHistoryAdmin):
         }),
     )
 
-    list_display = ('pk', 'name', 'computer_name', 'user_name', 'status',
+    list_display = ('pk_formatted', 'name', 'computer_name', 'user_name', 'status',
+                    'date_created', 'date_updated',
                     'update_record',)
     list_editable = ('name', 'computer_name', 'user_name',)
-    list_display_links = ['pk']
+    list_display_links = ['pk_formatted']
 
     actions = [test_selected_bots,]
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/bot/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
+    pk_formatted.admin_order_field = 'pk'
+    pk_formatted.short_description = 'ID'
 
 
 class AppAdmin(SimpleHistoryAdmin):
@@ -480,13 +486,19 @@ class AppAdmin(SimpleHistoryAdmin):
         }),
     )
 
-    list_display = ('pk', 'name', 'path',
+    list_display = ('pk_formatted', 'name', 'path',
+                    'date_created', 'date_updated',
                     'update_record')
     list_editable = ('name', 'path',)
-    list_display_links = ['pk']
+    list_display_links = ['pk_formatted']
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/app/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
+    pk_formatted.admin_order_field = 'pk'
+    pk_formatted.short_description = 'ID'
 
 
 class BotflowAdmin(SimpleHistoryAdmin):
@@ -515,19 +527,25 @@ class BotflowAdmin(SimpleHistoryAdmin):
         }),
     )
 
-    list_display = ('pk', 'name', 'path',
+    list_display = ('pk_formatted', 'name', 'path',
                     'queue_if_already_running',
                     'priority',
+                    'date_created', 'date_updated',
                     'update_record',)
     list_editable = ('name', 'path',
                      'queue_if_already_running',
                      'priority',)
-    list_display_links = ['pk']
+    list_display_links = ['pk_formatted']
 
     actions = [test_selected_botflows,]
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/botflow/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
+    pk_formatted.admin_order_field = 'pk'
+    pk_formatted.short_description = 'ID'
 
 
 class FileTriggerAdmin(SimpleHistoryAdmin):
@@ -550,18 +568,24 @@ class FileTriggerAdmin(SimpleHistoryAdmin):
         }),
     )
 
-    list_display = ('pk', 'assigned_bots', 'app', 'botflow',
+    list_display = ('pk_formatted', 'assigned_bots', 'app', 'botflow',
                     'folder_in', 'folder_out', 'filter',
                     'activated', 'status',
+                    'date_created', 'date_updated',
                     'update_record',)
     list_editable = ('app', 'botflow',
                     'folder_in', 'folder_out', 'filter', 'activated',)
-    list_display_links = ['pk']
+    list_display_links = ['pk_formatted']
 
     actions = [activate_selected_file_triggers, export_selected_file_triggers, test_selected_file_triggers,]
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/filetrigger/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
+    pk_formatted.admin_order_field = 'pk'
+    pk_formatted.short_description = 'ID'
 
 
 class ScheduleTriggerAdmin(SimpleHistoryAdmin):
@@ -585,13 +609,14 @@ class ScheduleTriggerAdmin(SimpleHistoryAdmin):
         }),
     )
 
-    list_display = ('pk', 'assigned_bots', 'app', 'botflow',
+    list_display = ('pk_formatted', 'assigned_bots', 'app', 'botflow',
                     'frequency', 'run_every', 'run_start',
                     'activated', 'status',
+                    'date_created', 'date_updated',
                     'update_record',)
     list_editable = ('app', 'botflow',
                     'frequency', 'run_every', 'run_start', 'activated',)
-    list_display_links = ['pk']
+    list_display_links = ['pk_formatted']
     exclude = ('past_settings',)
     readonly_fields = ('next_execution',)
 
@@ -599,6 +624,11 @@ class ScheduleTriggerAdmin(SimpleHistoryAdmin):
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/scheduletrigger/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
+    pk_formatted.admin_order_field = 'pk'
+    pk_formatted.short_description = 'ID'
 
 
 class EmailImapTriggerForm(forms.ModelForm):
@@ -635,15 +665,16 @@ class EmailImapTriggerAdmin(SimpleHistoryAdmin):
         }),
     )
 
-    list_display = ('pk', 'assigned_bots', 'app', 'botflow',
+    list_display = ('pk_formatted', 'assigned_bots', 'app', 'botflow',
                     'email',
                     'folder_in', 'folder_out',
                     'activated', 'status',
+                    'date_created', 'date_updated',
                     'update_record',)
     list_editable = ('app', 'botflow',
                      'email',
                      'folder_in', 'folder_out', 'activated',)
-    list_display_links = ['pk']
+    list_display_links = ['pk_formatted']
 
     activate_selected_email_imap_triggers.short_description = "Activate selected email IMAP triggers"
     export_selected_email_imap_triggers.short_description = "Export selected email IMAP triggers"
@@ -653,6 +684,11 @@ class EmailImapTriggerAdmin(SimpleHistoryAdmin):
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/emailimaptrigger/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
+    pk_formatted.admin_order_field = 'pk'
+    pk_formatted.short_description = 'ID'
 
 
 class EmailOutlookTriggerAdmin(SimpleHistoryAdmin):
@@ -675,15 +711,16 @@ class EmailOutlookTriggerAdmin(SimpleHistoryAdmin):
         }),
     )
 
-    list_display = ('pk', 'assigned_bots', 'app', 'botflow',
+    list_display = ('pk_formatted', 'assigned_bots', 'app', 'botflow',
                     'email',
                     'folder_in', 'folder_out',
                     'activated', 'status',
+                    'date_created', 'date_updated',
                     'update_record',)
     list_editable = ('app', 'botflow',
                      'email',
                      'folder_in', 'folder_out', 'activated',)
-    list_display_links = ['pk']
+    list_display_links = ['pk_formatted']
 
     activate_selected_email_outlook_triggers.short_description = "Activate selected email Outlook triggers"
     export_selected_email_outlook_triggers.short_description = "Export selected email Outlook triggers"
@@ -693,6 +730,11 @@ class EmailOutlookTriggerAdmin(SimpleHistoryAdmin):
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/emailoutlooktrigger/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
+    pk_formatted.admin_order_field = 'pk'
+    pk_formatted.short_description = 'ID'
 
 
 class ApiTriggerAdmin(SimpleHistoryAdmin):
@@ -705,12 +747,13 @@ class ApiTriggerAdmin(SimpleHistoryAdmin):
         }),
     )
 
-    list_display = ('pk', 'assigned_bots', 'app', 'botflow',
+    list_display = ('pk_formatted', 'assigned_bots', 'app', 'botflow',
                     'activated', 'status',
+                    'date_created', 'date_updated',
                     'update_record',)
     list_editable = ('app', 'botflow',
                      'activated',)
-    list_display_links = ['pk']
+    list_display_links = ['pk_formatted']
 
     activate_selected_api_triggers.short_description = "Activate selected API triggers"
     export_selected_api_triggers.short_description = "Export selected API triggers"
@@ -720,9 +763,14 @@ class ApiTriggerAdmin(SimpleHistoryAdmin):
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/apitrigger/{}/change/">EDIT</a>', obj.id)
 
+    def pk_formatted(self, obj):
+        return obj.pk
+    pk_formatted.admin_order_field = 'pk'
+    pk_formatted.short_description = 'ID'
+
 
 class BotflowExecutionAdmin(SimpleHistoryAdmin):
-    list_display = ('pk',
+    list_display = ('pk_formatted',
                     'time_queued_formatted',
                     'bot_formatted',
                     'app_formatted',
@@ -735,7 +783,7 @@ class BotflowExecutionAdmin(SimpleHistoryAdmin):
                     'time_end_formatted',
                     'time_updated_formatted',
                     'custom_status_formatted',)
-    list_display_links = ['pk']
+    list_display_links = ['pk_formatted']
     list_filter = ('computer_name', 'user_name', 'app', 'botflow', 'status',)
     readonly_fields = [field.name for field in BotflowExecution._meta.get_fields()]
 
@@ -749,23 +797,40 @@ class BotflowExecutionAdmin(SimpleHistoryAdmin):
     def has_add_permission(self, request, obj=None):
         return False
 
+    def pk_formatted(self, obj):
+        return obj.pk
+    pk_formatted.admin_order_field = 'pk'
+    pk_formatted.short_description = 'ID'
+
     def time_queued_formatted(self, obj):
-        return obj.time_queued.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+        time = obj.time_queued
+        if time != None:
+            time = time.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+        return time
     time_queued_formatted.admin_order_field = 'time_queued'
     time_queued_formatted.short_description = 'Time Queued'
 
     def time_start_formatted(self, obj):
-        return obj.time_queued.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+        time = obj.time_start
+        if time != None:
+            time = time.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+        return time
     time_start_formatted.admin_order_field = 'time_start'
     time_start_formatted.short_description = 'Time Start'
 
     def time_end_formatted(self, obj):
-        return obj.time_queued.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+        time = obj.time_end
+        if time != None:
+            time = time.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+        return time
     time_end_formatted.admin_order_field = 'time_end'
     time_end_formatted.short_description = 'Time End'
 
     def time_updated_formatted(self, obj):
-        return obj.time_queued.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+        time = obj.time_updated
+        if time != None:
+            time = time.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+        return time
     time_updated_formatted.admin_order_field = 'time_updated'
     time_updated_formatted.short_description = 'Time Updated'
 
@@ -832,13 +897,13 @@ class SmtpAccountAdmin(SimpleHistoryAdmin):
         }),
     )
 
-    list_display = ('pk', 'email',
+    list_display = ('pk_formatted', 'email',
                     'server', 'port', 'tls',
                     'activated', 'status',
                     'update_record',)
     list_editable = ('server', 'port', 'tls',
                      'activated',)
-    list_display_links = ['pk']
+    list_display_links = ['pk_formatted']
 
     test_selected_smtp_accounts.short_description = "Test selected SMTP accounts"
 
@@ -849,6 +914,11 @@ class SmtpAccountAdmin(SimpleHistoryAdmin):
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/smtpaccount/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
+    pk_formatted.admin_order_field = 'pk'
+    pk_formatted.short_description = 'ID'
 
 
 class PythonFunctionForm(forms.ModelForm):
@@ -884,21 +954,26 @@ class PythonFunctionAdmin(SimpleHistoryAdmin):
         }),
     )
 
-    list_display = ('pk', 'name', 'description',
+    list_display = ('pk_formatted', 'name', 'description',
                     'activated', 'update_record',)
     list_editable = ('name',
                      'activated',)
-    list_display_links = ['pk']
+    list_display_links = ['pk_formatted']
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/pythonfunction/{}/change/">EDIT</a>', obj.id)
 
+    def pk_formatted(self, obj):
+        return obj.pk
+    pk_formatted.admin_order_field = 'pk'
+    pk_formatted.short_description = 'ID'
+
 
 class PythonFunctionExecutionAdmin(SimpleHistoryAdmin):
-    list_display = ('pk', 'python_function',
+    list_display = ('pk_formatted', 'python_function',
                     'request_user', 'request_ip',
                     'time_start', 'time_end',)
-    list_display_links = ['pk']
+    list_display_links = ['pk_formatted']
     list_filter = ('python_function', 'request_user', 'request_ip',)
     readonly_fields = [field.name for field in PythonFunctionExecution._meta.get_fields()]
 
@@ -909,6 +984,11 @@ class PythonFunctionExecutionAdmin(SimpleHistoryAdmin):
 
     def has_add_permission(self, request, obj=None):
         return False
+
+    def pk_formatted(self, obj):
+        return obj.pk
+    pk_formatted.admin_order_field = 'pk'
+    pk_formatted.short_description = 'ID'
 
 
 admin.site.register(Bot, BotAdmin)

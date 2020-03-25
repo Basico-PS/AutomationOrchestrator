@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     'admin_reorder',
     'simple_history',
     'sortedm2m',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -195,6 +196,7 @@ REST_FRAMEWORK = {'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsA
                       'pythonfunctionexecution': '1/second'
                       },
                   'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+                  'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
                   }
 
 ADMIN_REORDER = (

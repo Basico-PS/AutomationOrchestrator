@@ -5,6 +5,7 @@ import traceback
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
+from django_filters import rest_framework as filters
 from django.shortcuts import get_object_or_404
 from .serializers import ApiTriggerSerializer, BotflowExecutionSerializer, PythonFunctionSerializer, PythonFunctionExecutionSerializer
 from orchestrator.models import ApiTrigger, BotflowExecution, PythonFunction, PythonFunctionExecution
@@ -70,7 +71,7 @@ class BotflowExecutionView(viewsets.ModelViewSet):
     serializer_class = BotflowExecutionSerializer
     throttle_scope = 'botflowexecution'
     http_method_names = ['get', 'patch']
-
+    filterset_fields = ('computer_name', 'user_name', 'status',)
 
 class PythonFunctionView(viewsets.ModelViewSet):
     """

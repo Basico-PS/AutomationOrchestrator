@@ -255,7 +255,6 @@ def bot_status(item):
                 if item.status != "Unknown":
                     item.status = "Unknown"
                     item.save()
-
                 return
 
             sessions = subprocess.run([psexec_path, f"\\\\{computer_name}", "query", "session"], stdout=subprocess.PIPE, text=True).stdout.split("\n")
@@ -267,7 +266,6 @@ def bot_status(item):
             if item.status != "Unknown":
                 item.status = "Unknown"
                 item.save()
-
             return
 
         active = False
@@ -287,7 +285,7 @@ def bot_status(item):
                 item.save()
 
     except:
-        with open("logs\\error_log.txt", 'a') as f:
+        with open("logs\\error_bot_status.txt", 'a') as f:
             try:
                 f.write(traceback.format_exc())
                 print(traceback.format_exc())

@@ -786,15 +786,39 @@ def botflow_execution_monitor_evaluate():
                 try:
                     if app == "foxbot.exe" or app == "foxtrot.exe":
                         if item.close_bot_automatically:
-                            subprocess.run([item.app, '/Open', item.botflow, '/Run', '/Close', '/Exit'], timeout=(item.timeout_minutes * 60))
+                            subprocess.run(
+                                [item.app, '/Open', item.botflow, '/Run', '/Close', '/Exit'],
+                                timeout=(item.timeout_minutes * 60),
+                                cwd=os.path.dirname(item.botflow)
+                            )
+
                         else:
-                            subprocess.run([item.app, '/Open', item.botflow, '/Run'], timeout=(item.timeout_minutes * 60))
+                            subprocess.run(
+                                [item.app, '/Open', item.botflow, '/Run'],
+                                timeout=(item.timeout_minutes * 60),
+                                cwd=os.path.dirname(item.botflow)
+                            )
 
                     elif app == "uirobot.exe":
-                        subprocess.run([item.app, "execute", "--file", item.botflow, "--input", str({'aoTrigger': item.trigger})], timeout=(item.timeout_minutes * 60))
+                        subprocess.run(
+                            [item.app, "execute", "--file", item.botflow, "--input", str({'aoId': item.pk, 'aoTrigger': item.trigger})],
+                            timeout=(item.timeout_minutes * 60),
+                            cwd=os.path.dirname(item.botflow)
+                        )
+
+                    elif (app == "python.exe" or app == "pythonw.exe" or app == "cscript.exe" or app == "wscript.exe"):
+                        subprocess.run(
+                            [item.app, item.botflow, item.pk, item.trigger],
+                            timeout=(item.timeout_minutes * 60),
+                            cwd=os.path.dirname(item.botflow)
+                        )
 
                     else:
-                        subprocess.run([item.app, item.botflow], timeout=(item.timeout_minutes * 60))
+                        subprocess.run(
+                            [item.app, item.botflow],
+                            timeout=(item.timeout_minutes * 60),
+                            cwd=os.path.dirname(item.botflow)
+                        )
 
                 except subprocess.TimeoutExpired:
                     status = "Error - Botflow Timeout"

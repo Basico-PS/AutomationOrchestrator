@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAdminUser
 from django.shortcuts import get_object_or_404
 from .serializers import ApiTriggerSerializer, BotflowExecutionSerializer, PythonFunctionSerializer, PythonFunctionExecutionSerializer
 from orchestrator.models import ApiTrigger, BotflowExecution, PythonFunction, PythonFunctionExecution
-from orchestrator.monitoring import add_botflow_execution_object
+from orchestrator.monitoring import add_botflow_execution_object, determine_execution_bot
 
 
 class IsSuperUser(IsAdminUser):
@@ -25,6 +25,7 @@ class ApiTriggerView(viewsets.ModelViewSet):
     Return and activate the given API trigger.
     """
 
+    queryset = ''
     serializer_class = ApiTriggerSerializer
     throttle_scope = 'apitrigger'
     http_method_names = ['get']
@@ -38,16 +39,19 @@ class ApiTriggerView(viewsets.ModelViewSet):
         queryset = ApiTrigger.objects.exclude(activated=False)
         api_trigger = get_object_or_404(queryset, pk=pk)
         serializer = ApiTriggerSerializer(api_trigger)
+        response = serializer.data
 
-        item = json.loads(json.dumps(serializer.data))
+        bot = determine_execution_bot(api_trigger)
+        response['bot'] = bot.pk
 
         add_botflow_execution_object(
-            bot_pk=item['bot'],
-            app_pk=item['app'],
-            botflow_pk=item['botflow'],
+            bot_pk=bot.pk,
+            app_pk=api_trigger.app.pk,
+            botflow_pk=api_trigger.botflow.pk,
             trigger=f"API Trigger: {str(pk)}"
         )
-        return Response(serializer.data)
+
+        return Response(response)
 
 
 class BotflowExecutionView(viewsets.ModelViewSet):

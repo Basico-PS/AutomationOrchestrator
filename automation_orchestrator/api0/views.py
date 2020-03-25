@@ -66,7 +66,7 @@ class BotflowExecutionView(viewsets.ModelViewSet):
     Partially update the Botflow execution record instance.
     """
 
-    queryset = BotflowExecution.objects.exclude(status="Completed")
+    queryset = BotflowExecution.objects.all()
     serializer_class = BotflowExecutionSerializer
     throttle_scope = 'botflowexecution'
     http_method_names = ['get', 'patch']
@@ -80,6 +80,7 @@ class PythonFunctionView(viewsets.ModelViewSet):
     Return and activate the given Python function.
     """
 
+    queryset = ''
     permission_classes = (IsSuperUser,)
     throttle_scope = 'pythonfunction'
     http_method_names = ['get']
@@ -149,7 +150,7 @@ class PythonFunctionExecutionView(viewsets.ModelViewSet):
     Return the given Python function execution record.
     """
 
-    queryset = BotflowExecution.objects.all()
+    queryset = PythonFunctionExecution.objects.all()
     serializer_class = PythonFunctionExecutionSerializer
     throttle_scope = 'pythonfunctionexecution'
     http_method_names = ['get']

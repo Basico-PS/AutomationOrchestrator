@@ -801,14 +801,14 @@ def botflow_execution_monitor_evaluate():
 
                     elif app == "uirobot.exe":
                         subprocess.run(
-                            [item.app, "execute", "--file", item.botflow, "--input", str({'aoId': item.pk, 'aoTrigger': item.trigger})],
+                            [item.app, "execute", "--file", item.botflow, "--input", str({'aoId': str(item.pk), 'aoTrigger': item.trigger})],
                             timeout=(item.timeout_minutes * 60),
                             cwd=os.path.dirname(item.botflow)
                         )
 
                     elif (app == "python.exe" or app == "pythonw.exe" or app == "cscript.exe" or app == "wscript.exe"):
                         subprocess.run(
-                            [item.app, item.botflow, item.pk, item.trigger],
+                            [item.app, item.botflow, str(item.pk), item.trigger],
                             timeout=(item.timeout_minutes * 60),
                             cwd=os.path.dirname(item.botflow)
                         )

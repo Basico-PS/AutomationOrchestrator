@@ -47,9 +47,13 @@ def format_botflow_executions(botflow_executions):
         record_overview['priority'] = element.priority
         record_overview['status'] = element.status
 
-        record_overview['time_start'] = element.time_start
+        record_overview['custom_progress'] = element.custom_progress
+        record_overview['custom_progress'] = str(record_overview['custom_progress']).replace('.00', '') + '%'
+        record_overview['custom_status'] = element.custom_status
 
+        record_overview['time_start'] = element.time_start
         record_overview['time_end'] = element.time_end
+        record_overview['time_updated'] = element.time_updated
 
         record_calendar['computer_name'] = record_overview['computer_name']
         record_calendar['user_name'] = record_overview['user_name']
@@ -106,7 +110,7 @@ def get_context():
 
     botflow_executions = BotflowExecution.objects.all()
 
-    botflow_executions_running = botflow_executions.filter(status='Running')
+    botflow_executions_running = botflow_executions.filter(status='Running', time_end__isnull=True)
     botflow_executions_pending = botflow_executions.filter(status='Pending')
     botflow_executions_completed_today = botflow_executions.filter(status='Completed', time_end__date=today)
     botflow_executions_failed_today = botflow_executions.filter(time_end__date=today).exclude(status='Completed')

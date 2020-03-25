@@ -119,8 +119,11 @@
                             <th>Trigger</th>
                             <th>Priority</th>
                             <th>Status</th>
+                            <th>Progress</th>
                             <th>Time Start</th>
                             <th>Time End</th>
+                            <th>Time Updated</th>
+                            <th>Note</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -134,8 +137,11 @@
                             <td>{{ botflow_execution.trigger_formatted }}</td>
                             <td>{{ botflow_execution.priority }}</td>
                             <td>{{ botflow_execution.status }}</td>
+                            <td>{{ botflow_execution.custom_progress }}</td>
                             <td>{{ botflow_execution.time_start|date:"SHORT_DATETIME_FORMAT" }}</td>
                             <td>{{ botflow_execution.time_end|date:"SHORT_DATETIME_FORMAT" }}</td>
+                            <td>{{ botflow_execution.time_updated|date:"SHORT_DATETIME_FORMAT" }}</td>
+                            <td>{{ botflow_execution.custom_status }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

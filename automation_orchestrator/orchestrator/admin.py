@@ -741,6 +741,8 @@ class BotflowExecutionAdmin(SimpleHistoryAdmin):
 
     actions = [cancel_selected_botflow_executions, export_selected_botflow_executions,]
 
+    list_per_page = 20
+
     def get_ordering(self, request):
         return ['-time_queued']
 
@@ -899,6 +901,8 @@ class PythonFunctionExecutionAdmin(SimpleHistoryAdmin):
     list_display_links = ['pk']
     list_filter = ('python_function', 'request_user', 'request_ip',)
     readonly_fields = [field.name for field in PythonFunctionExecution._meta.get_fields()]
+
+    list_per_page = 20
 
     def get_ordering(self, request):
         return ['-time_start']

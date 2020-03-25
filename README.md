@@ -36,16 +36,30 @@ Feature highlights out-of-the-box:
 - Notifications
   - SMTP accounts
 - Triggers
+  - API Triggers
   - Email IMAP Triggers
   - Email Outlook Triggers
   - File Triggers
   - Schedule Triggers
 - Botflow Execution Log
   - Queue Functionality with License Awareness and Botflow Priorities
+- Native Script Support
+  - Python
+  - Nintex Foxtrot RPA
+  - UiPath
+  - VBScript
+  - Any other tools that can be executed as a command with: "application_path.exe" "file_path.abc"
+- Dashboard
+  - Graphic Execution Overview
+  - Calendar View of Execution History
 
 ## Installation
 
 We highly recommend that the Automation Orchestrator is installed and setup only by people experienced with both Python and Nintex RPA. You are always welcome to contact us for assistance via: robotics@basico.dk
+
+Out-of-the-box, the Automation Orchestrator can trigger and schedule scripts on the same machine and user running the server. In case you wish to do either of the following two things, you need to utilize the [Automation Orchestrator Executor](https://github.com/Basico-PS/AutomationOrchestratorExecutor) add-on:
+- Run the Automation Orchestrator on one machine but execute the scripts on a different machine, or
+- Run the Automation Orchestrator on a machine (for example, a Windows Terminal Server) with multiple users that are supposed to execute scripts
 
 For the Automation Orchestrator to work, you need to install [Python](https://www.python.org/downloads/windows/). The Automation Orchestrator is tested with [![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/windows/) and [![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/windows/). If you are in any doubts on how to correctly install Python, follow [this guide](https://www.mbalslow.com/blog/article/how-to-install-python/).
 
@@ -55,7 +69,7 @@ After installing Python, you are now ready to install the Automation Orchestrato
 
 2. Navigate to the [list of releases](https://github.com/Basico-PS/AutomationOrchestrator/releases) and download the source code (ZIP) of the latest version.
 
-3. Unzip the folder in your created "AutomationOrchestrator" folder. So, your path could be similar to "C:\AutomationOrchestrator\AutomationOrchestrator-0.1.0" or "C:\Program Files\AutomationOrchestrator\AutomationOrchestrator-0.1.0".
+3. Unzip the folder in your created "AutomationOrchestrator" folder. So, your path could be similar to "C:\AutomationOrchestrator\AutomationOrchestrator-0.3.0" or "C:\Program Files\AutomationOrchestrator\AutomationOrchestrator-0.3.0".
 
 4. After unzipping the folder, run the "INSTALL.bat" [file](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/INSTALL.bat) for an automated installation process. Remember to run the batch file (or commands manually) as an administrator.
 
@@ -129,6 +143,7 @@ After signing in, you can begin to set up the Automation Orchestrator. This is t
     * Running
     * Completed
     * Error
+    * Cancelled
 
 <p align="center">
   <img src="/images/executions.png">
@@ -159,17 +174,13 @@ You have now set up the Automation Orchestrator!
 
 ## Notes
 
-Out-of-the-box, the Automation Orchestrator can trigger and schedule scripts on the same machine and user running the server. In case you wish to do either of the two things below, you need to utilize the [Automation Orchestrator Executor](https://github.com/Basico-PS/AutomationOrchestratorExecutor) add-on:
-- Run the Automation Orchestrator on one machine but execute the scripts on a different machine, or
-- Run the Automation Orchestrator on a machine (for example, a Windows Terminal Server) with multiple users that are supposed to execute scripts
-
 The Automation Orchestrator runs with the ["DEBUG" flag set to "True"](https://docs.djangoproject.com/en/3.0/ref/settings/#debug), which is not recommended in a cloud production environment, since the Automation Orchestrator should only be used to run fully locally or shared in your protected internal network. If you wish to deploy the Automation Orchestrator in the open cloud, there are [many additional steps](https://docs.djangoproject.com/en/3.0/howto/deployment/) to consider and implement.
 
 ## Copyrights
 
-Starting from 0.0.17 Basico P/S - Automation Orchestrator is distributed under the [BSD 3-clause license](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/LICENSE). Basico P/S - Automation Orchestrator 0.0.16 and before was distributed under the MIT license.
+Starting from v0.0.17 Basico P/S - Automation Orchestrator is distributed under the [BSD 3-clause license](https://github.com/Basico-PS/AutomationOrchestrator/blob/master/LICENSE). Basico P/S - Automation Orchestrator v0.0.16 and before was distributed under the MIT license.
 
-(c) Basico P/S, Mathias Balsløw 2019
+(c) Basico P/S, Mathias Balsløw 2019-2020
 
 ## Contact
 

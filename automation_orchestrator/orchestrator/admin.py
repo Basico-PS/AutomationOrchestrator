@@ -48,9 +48,12 @@ def activate_selected_api_triggers(modeladmin, request, queryset):
 
 
 def cancel_selected_botflow_executions(modeladmin, request, queryset):
+    time_now = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))}00")
+
     for item in queryset:
         item.status = "Cancelled"
-        item.time_end = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))}00")
+        item.time_start = time_now
+        item.time_end = time_now
         item.save()
 
 

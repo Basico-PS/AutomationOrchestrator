@@ -10,6 +10,7 @@ import traceback
 import subprocess
 import time as t
 import win32com.client as win32
+from random import randrange
 from imaplib import IMAP4, IMAP4_SSL
 from .models import Bot, App, Botflow, FileTrigger, ScheduleTrigger, EmailImapTrigger, EmailOutlookTrigger, BotflowExecution
 from django.db.models import Q
@@ -18,10 +19,10 @@ from pythoncom import CoInitialize, CoUninitialize
 
 
 bot_status_sleep = 60
-trigger_sleep = 10
+trigger_sleep = 5
 email_imap_sleep = 15
 email_outlook_sleep = 15
-queue_sleep = 10
+queue_sleep = 5
 
 
 class EmailImapFolderException(Exception):
@@ -242,7 +243,7 @@ def calculate_next_botflow_execution(run_start, frequency, run_every, run_after,
 def bot_status_monitor():
     while True:
         range(10000)
-        t.sleep(bot_status_sleep)
+        t.sleep(randrange((bot_status_sleep / 2), bot_status_sleep))
 
         for item in Bot.objects.all():
             range(10000)
@@ -307,7 +308,7 @@ def bot_status(item):
 def file_trigger_monitor():
     while True:
         range(10000)
-        t.sleep(trigger_sleep)
+        t.sleep(randrange((trigger_sleep / 2), trigger_sleep))
 
         if os.path.exists("logs\\error_log.txt"):
             break
@@ -392,7 +393,7 @@ def file_trigger_monitor_evaluate():
 def schedule_trigger_monitor():
     while True:
         range(10000)
-        t.sleep(trigger_sleep)
+        t.sleep(randrange((trigger_sleep / 2), trigger_sleep))
 
         if os.path.exists("logs\\error_log.txt"):
             break
@@ -485,7 +486,7 @@ def schedule_trigger_monitor_evaluate():
 def email_imap_trigger_monitor():
     while True:
         range(10000)
-        t.sleep(email_imap_sleep)
+        t.sleep(randrange((email_imap_sleep / 2), email_imap_sleep))
 
         if os.path.exists("logs\\error_log.txt"):
             break
@@ -597,7 +598,7 @@ def email_imap_trigger_monitor_evaluate():
 def email_outlook_trigger_monitor():
     while True:
         range(10000)
-        t.sleep(email_outlook_sleep)
+        t.sleep(randrange((email_outlook_sleep / 2), email_outlook_sleep))
 
         if EmailOutlookTrigger.objects.filter(activated=True).exists():
             break
@@ -607,7 +608,7 @@ def email_outlook_trigger_monitor():
 
     while True:
         range(10000)
-        t.sleep(email_outlook_sleep)
+        t.sleep(randrange((email_outlook_sleep / 2), email_outlook_sleep))
 
         if os.path.exists("logs\\error_log.txt"):
             break
@@ -742,7 +743,7 @@ def email_outlook_trigger_monitor_evaluate(email_outlook):
 def botflow_execution_monitor():
     while True:
         range(10000)
-        t.sleep(queue_sleep)
+        t.sleep(randrange((queue_sleep / 2), queue_sleep))
 
         if os.path.exists("logs\\error_log.txt"):
             break

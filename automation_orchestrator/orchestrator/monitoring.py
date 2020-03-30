@@ -69,24 +69,28 @@ def determine_execution_bot(trigger):
 
 
 def time_filter_evalution(item):
+    utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+    cph_now = datetime.datetime.now(pytz.timezone('Europe/Copenhagen'))
+    utc_offset = utc_now.astimezone(pytz.timezone('Europe/Copenhagen')).utcoffset()
+
     if not item.run_on_week_days:
-        if 0 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 4:
+        if 0 <= cph_now.weekday() <= 4:
             return False
     if not item.run_on_weekend_days:
-        if 5 <= datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).weekday() <= 6:
+        if 5 <= cph_now.weekday() <= 6:
             return False
 
     if item.run_after is not None:
-        run_after = datetime.timedelta(hours=item.run_after.hour, minutes=item.run_after.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
+        run_after = datetime.timedelta(hours=item.run_after.hour, minutes=item.run_after.minute) - utc_offset
     else:
         run_after = datetime.timedelta(hours=0, minutes=0)
 
     if item.run_until is not None:
-        run_until = datetime.timedelta(hours=item.run_until.hour, minutes=item.run_until.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
+        run_until = datetime.timedelta(hours=item.run_until.hour, minutes=item.run_until.minute) - utc_offset
     else:
         run_until = datetime.timedelta(hours=0, minutes=0)
 
-    time_timedelta = datetime.timedelta(hours=datetime.datetime.now(pytz.timezone('UTC')).hour, minutes=datetime.datetime.now(pytz.timezone('UTC')).minute)
+    time_timedelta = datetime.timedelta(hours=utc_now.hour, minutes=utc_now.minute)
 
     if run_after < run_until:
         if time_timedelta < run_after:
@@ -131,6 +135,9 @@ def add_botflow_execution_object(bot_pk, app_pk, botflow_pk, trigger):
 
 
 def calculate_next_botflow_execution(run_start, frequency, run_every, run_after, run_until, run_on_week_days, run_on_weekend_days):
+    utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+    utc_offset = utc_now.astimezone(pytz.timezone('Europe/Copenhagen')).utcoffset()
+
     for i in range(5256000):
         if frequency == "MIN":
             time = run_start + datetime.timedelta(minutes=int(run_every) * i)
@@ -206,7 +213,7 @@ def calculate_next_botflow_execution(run_start, frequency, run_every, run_after,
         else:
             continue
 
-        if time >= datetime.datetime.now(pytz.timezone('UTC')):
+        if time >= utc_now:
             time_timedelta = datetime.timedelta(hours=time.hour, minutes=time.minute)
 
             if run_after < run_until:
@@ -221,13 +228,13 @@ def calculate_next_botflow_execution(run_start, frequency, run_every, run_after,
                     continue
 
             if not run_on_week_days:
-                if 0 <= time.weekday() <= 4:
+                if 0 <= (time + utc_offset).weekday() <= 4:
                     continue
             if not run_on_weekend_days:
-                if 5 <= time.weekday() <= 6:
+                if 5 <= (time + utc_offset).weekday() <= 6:
                     continue
 
-            return time.strftime("%Y-%m-%d %H:%M")
+            return time
 
     return ""
 
@@ -406,35 +413,44 @@ def schedule_trigger_monitor():
 def schedule_trigger_monitor_evaluate():
     items = ScheduleTrigger.objects.filter(activated=True)
 
+    utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+    utc_offset = utc_now.astimezone(pytz.timezone('Europe/Copenhagen')).utcoffset()
+    utc_now_formatted = pytz.utc.localize(datetime.datetime(
+        year=utc_now.year,
+        month=utc_now.month,
+        day=utc_now.day,
+        hour=utc_now.hour,
+        minute=utc_now.minute
+    ))
+
     for item in items:
-        now = datetime.datetime.now(pytz.timezone('UTC'))
-        now = datetime.datetime.strptime(f"{now.year}-{now.month}-{now.day} {now.hour}:{now.minute}", "%Y-%m-%d %H:%M")
-
-        if item.run_after is not None:
-            run_after = datetime.timedelta(hours=item.run_after.hour, minutes=item.run_after.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
-        else:
+        if item.run_after == None:
             run_after = datetime.timedelta(hours=0, minutes=0)
-
-        if item.run_until is not None:
-            run_until = datetime.timedelta(hours=item.run_until.hour, minutes=item.run_until.minute) - datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset()
         else:
+            run_after = datetime.timedelta(hours=item.run_after.hour, minutes=item.run_after.minute) - utc_offset
+
+        if item.run_until == None:
             run_until = datetime.timedelta(hours=0, minutes=0)
+        else:
+            run_until = datetime.timedelta(hours=item.run_until.hour, minutes=item.run_until.minute) - utc_offset
 
         settings = f"{item.frequency},{item.run_every},{item.run_start},{item.run_after},{item.run_until},{item.run_on_week_days},{item.run_on_weekend_days}"
 
-        if item.next_execution == "":
-            run_start = item.run_start.replace(tzinfo=pytz.timezone('UTC'))
-            item.next_execution = calculate_next_botflow_execution(run_start, item.frequency, item.run_every, run_after, run_until, item.run_on_week_days, item.run_on_weekend_days)
+        if item.next_execution == "" or item.next_execution == None or item.past_settings != settings:
+            item.next_execution = calculate_next_botflow_execution(item.run_start, item.frequency, item.run_every, run_after, run_until, item.run_on_week_days, item.run_on_weekend_days)
             item.past_settings = settings
             item.save()
 
-        elif item.past_settings != settings:
-            run_start = item.run_start.replace(tzinfo=pytz.timezone('UTC'))
-            item.next_execution = calculate_next_botflow_execution(run_start, item.frequency, item.run_every, run_after, run_until, item.run_on_week_days, item.run_on_weekend_days)
-            item.past_settings = settings
-            item.save()
+        next_execution = item.next_execution
+        next_execution_formatted = pytz.utc.localize(datetime.datetime(
+            year=next_execution.year,
+            month=next_execution.month,
+            day=next_execution.day,
+            hour=next_execution.hour,
+            minute=next_execution.minute
+        ))
 
-        if datetime.datetime.strptime(item.next_execution, "%Y-%m-%d %H:%M") == now:
+        if next_execution_formatted == utc_now_formatted:
             if not Botflow.objects.get(pk=item.botflow.pk).queue_if_already_running:
                 if BotflowExecution.objects.filter(Q(status="Pending") | Q(status="Running"), botflow=Botflow.objects.get(pk=item.botflow.pk).path).exists():
                     add_botflow_execution = False
@@ -444,16 +460,16 @@ def schedule_trigger_monitor_evaluate():
                 add_botflow_execution = True
 
             if add_botflow_execution:
-                time_trigger = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime("%Y-%m-%d %H:%M")
+                time_trigger = utc_now.astimezone(pytz.timezone('Europe/Copenhagen')).strftime("%Y-%m-%d %H:%M")
                 add_botflow_execution_object(bot_pk=determine_execution_bot(item).pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=f"Schedule Trigger: {time_trigger}")
 
-            run_start = now.replace(tzinfo=pytz.timezone('UTC'))
+            run_start = utc_now
             item.next_execution = calculate_next_botflow_execution(run_start, item.frequency, item.run_every, run_after, run_until, item.run_on_week_days, item.run_on_weekend_days)
             item.past_settings = settings
             item.save()
 
-        elif datetime.datetime.strptime(item.next_execution, "%Y-%m-%d %H:%M") < now:
-            run_start = datetime.datetime.strptime(item.next_execution, "%Y-%m-%d %H:%M").replace(tzinfo=pytz.timezone('UTC'))
+        elif next_execution_formatted < utc_now_formatted:
+            run_start = next_execution_formatted
             item.next_execution = calculate_next_botflow_execution(run_start, item.frequency, item.run_every, run_after, run_until, item.run_on_week_days, item.run_on_weekend_days)
             item.past_settings = settings
             item.save()

@@ -173,7 +173,7 @@ class ScheduleTrigger(models.Model):
     run_on_week_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on week days.")
     run_on_weekend_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on weekend days.")
 
-    next_execution = models.CharField(max_length=255, blank=True, editable=False, help_text="This field specifies the scheduled time for the next execution. IMPORTANT: This date and time field is in UTC timezone, therefore, an offset is expected!")
+    next_execution = models.DateTimeField(null=True, blank=True, editable=False, help_text="This field specifies the scheduled time for the next execution.")
     past_settings = models.CharField(max_length=255, blank=True)
 
     status = models.CharField(max_length=255, default="Active", editable=False, help_text="Indicates the status of the trigger.")

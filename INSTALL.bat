@@ -1,3 +1,5 @@
+@echo off
+
 CALL CD %~dp0
 CALL python -m venv venv
 CALL venv\scripts\activate
@@ -15,4 +17,4 @@ IF %create_super_user% == y (
 )
 
 echo The installation is now complete!
-TIMEOUT 5
+TIMEOUT 15

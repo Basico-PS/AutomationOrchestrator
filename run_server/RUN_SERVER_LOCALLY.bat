@@ -1,3 +1,5 @@
+@echo off
+
 CALL CD %~dp0
 CALL CD ..
 CALL venv\scripts\activate

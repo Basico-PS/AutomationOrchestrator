@@ -463,7 +463,6 @@ class BotAdmin(SimpleHistoryAdmin):
     )
 
     list_display = ('pk_formatted', 'name', 'computer_name', 'user_name', 'status',
-                    'date_created', 'date_updated',
                     'update_record',)
     list_editable = ('name', 'computer_name', 'user_name',)
     list_display_links = ['pk_formatted']
@@ -487,7 +486,6 @@ class AppAdmin(SimpleHistoryAdmin):
     )
 
     list_display = ('pk_formatted', 'name', 'path',
-                    'date_created', 'date_updated',
                     'update_record')
     list_editable = ('name', 'path',)
     list_display_links = ['pk_formatted']
@@ -530,7 +528,6 @@ class BotflowAdmin(SimpleHistoryAdmin):
     list_display = ('pk_formatted', 'name', 'path',
                     'queue_if_already_running',
                     'priority',
-                    'date_created', 'date_updated',
                     'update_record',)
     list_editable = ('name', 'path',
                      'queue_if_already_running',
@@ -571,7 +568,6 @@ class FileTriggerAdmin(SimpleHistoryAdmin):
     list_display = ('pk_formatted', 'assigned_bots', 'app', 'botflow',
                     'folder_in', 'folder_out', 'filter',
                     'activated', 'status',
-                    'date_created', 'date_updated',
                     'update_record',)
     list_editable = ('app', 'botflow',
                     'folder_in', 'folder_out', 'filter', 'activated',)
@@ -612,7 +608,7 @@ class ScheduleTriggerAdmin(SimpleHistoryAdmin):
     list_display = ('pk_formatted', 'assigned_bots', 'app', 'botflow',
                     'frequency', 'run_every', 'run_start',
                     'activated', 'status',
-                    'date_created', 'date_updated',
+                    'next_execution',
                     'update_record',)
     list_editable = ('app', 'botflow',
                     'frequency', 'run_every', 'run_start', 'activated',)
@@ -669,7 +665,6 @@ class EmailImapTriggerAdmin(SimpleHistoryAdmin):
                     'email',
                     'folder_in', 'folder_out',
                     'activated', 'status',
-                    'date_created', 'date_updated',
                     'update_record',)
     list_editable = ('app', 'botflow',
                      'email',
@@ -715,7 +710,6 @@ class EmailOutlookTriggerAdmin(SimpleHistoryAdmin):
                     'email',
                     'folder_in', 'folder_out',
                     'activated', 'status',
-                    'date_created', 'date_updated',
                     'update_record',)
     list_editable = ('app', 'botflow',
                      'email',
@@ -749,7 +743,6 @@ class ApiTriggerAdmin(SimpleHistoryAdmin):
 
     list_display = ('pk_formatted', 'assigned_bots', 'app', 'botflow',
                     'activated', 'status',
-                    'date_created', 'date_updated',
                     'update_record',)
     list_editable = ('app', 'botflow',
                      'activated',)

@@ -804,14 +804,14 @@ def botflow_execution_monitor_evaluate():
                             subprocess.run(
                                 [item.app, '/Open', item.botflow, '/Run', '/Close', '/Exit'],
                                 timeout=(item.timeout_minutes * 60),
-                                cwd=os.path.dirname(item.botflow)
+                                cwd=os.path.dirname(item.app)
                             )
 
                         else:
                             subprocess.run(
                                 [item.app, '/Open', item.botflow, '/Run'],
                                 timeout=(item.timeout_minutes * 60),
-                                cwd=os.path.dirname(item.botflow)
+                                cwd=os.path.dirname(item.app)
                             )
 
                     elif app == "uirobot.exe":

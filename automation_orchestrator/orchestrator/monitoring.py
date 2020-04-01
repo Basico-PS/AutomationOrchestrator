@@ -391,6 +391,11 @@ def file_trigger_monitor_evaluate():
 
 
 def schedule_trigger_monitor():
+    try:
+        ScheduleTrigger.objects.all().update(next_execution=None)
+    except sqlite3.OperationalError:
+        pass
+
     while True:
         range(10000)
         t.sleep(randrange((round(trigger_sleep / 2)), trigger_sleep))

@@ -36,10 +36,8 @@
     {% block userlinks %}
     {% if site_url %}
     <a href="{{ site_url }}">Home</a> /
-    {% endif %}
-
-    {% if site_url %}
     <a href="{% url 'dashboard-overview' %}">Dashboard</a> /
+    <a href="{{ site_url }}api/0/docs/">API</a> /
     {% endif %}
 
     {% if user.is_active and user.is_staff %}

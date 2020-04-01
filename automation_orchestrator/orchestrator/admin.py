@@ -60,6 +60,88 @@ def cancel_selected_botflow_executions(modeladmin, request, queryset):
             item.save()
 
 
+def copy_selected_file_triggers(modeladmin, request, queryset):
+    for item in queryset:
+        bots = item.bots.all()
+
+        item_new = item
+        item_new.pk = None
+        item_new.date_created = None
+        item_new.date_updated = None
+        item_new.activated = False
+
+        item_new.save()
+
+        item_new.bots.set([x.id for x in bots])
+        item_new.save()
+
+
+def copy_selected_schedule_triggers(modeladmin, request, queryset):
+    for item in queryset:
+        bots = item.bots.all()
+
+        item_new = item
+        item_new.pk = None
+        item_new.date_created = None
+        item_new.date_updated = None
+        item_new.activated = False
+
+        item_new.next_execution = None
+
+        item_new.save()
+
+        item_new.bots.set([x.id for x in bots])
+        item_new.save()
+
+
+def copy_selected_email_imap_triggers(modeladmin, request, queryset):
+    for item in queryset:
+        bots = item.bots.all()
+
+        item_new = item
+        item_new.pk = None
+        item_new.date_created = None
+        item_new.date_updated = None
+        item_new.activated = False
+
+        item_new.save()
+
+        item_new.bots.set([x.id for x in bots])
+        item_new.save()
+
+
+def copy_selected_email_outlook_triggers(modeladmin, request, queryset):
+    for item in queryset:
+        bots = item.bots.all()
+
+        item_new = item
+        item_new.pk = None
+        item_new.date_created = None
+        item_new.date_updated = None
+        item_new.activated = False
+
+        item_new.save()
+
+        item_new.bots.set([x.id for x in bots])
+        item_new.save()
+
+
+def copy_selected_api_triggers(modeladmin, request, queryset):
+    for item in queryset:
+        bots = item.bots.all()
+
+        item_new = item
+        item_new.pk = None
+        item_new.date_created = None
+        item_new.date_updated = None
+        item_new.activated = False
+
+        item_new.save()
+
+        item_new.bots.set([x.id for x in bots])
+        item_new.save()
+
+
 def export_selected_file_triggers(modeladmin, request, queryset):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="file_triggers.csv"'
@@ -573,7 +655,7 @@ class FileTriggerAdmin(SimpleHistoryAdmin):
                     'folder_in', 'folder_out', 'filter', 'activated',)
     list_display_links = ['pk_formatted']
 
-    actions = [activate_selected_file_triggers, export_selected_file_triggers, test_selected_file_triggers,]
+    actions = [activate_selected_file_triggers, copy_selected_file_triggers, export_selected_file_triggers, test_selected_file_triggers,]
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/filetrigger/{}/change/">EDIT</a>', obj.id)
@@ -616,7 +698,7 @@ class ScheduleTriggerAdmin(SimpleHistoryAdmin):
     exclude = ('past_settings',)
     readonly_fields = ('next_execution',)
 
-    actions = [activate_selected_schedule_triggers, export_selected_schedule_triggers,]
+    actions = [activate_selected_schedule_triggers, copy_selected_schedule_triggers, export_selected_schedule_triggers,]
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/scheduletrigger/{}/change/">EDIT</a>', obj.id)
@@ -672,10 +754,11 @@ class EmailImapTriggerAdmin(SimpleHistoryAdmin):
     list_display_links = ['pk_formatted']
 
     activate_selected_email_imap_triggers.short_description = "Activate selected email IMAP triggers"
+    copy_selected_email_imap_triggers.short_description = "Copy selected email IMAP triggers"
     export_selected_email_imap_triggers.short_description = "Export selected email IMAP triggers"
     test_selected_email_imap_triggers.short_description = "Test selected email IMAP triggers"
 
-    actions = [activate_selected_email_imap_triggers, export_selected_email_imap_triggers, test_selected_email_imap_triggers,]
+    actions = [activate_selected_email_imap_triggers, copy_selected_email_imap_triggers, export_selected_email_imap_triggers, test_selected_email_imap_triggers,]
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/emailimaptrigger/{}/change/">EDIT</a>', obj.id)
@@ -717,10 +800,11 @@ class EmailOutlookTriggerAdmin(SimpleHistoryAdmin):
     list_display_links = ['pk_formatted']
 
     activate_selected_email_outlook_triggers.short_description = "Activate selected email Outlook triggers"
+    copy_selected_email_outlook_triggers.short_description = "Copy selected email Outlook triggers"
     export_selected_email_outlook_triggers.short_description = "Export selected email Outlook triggers"
     test_selected_email_outlook_triggers.short_description = "Test selected email Outlook triggers"
 
-    actions = [activate_selected_email_outlook_triggers, export_selected_email_outlook_triggers,]
+    actions = [activate_selected_email_outlook_triggers, copy_selected_email_outlook_triggers, export_selected_email_outlook_triggers,]
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/emailoutlooktrigger/{}/change/">EDIT</a>', obj.id)
@@ -749,9 +833,10 @@ class ApiTriggerAdmin(SimpleHistoryAdmin):
     list_display_links = ['pk_formatted']
 
     activate_selected_api_triggers.short_description = "Activate selected API triggers"
+    copy_selected_api_triggers.short_description = "Copy selected API triggers"
     export_selected_api_triggers.short_description = "Export selected API triggers"
 
-    actions = [activate_selected_api_triggers, export_selected_api_triggers,]
+    actions = [activate_selected_api_triggers, copy_selected_api_triggers, export_selected_api_triggers,]
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/apitrigger/{}/change/">EDIT</a>', obj.id)

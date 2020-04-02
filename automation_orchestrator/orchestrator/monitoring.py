@@ -15,6 +15,7 @@ from sqlite3 import OperationalError
 from imaplib import IMAP4, IMAP4_SSL
 from .models import Bot, App, Botflow, FileTrigger, ScheduleTrigger, EmailImapTrigger, EmailOutlookTrigger, BotflowExecution
 from django.db.models import Q
+from django.db.utils import OperationalError
 from dateutil.relativedelta import relativedelta
 from pythoncom import CoInitialize, CoUninitialize
 

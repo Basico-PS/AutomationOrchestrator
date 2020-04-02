@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 import socket
+from tzlocal import get_localzone
 
 
 # Retrieve the secret key for the server.
@@ -169,7 +170,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Europe/Copenhagen'
+TIME_ZONE = str(get_localzone())
 
 USE_I18N = True
 

@@ -11,6 +11,7 @@ import subprocess
 import time as t
 import win32com.client as win32
 from random import randrange
+from sqlite3 import OperationalError
 from imaplib import IMAP4, IMAP4_SSL
 from .models import Bot, App, Botflow, FileTrigger, ScheduleTrigger, EmailImapTrigger, EmailOutlookTrigger, BotflowExecution
 from django.db.models import Q
@@ -393,7 +394,7 @@ def file_trigger_monitor_evaluate():
 def schedule_trigger_monitor():
     try:
         ScheduleTrigger.objects.all().update(next_execution=None)
-    except sqlite3.OperationalError:
+    except OperationalError:
         pass
 
     while True:

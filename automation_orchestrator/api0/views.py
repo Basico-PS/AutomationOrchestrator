@@ -12,6 +12,16 @@ from orchestrator.models import Bot, ApiTrigger, BotflowExecution, PythonFunctio
 from orchestrator.monitoring import add_botflow_execution_object, determine_execution_bot
 
 
+class BotflowExecutionFilter(filters.FilterSet):
+    class Meta:
+        model = BotflowExecution
+        fields = {
+            'computer_name': ['exact', 'iexact'],
+            'user_name': ['exact', 'iexact'],
+            'status': ['exact', 'iexact']
+        }
+
+
 class IsSuperUser(IsAdminUser):
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_superuser)
@@ -71,11 +81,16 @@ class BotflowExecutionView(viewsets.ModelViewSet):
     serializer_class = BotflowExecutionSerializer
     throttle_scope = 'botflowexecution'
     http_method_names = ['get', 'patch']
-    filterset_fields = ('computer_name', 'user_name', 'status',)
+    filterset_class = BotflowExecutionFilter
 
     def get_queryset(self):
         computer_name = self.request.query_params.get('computer_name', None)
+        if computer_name == None:
+            computer_name = self.request.query_params.get('computer_name__iexact', None)
+
         user_name = self.request.query_params.get('user_name', None)
+        if user_name == None:
+            user_name = self.request.query_params.get('user_name__iexact', None)
 
         if computer_name != None and user_name != None:
             try:

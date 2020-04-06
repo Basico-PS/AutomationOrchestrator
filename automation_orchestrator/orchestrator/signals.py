@@ -25,7 +25,7 @@ def botflow_execution_bot_status(sender, instance, **kwargs):
 
         if bot.status != "Running":
             bot.status = "Running"
-            bot.save()
+            bot.save_without_historical_record()
 
     elif instance.status != "Pending":
         try:
@@ -36,7 +36,7 @@ def botflow_execution_bot_status(sender, instance, **kwargs):
         if instance.status == "Completed":
             if bot.status != "Active":
                 bot.status = "Active"
-                bot.save()
+                bot.save_without_historical_record()
 
         else:
             latest_execution = BotflowExecution.objects.filter(status="Running", computer_name__iexact=os.environ['COMPUTERNAME'], user_name__iexact=os.environ['USERNAME']).order_by('-time_start')
@@ -52,7 +52,7 @@ def botflow_execution_bot_status(sender, instance, **kwargs):
 
             if bot.status != "Unknown":
                 bot.status = "Unknown"
-                bot.save()
+                bot.save_without_historical_record()
 
 
 @receiver(post_save, sender=BotflowExecution)
@@ -127,7 +127,7 @@ def botflow_execution_notification(sender, instance, **kwargs):
 
         if smtp_account.status != "Active":
             smtp_account.status = "Active"
-            smtp_account.save()
+            smtp_account.save_without_historical_record()
 
     except:
         if smtp_account.tls:
@@ -147,9 +147,9 @@ def botflow_execution_notification(sender, instance, **kwargs):
 
                 if smtp_account.status != "Active":
                     smtp_account.status = "Active"
-                    smtp_account.save()
+                    smtp_account.save_without_historical_record()
 
             except:
                 if smtp_account.status != "ERROR":
                     smtp_account.status = "ERROR"
-                    smtp_account.save()
+                    smtp_account.save_without_historical_record()

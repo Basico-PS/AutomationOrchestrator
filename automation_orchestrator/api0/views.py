@@ -98,11 +98,11 @@ class BotflowExecutionView(viewsets.ModelViewSet):
 
                 if bot.status != "Active":
                     bot.status = "Active"
-                    bot.save()
+                    bot.save_without_historical_record()
 
                 elif (pytz.utc.localize(datetime.datetime.utcnow()) - bot.date_updated).seconds > 240:
                     bot.status = "Active"
-                    bot.save()
+                    bot.save_without_historical_record()
 
             except:
                 pass

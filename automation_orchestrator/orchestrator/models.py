@@ -81,6 +81,14 @@ class Bot(models.Model):
         if Bot.objects.filter(computer_name=self.computer_name).filter(user_name=self.user_name).exclude(id=self.id).exists():
             raise ValidationError('A bot with the same computer name and username already exists!')
 
+    def save_without_historical_record(self, *args, **kwargs):
+        self.skip_history_when_saving = True
+        try:
+            ret = self.save(*args, **kwargs)
+        finally:
+            del self.skip_history_when_saving
+        return ret
+
 
 class App(models.Model):
     name = models.CharField(max_length=255, unique=True, help_text="Specify the name of the application.")
@@ -93,6 +101,14 @@ class App(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save_without_historical_record(self, *args, **kwargs):
+        self.skip_history_when_saving = True
+        try:
+            ret = self.save(*args, **kwargs)
+        finally:
+            del self.skip_history_when_saving
+        return ret
 
 
 class Botflow(models.Model):
@@ -119,6 +135,14 @@ class Botflow(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save_without_historical_record(self, *args, **kwargs):
+        self.skip_history_when_saving = True
+        try:
+            ret = self.save(*args, **kwargs)
+        finally:
+            del self.skip_history_when_saving
+        return ret
 
 
 class FileTrigger(models.Model):
@@ -151,6 +175,14 @@ class FileTrigger(models.Model):
 
     def assigned_bots(self):
         return ", ".join([bot.name for bot in self.bots.all()])
+
+    def save_without_historical_record(self, *args, **kwargs):
+        self.skip_history_when_saving = True
+        try:
+            ret = self.save(*args, **kwargs)
+        finally:
+            del self.skip_history_when_saving
+        return ret
 
 
 class ScheduleTrigger(models.Model):
@@ -185,6 +217,14 @@ class ScheduleTrigger(models.Model):
 
     def assigned_bots(self):
         return ", ".join([bot.name for bot in self.bots.all()])
+
+    def save_without_historical_record(self, *args, **kwargs):
+        self.skip_history_when_saving = True
+        try:
+            ret = self.save(*args, **kwargs)
+        finally:
+            del self.skip_history_when_saving
+        return ret
 
 
 class EmailImapTrigger(models.Model):
@@ -227,6 +267,14 @@ class EmailImapTrigger(models.Model):
     def assigned_bots(self):
         return ", ".join([bot.name for bot in self.bots.all()])
 
+    def save_without_historical_record(self, *args, **kwargs):
+        self.skip_history_when_saving = True
+        try:
+            ret = self.save(*args, **kwargs)
+        finally:
+            del self.skip_history_when_saving
+        return ret
+
 
 class EmailOutlookTrigger(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.PROTECT, null=True, help_text="Select the bot for this trigger.")
@@ -264,6 +312,14 @@ class EmailOutlookTrigger(models.Model):
     def assigned_bots(self):
         return ", ".join([bot.name for bot in self.bots.all()])
 
+    def save_without_historical_record(self, *args, **kwargs):
+        self.skip_history_when_saving = True
+        try:
+            ret = self.save(*args, **kwargs)
+        finally:
+            del self.skip_history_when_saving
+        return ret
+
 
 class ApiTrigger(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.PROTECT, null=True, help_text="Select the bot for this trigger.")
@@ -286,6 +342,14 @@ class ApiTrigger(models.Model):
 
     def assigned_bots(self):
         return ", ".join([bot.name for bot in self.bots.all()])
+
+    def save_without_historical_record(self, *args, **kwargs):
+        self.skip_history_when_saving = True
+        try:
+            ret = self.save(*args, **kwargs)
+        finally:
+            del self.skip_history_when_saving
+        return ret
 
 
 class BotflowExecution(models.Model):
@@ -350,6 +414,14 @@ class SmtpAccount(models.Model):
         if self.activated and SmtpAccount.objects.filter(activated=True).exclude(id=self.id).exists():
             raise ValidationError('An activated SMTP account already exists! Make sure to not activate this account or deactivate the activated account.')
 
+    def save_without_historical_record(self, *args, **kwargs):
+        self.skip_history_when_saving = True
+        try:
+            ret = self.save(*args, **kwargs)
+        finally:
+            del self.skip_history_when_saving
+        return ret
+
 
 class PythonFunction(models.Model):
     name = models.CharField(max_length=255, unique=True, help_text="Specify the name of the Python function.")
@@ -372,6 +444,14 @@ class PythonFunction(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save_without_historical_record(self, *args, **kwargs):
+        self.skip_history_when_saving = True
+        try:
+            ret = self.save(*args, **kwargs)
+        finally:
+            del self.skip_history_when_saving
+        return ret
 
 
 class PythonFunctionExecution(models.Model):

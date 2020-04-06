@@ -281,7 +281,7 @@ def refresh_selected_bots(modeladmin, request, queryset):
                 if not "SESSIONNAME" in str(sessions):
                     if item.status != "Unknown":
                         item.status = "Unknown"
-                        item.save()
+                        item.save_without_historical_record()
 
                 active = False
                 for session in sessions:
@@ -292,24 +292,24 @@ def refresh_selected_bots(modeladmin, request, queryset):
                 if active:
                     if item.status != "Active" and item.status != "Running":
                         item.status = "Active"
-                        item.save()
+                        item.save_without_historical_record()
 
                 else:
                     if item.status != "ERROR":
                         item.status = "ERROR"
-                        item.save()
+                        item.save_without_historical_record()
 
             else:
                 if item.status != "Running":
                     if (pytz.utc.localize(datetime.datetime.utcnow()) - item.date_updated).seconds > 300:
                         if item.status != "Unknown":
                             item.status = "Unknown"
-                            item.save()
+                            item.save_without_historical_record()
 
         except:
             if item.status != "Unknown":
                 item.status = "Unknown"
-                item.save()
+                item.save_without_historical_record()
 
 
 def test_selected_botflows(modeladmin, request, queryset):
@@ -341,14 +341,14 @@ def test_selected_file_triggers(modeladmin, request, queryset):
 
             if item.status != "Active":
                 item.status = "Active"
-                item.save()
+                item.save_without_historical_record()
 
         except:
             messages.error(request, f"Failed to retrieve files from the incoming folder: {item.folder_in}")
 
             if item.status != "ERROR":
                 item.status = "ERROR"
-                item.save()
+                item.save_without_historical_record()
 
 
 def test_selected_email_imap_triggers(modeladmin, request, queryset):
@@ -377,21 +377,21 @@ def test_selected_email_imap_triggers(modeladmin, request, queryset):
 
                 if item.status != "ERROR":
                     item.status = "ERROR"
-                    item.save()
+                    item.save_without_historical_record()
 
             else:
                 messages.success(request, f"Successfully connected to email {item.email}! Number of messages detected in the 'INBOX/{item.folder_in}' folder: {emails_folder_in}")
 
                 if item.status != "Active":
                     item.status = "Active"
-                    item.save()
+                    item.save_without_historical_record()
 
         except:
             messages.error(request, f"Failed to connect to email {item.email}!")
 
             if item.status != "ERROR":
                 item.status = "ERROR"
-                item.save()
+                item.save_without_historical_record()
 
         finally:
             try:
@@ -444,12 +444,12 @@ def test_selected_email_outlook_triggers(modeladmin, request, queryset):
 
             if item.status != "Active":
                 item.status = "Active"
-                item.save()
+                item.save_without_historical_record()
 
         except:
             if item.status != "ERROR":
                 item.status = "ERROR"
-                item.save()
+                item.save_without_historical_record()
 
         finally:
             accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None, None, None
@@ -485,7 +485,7 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
 
             if item.status != "Active":
                 item.status = "Active"
-                item.save()
+                item.save_without_historical_record()
 
         except:
             if item.tls:
@@ -509,7 +509,7 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
 
             if item.status != "ERROR":
                 item.status = "ERROR"
-                item.save()
+                item.save_without_historical_record()
 
 
 class BotAdmin(SimpleHistoryAdmin):

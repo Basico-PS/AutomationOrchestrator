@@ -253,7 +253,7 @@ def bot_status(item):
             if not "SESSIONNAME" in str(sessions):
                 if item.status != "Unknown":
                     item.status = "Unknown"
-                    item.save()
+                    item.save_without_historical_record()
                 return
 
             active = False
@@ -265,19 +265,19 @@ def bot_status(item):
             if active:
                 if item.status != "Active" and item.status != "Running":
                     item.status = "Active"
-                    item.save()
+                    item.save_without_historical_record()
 
             else:
                 if item.status != "ERROR":
                     item.status = "ERROR"
-                    item.save()
+                    item.save_without_historical_record()
 
         else:
             if item.status != "Running":
                 if (pytz.utc.localize(datetime.datetime.utcnow()) - item.date_updated).seconds > 300:
                     if item.status != "Unknown":
                         item.status = "Unknown"
-                        item.save()
+                        item.save_without_historical_record()
 
     except:
         with open("logs\\error_bot_status.txt", 'a') as f:
@@ -289,7 +289,7 @@ def bot_status(item):
 
         if item.status != "Unknown":
             item.status = "Unknown"
-            item.save()
+            item.save_without_historical_record()
 
 
 def file_trigger_monitor():
@@ -320,7 +320,7 @@ def file_trigger_monitor_evaluate():
         if not os.path.isdir(item.folder_in) or not os.path.isdir(item.folder_out):
             if item.status != "ERROR":
                 item.status = "ERROR"
-                item.save()
+                item.save_without_historical_record()
                 continue
 
         if not time_filter_evalution(item):
@@ -371,7 +371,7 @@ def file_trigger_monitor_evaluate():
 
         if item.status != "Active":
             item.status = "Active"
-            item.save()
+            item.save_without_historical_record()
 
     items = None
     del items
@@ -379,7 +379,9 @@ def file_trigger_monitor_evaluate():
 
 def schedule_trigger_monitor():
     try:
-        ScheduleTrigger.objects.all().update(next_execution=None)
+        for schedule_trigger in ScheduleTrigger.objects.all():
+            schedule_trigger.next_execution = None
+            schedule_trigger.save_without_historical_record()
     except OperationalError:
         pass
 
@@ -432,7 +434,7 @@ def schedule_trigger_monitor_evaluate():
         if item.next_execution == "" or item.next_execution == None or item.past_settings != settings:
             item.next_execution = calculate_next_botflow_execution(item.run_start, item.frequency, item.run_every, run_after, run_until, item.run_on_week_days, item.run_on_weekend_days)
             item.past_settings = settings
-            item.save()
+            item.save_without_historical_record()
 
         next_execution = item.next_execution
         next_execution_formatted = pytz.utc.localize(datetime.datetime(
@@ -459,17 +461,17 @@ def schedule_trigger_monitor_evaluate():
             run_start = utc_now
             item.next_execution = calculate_next_botflow_execution(run_start, item.frequency, item.run_every, run_after, run_until, item.run_on_week_days, item.run_on_weekend_days)
             item.past_settings = settings
-            item.save()
+            item.save_without_historical_record()
 
         elif next_execution_formatted < utc_now_formatted:
             run_start = next_execution_formatted
             item.next_execution = calculate_next_botflow_execution(run_start, item.frequency, item.run_every, run_after, run_until, item.run_on_week_days, item.run_on_weekend_days)
             item.past_settings = settings
-            item.save()
+            item.save_without_historical_record()
 
         if item.status != "Active":
             item.status = "Active"
-            item.save()
+            item.save_without_historical_record()
 
     items = None
     del items
@@ -529,7 +531,7 @@ def email_imap_trigger_monitor_evaluate():
 
             if item.status != "Active":
                 item.status = "Active"
-                item.save()
+                item.save_without_historical_record()
 
             try:
                 server.select('INBOX/' + item.folder_in)
@@ -572,7 +574,7 @@ def email_imap_trigger_monitor_evaluate():
         except:
             if item.status != "ERROR":
                 item.status = "ERROR"
-                item.save()
+                item.save_without_historical_record()
 
         finally:
             try:
@@ -674,7 +676,7 @@ def email_outlook_trigger_monitor_evaluate(email_outlook):
                 if not item.email in accounts_list:
                     if item.status != "ERROR":
                         item.status = "ERROR"
-                        item.save()
+                        item.save_without_historical_record()
                         continue
 
                 namespace = None
@@ -689,7 +691,7 @@ def email_outlook_trigger_monitor_evaluate(email_outlook):
         except:
             if item.status != "ERROR":
                 item.status = "ERROR"
-                item.save()
+                item.save_without_historical_record()
 
             items, accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None, None, None, None
             del items, accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails
@@ -723,7 +725,7 @@ def email_outlook_trigger_monitor_evaluate(email_outlook):
 
         if item.status != "Active":
             item.status = "Active"
-            item.save()
+            item.save_without_historical_record()
 
         accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails = None, None, None, None, None, None, None
         del accounts, accounts_list, namespace, inbox, folder_in, folder_out, emails

@@ -269,61 +269,44 @@ def export_selected_botflow_executions(modeladmin, request, queryset):
     return response
 
 
-def test_selected_bots(modeladmin, request, queryset):
+def refresh_selected_bots(modeladmin, request, queryset):
     for item in queryset:
         try:
             computer_name = item.computer_name
             user_name = item.user_name
 
-            if str(computer_name).lower() != os.environ['COMPUTERNAME'].lower():
-                psexec_path = os.path.abspath(".\\automation_orchestrator\\tools\\psexec\\psexec.exe")
+            if str(computer_name).lower() == os.environ['COMPUTERNAME'].lower():
+                sessions = subprocess.run(["query", "session"], stdout=subprocess.PIPE, text=True).stdout.split("\n")
 
-                if not os.path.isfile(psexec_path):
-                    messages.error(request, f"Unable to test the bot as the psexec tool cannot be located: {psexec_path}")
-
+                if not "SESSIONNAME" in str(sessions):
                     if item.status != "Unknown":
                         item.status = "Unknown"
                         item.save()
 
-                    continue
+                active = False
+                for session in sessions:
+                    if f" {user_name.lower()} " in session.lower() and " Active " in session:
+                        active = True
+                        break
 
-                sessions = subprocess.run([psexec_path, f"\\\\{computer_name}", "query", "session"], stdout=subprocess.PIPE, text=True).stdout.split("\n")
+                if active:
+                    if item.status != "Active" and item.status != "Running":
+                        item.status = "Active"
+                        item.save()
 
-            else:
-                sessions = subprocess.run(["query", "session"], stdout=subprocess.PIPE, text=True).stdout.split("\n")
-
-            if not "SESSIONNAME" in str(sessions):
-                messages.error(request, f"Failed to connect to computer: {computer_name}")
-
-                if item.status != "Unknown":
-                    item.status = "Unknown"
-                    item.save()
-
-                continue
-
-            active = False
-            for session in sessions:
-                if f" {user_name.lower()} " in session.lower() and " Active " in session:
-                    active = True
-                    break
-
-            if active:
-                messages.success(request, f"Successfully connected to computer '{computer_name}' and identified an active session for user: {user_name}")
-
-                if item.status != "Active" and item.status != "Running":
-                    item.status = "Active"
-                    item.save()
+                else:
+                    if item.status != "ERROR":
+                        item.status = "ERROR"
+                        item.save()
 
             else:
-                messages.error(request, f"Successfully connected to computer '{computer_name}', however, no active session identified for user: {user_name}")
-
-                if item.status != "ERROR":
-                    item.status = "ERROR"
-                    item.save()
+                if item.status != "Running":
+                    if (pytz.utc.localize(datetime.datetime.utcnow()) - item.date_updated).seconds > 300:
+                        if item.status != "Unknown":
+                            item.status = "Unknown"
+                            item.save()
 
         except:
-            messages.error(request, f"Fatal error when attempting to test computer '{computer_name}' and user: {user_name}")
-
             if item.status != "Unknown":
                 item.status = "Unknown"
                 item.save()
@@ -549,7 +532,7 @@ class BotAdmin(SimpleHistoryAdmin):
     list_editable = ('name', 'computer_name', 'user_name',)
     list_display_links = ['pk_formatted']
 
-    actions = [test_selected_bots,]
+    actions = [refresh_selected_bots,]
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/bot/{}/change/">EDIT</a>', obj.id)

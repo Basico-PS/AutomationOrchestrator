@@ -242,57 +242,42 @@ def calculate_next_botflow_execution(run_start, frequency, run_every, run_after,
     return ""
 
 
-def bot_status_monitor():
-    while True:
-        range(10000)
-        t.sleep(randrange((round(bot_status_sleep / 2)), bot_status_sleep))
-
-        for item in Bot.objects.all():
-            range(10000)
-            t.sleep(10)
-            bot_status(item)
-
-
 def bot_status(item):
     try:
         computer_name = item.computer_name
         user_name = item.user_name
 
-        if str(computer_name).lower() != os.environ['COMPUTERNAME'].lower():
-            psexec_path = os.path.abspath(".\\automation_orchestrator\\tools\\psexec\\psexec.exe")
+        if str(computer_name).lower() == os.environ['COMPUTERNAME'].lower() and str(user_name).lower() == os.environ['USERNAME'].lower():
+            sessions = subprocess.run(["query", "session"], stdout=subprocess.PIPE, text=True).stdout.split("\n")
 
-            if not os.path.isfile(psexec_path):
+            if not "SESSIONNAME" in str(sessions):
                 if item.status != "Unknown":
                     item.status = "Unknown"
                     item.save()
                 return
 
-            sessions = subprocess.run([psexec_path, f"\\\\{computer_name}", "query", "session"], stdout=subprocess.PIPE, text=True).stdout.split("\n")
+            active = False
+            for session in sessions:
+                if f" {user_name.lower()} " in session.lower() and " Active " in session:
+                    active = True
+                    break
+
+            if active:
+                if item.status != "Active" and item.status != "Running":
+                    item.status = "Active"
+                    item.save()
+
+            else:
+                if item.status != "ERROR":
+                    item.status = "ERROR"
+                    item.save()
 
         else:
-            sessions = subprocess.run(["query", "session"], stdout=subprocess.PIPE, text=True).stdout.split("\n")
-
-        if not "SESSIONNAME" in str(sessions):
-            if item.status != "Unknown":
-                item.status = "Unknown"
-                item.save()
-            return
-
-        active = False
-        for session in sessions:
-            if f" {user_name.lower()} " in session.lower() and " Active " in session:
-                active = True
-                break
-
-        if active:
-            if item.status != "Active" and item.status != "Running":
-                item.status = "Active"
-                item.save()
-
-        else:
-            if item.status != "ERROR":
-                item.status = "ERROR"
-                item.save()
+            if item.status != "Running":
+                if (pytz.utc.localize(datetime.datetime.utcnow()) - item.date_updated).seconds > 300:
+                    if item.status != "Unknown":
+                        item.status = "Unknown"
+                        item.save()
 
     except:
         with open("logs\\error_bot_status.txt", 'a') as f:

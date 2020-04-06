@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAdminUser
 from django_filters import rest_framework as filters
 from django.shortcuts import get_object_or_404
 from .serializers import ApiTriggerSerializer, BotflowExecutionSerializer, PythonFunctionSerializer, PythonFunctionExecutionSerializer
-from orchestrator.models import ApiTrigger, BotflowExecution, PythonFunction, PythonFunctionExecution
+from orchestrator.models import Bot, ApiTrigger, BotflowExecution, PythonFunction, PythonFunctionExecution
 from orchestrator.monitoring import add_botflow_execution_object, determine_execution_bot
 
 
@@ -72,6 +72,28 @@ class BotflowExecutionView(viewsets.ModelViewSet):
     throttle_scope = 'botflowexecution'
     http_method_names = ['get', 'patch']
     filterset_fields = ('computer_name', 'user_name', 'status',)
+
+    def get_queryset(self):
+        computer_name = self.request.query_params.get('computer_name', None)
+        user_name = self.request.query_params.get('user_name', None)
+
+        if computer_name != None and user_name != None:
+            try:
+                bot = Bot.objects.filter(computer_name__iexact=computer_name, user_name__iexact=user_name)[0]
+
+                if bot.status != "Active":
+                    bot.status = "Active"
+                    bot.save()
+
+                elif (pytz.utc.localize(datetime.datetime.utcnow()) - bot.date_updated).seconds > 240:
+                    bot.status = "Active"
+                    bot.save()
+
+            except:
+                pass
+
+        return BotflowExecution.objects.all()
+
 
 class PythonFunctionView(viewsets.ModelViewSet):
     """

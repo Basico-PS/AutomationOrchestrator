@@ -19,7 +19,7 @@ def botflow_execution_update_progress(sender, instance, **kwargs):
 def botflow_execution_bot_status(sender, instance, **kwargs):
     if instance.status == "Running":
         try:
-            bot = Bot.objects.filter(computer_name=instance.computer_name, user_name=instance.user_name)[0]
+            bot = Bot.objects.filter(computer_name__iexact=instance.computer_name, user_name__iexact=instance.user_name)[0]
         except:
             return
 
@@ -29,7 +29,7 @@ def botflow_execution_bot_status(sender, instance, **kwargs):
 
     elif instance.status != "Pending":
         try:
-            bot = Bot.objects.filter(computer_name=instance.computer_name, user_name=instance.user_name)[0]
+            bot = Bot.objects.filter(computer_name__iexact=instance.computer_name, user_name__iexact=instance.user_name)[0]
         except:
             return
 

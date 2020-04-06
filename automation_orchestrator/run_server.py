@@ -11,6 +11,11 @@ from datetime import datetime
 from automation_orchestrator.settings import DATABASE_DIR, DATABASE_NAME
 
 
+SERVER_LOG_PATH = "logs\\server_log.txt"
+ERROR_LOG_PATH = "logs\\error_log.txt"
+MANAGE_SERVER_PATH = "automation_orchestrator\\manage.py"
+
+
 sys.path.append('automation_orchestrator')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'automation_orchestrator.settings'
 django.setup()
@@ -47,6 +52,8 @@ def database_backup():
 
 
 def main():
+    os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
     database_backup()
 
     start_time_main = datetime.now()
@@ -57,7 +64,7 @@ def main():
     restart_time = 2
     error_count = 0
 
-    if not os.path.exists("automation_orchestrator\\manage.py"):
+    if not os.path.exists(MANAGE_SERVER_PATH):
         print(f"{datetime.now()}: ERROR! The 'manage.py' file was not found, closing down...")
         sleep(restart_time)
         return None
@@ -69,22 +76,23 @@ def main():
 
     if str(sys.argv[-1]).lower() == '--locally=true':
         url = "http://127.0.0.1:8000/"
-        cmd = [python, 'automation_orchestrator\\manage.py', 'runserver', '--noreload']
+        cmd = [python, MANAGE_SERVER_PATH, 'runserver', '--noreload']
     else:
         url = gethostbyname_ex(gethostname())[-1][-1]
         url = f"http://{url}:8000/"
-        cmd = [python, 'automation_orchestrator\\manage.py', 'runserver', '0.0.0.0:8000', '--noreload']
+        cmd = [python, MANAGE_SERVER_PATH, 'runserver', '0.0.0.0:8000', '--noreload']
 
     while True:
         start_time_loop = datetime.now()
 
-        with open("logs\\server_log.txt", "w") as log_file:
+        with open(SERVER_LOG_PATH, "w") as log_file:
             with Popen(cmd, stdout=log_file, stderr=log_file) as p:
                 try:
                     print(f"{datetime.now()}: The server is now running on: {url}")
                     print(f"{datetime.now()}: The server will automatically restart in {str(server_runtime)} seconds...")
 
                     while True:
+                        range(10000)
                         sleep(sleep_time)
 
                         try:
@@ -93,12 +101,12 @@ def main():
                         except requests.exceptions.Timeout:
                             server_responded = False
 
-                        if (datetime.now() - start_time_loop).seconds >= server_runtime or os.path.exists("logs\\error_log.txt") or not server_responded:
+                        if (datetime.now() - start_time_loop).seconds >= server_runtime or os.path.exists(ERROR_LOG_PATH) or not server_responded:
                             if not BotflowExecution.objects.filter(Q(status="Pending") | Q(status="Running")).exists() and not PythonFunctionExecution.objects.filter(time_end__isnull=True).exists():
-                                if os.path.exists("logs\\error_log.txt"):
+                                if os.path.exists(ERROR_LOG_PATH):
                                     error_count += 1
 
-                                    with open("logs\\error_log.txt") as error_file:
+                                    with open(ERROR_LOG_PATH) as error_file:
                                         error_message = error_file.read()
 
                                     print(f"{datetime.now()}: ERROR OCCURRED: {error_message}")

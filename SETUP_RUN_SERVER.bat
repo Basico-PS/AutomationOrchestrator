@@ -25,12 +25,12 @@ echo It is recommended NOT to run with highest privileges unless it is necessary
 CALL SET /P privileges=Would you like to run the server with highest privileges (Y/N)?
 
 IF %server% == L (
-    CALL SET batchfile="%CD%\run_server\RUN_SERVER_LOCALLY.bat"
+    CALL SET locally=true
 ) else (
     IF %server% == l (
-        CALL SET batchfile="%CD%\run_server\RUN_SERVER_LOCALLY.bat"
+        CALL SET locally=true
     ) else (
-        CALL SET batchfile="%CD%\run_server\RUN_SERVER_NETWORK.bat"
+        CALL SET locally=false
     )
 )
 
@@ -44,5 +44,5 @@ IF %privileges% == Y (
     )
 )
 
-CALL SCHTASKS /CREATE /SC DAILY /TN "AutomationOrchestratorRunServer" /TR %batchfile% /ST 00:00 /RI 1 /DU 23:59 /RL %level% /F
+CALL SCHTASKS /CREATE /SC DAILY /TN "AutomationOrchestratorRunServer" /TR "'%CD%\venv\scripts\python.exe' %CD%\automation_orchestrator\run_server.py --locally=%locally%" /ST 00:00 /RI 1 /DU 23:59 /RL %level% /F
 TIMEOUT 15

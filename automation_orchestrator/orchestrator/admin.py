@@ -690,7 +690,7 @@ class ScheduleTriggerAdmin(SimpleHistoryAdmin):
     list_display = ('pk_formatted', 'assigned_bots', 'app', 'botflow',
                     'frequency', 'run_every', 'run_start',
                     'activated', 'status',
-                    'next_execution',
+                    'next_execution_formatted',
                     'update_record',)
     list_editable = ('app', 'botflow',
                     'frequency', 'run_every', 'run_start', 'activated',)
@@ -707,6 +707,14 @@ class ScheduleTriggerAdmin(SimpleHistoryAdmin):
         return obj.pk
     pk_formatted.admin_order_field = 'pk'
     pk_formatted.short_description = 'ID'
+
+    def next_execution_formatted(self, obj):
+        time = obj.next_execution
+        if time != None and time != "":
+            time = time.astimezone().strftime("%Y-%m-%d %H:%M")
+        return time
+    next_execution_formatted.admin_order_field = 'next_execution'
+    next_execution_formatted.short_description = 'Next Execution'
 
 
 class EmailImapTriggerForm(forms.ModelForm):
@@ -895,7 +903,7 @@ class BotflowExecutionAdmin(SimpleHistoryAdmin):
     def time_queued_formatted(self, obj):
         time = obj.time_queued
         if time != None:
-            time = time.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+            time = time.astimezone().strftime("%Y-%m-%d %H:%M:%S")
         return time
     time_queued_formatted.admin_order_field = 'time_queued'
     time_queued_formatted.short_description = 'Time Queued'
@@ -903,7 +911,7 @@ class BotflowExecutionAdmin(SimpleHistoryAdmin):
     def time_start_formatted(self, obj):
         time = obj.time_start
         if time != None:
-            time = time.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+            time = time.astimezone().strftime("%Y-%m-%d %H:%M:%S")
         return time
     time_start_formatted.admin_order_field = 'time_start'
     time_start_formatted.short_description = 'Time Start'
@@ -911,7 +919,7 @@ class BotflowExecutionAdmin(SimpleHistoryAdmin):
     def time_end_formatted(self, obj):
         time = obj.time_end
         if time != None:
-            time = time.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+            time = time.astimezone().strftime("%Y-%m-%d %H:%M:%S")
         return time
     time_end_formatted.admin_order_field = 'time_end'
     time_end_formatted.short_description = 'Time End'
@@ -919,7 +927,7 @@ class BotflowExecutionAdmin(SimpleHistoryAdmin):
     def time_updated_formatted(self, obj):
         time = obj.time_updated
         if time != None:
-            time = time.astimezone().strftime("%d-%m-%Y %H:%M:%S")
+            time = time.astimezone().strftime("%Y-%m-%d %H:%M:%S")
         return time
     time_updated_formatted.admin_order_field = 'time_updated'
     time_updated_formatted.short_description = 'Time Updated'

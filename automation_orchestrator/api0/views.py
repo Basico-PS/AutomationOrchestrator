@@ -59,7 +59,8 @@ class ApiTriggerView(viewsets.ModelViewSet):
             bot_pk=bot.pk,
             app_pk=api_trigger.app.pk,
             botflow_pk=api_trigger.botflow.pk,
-            trigger=f"API Trigger: {str(pk)}"
+            trigger=f"API Trigger: {str(pk)}",
+            custom_status=api_trigger.botflow_execution_custom_status
         )
 
         return Response(response)

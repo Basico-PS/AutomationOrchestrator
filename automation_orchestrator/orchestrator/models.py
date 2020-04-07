@@ -162,6 +162,8 @@ class FileTrigger(models.Model):
     run_on_week_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on week days.")
     run_on_weekend_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on weekend days.")
 
+    botflow_execution_custom_status = models.CharField(verbose_name="Botflow Execution Note", max_length=255, blank=True, help_text="Specify a custom text to set as the start note of the queued Botflow Execution.")
+
     status = models.CharField(max_length=255, default="Active", editable=False, help_text="Indicates the status of the trigger.")
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
@@ -208,6 +210,8 @@ class ScheduleTrigger(models.Model):
     next_execution = models.DateTimeField(null=True, blank=True, editable=False, help_text="This field specifies the scheduled time for the next execution.")
     past_settings = models.CharField(max_length=255, blank=True)
 
+    botflow_execution_custom_status = models.CharField(verbose_name="Botflow Execution Note", max_length=255, blank=True, help_text="Specify a custom text to set as the start note of the queued Botflow Execution.")
+
     status = models.CharField(max_length=255, default="Active", editable=False, help_text="Indicates the status of the trigger.")
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
@@ -248,6 +252,8 @@ class EmailImapTrigger(models.Model):
     run_until = models.TimeField(null=True, blank=True, help_text="Specify a time to limit the trigger to only be active before this time.")
     run_on_week_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on week days.")
     run_on_weekend_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on weekend days.")
+
+    botflow_execution_custom_status = models.CharField(verbose_name="Botflow Execution Note", max_length=255, blank=True, help_text="Specify a custom text to set as the start note of the queued Botflow Execution.")
 
     status = models.CharField(max_length=255, default="Active", editable=False, help_text="Indicates the status of the trigger.")
 
@@ -294,6 +300,8 @@ class EmailOutlookTrigger(models.Model):
     run_on_week_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on week days.")
     run_on_weekend_days = models.BooleanField(default=True, help_text="Specify whether the trigger should be active on weekend days.")
 
+    botflow_execution_custom_status = models.CharField(verbose_name="Botflow Execution Note", max_length=255, blank=True, help_text="Specify a custom text to set as the start note of the queued Botflow Execution.")
+
     status = models.CharField(max_length=255, default="Active", editable=False, help_text="Indicates the status of the trigger.")
 
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
@@ -328,6 +336,8 @@ class ApiTrigger(models.Model):
     botflow = models.ForeignKey(Botflow, on_delete=models.PROTECT, help_text="Select the botflow for this trigger.")
 
     activated = models.BooleanField(default=False, help_text="Specify whether the trigger should be active.")
+
+    botflow_execution_custom_status = models.CharField(verbose_name="Botflow Execution Note", max_length=255, blank=True, help_text="Specify a custom text to set as the start note of the queued Botflow Execution.")
 
     status = models.CharField(max_length=255, default="Active", editable=False, help_text="Indicates the status of the trigger.")
 

@@ -19,7 +19,13 @@ admin.site.index_title = 'Orchestrate amazing automation'
 
 
 def queue_item(item, trigger):
-    add_botflow_execution_object(bot_pk=determine_execution_bot(item).pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=trigger)
+    add_botflow_execution_object(
+        bot_pk=determine_execution_bot(item).pk,
+        app_pk=item.app.pk,
+        botflow_pk=item.botflow.pk,
+        trigger=trigger,
+        custom_status=item.botflow_execution_custom_status
+    )
 
 
 def activate_selected_file_triggers(modeladmin, request, queryset):
@@ -628,6 +634,10 @@ class FileTriggerAdmin(SimpleHistoryAdmin):
             'classes': ('collapse',),
             'fields': ('run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',),
         }),
+        ('Botflow Execution Note', {
+            'classes': ('collapse',),
+            'fields': ('botflow_execution_custom_status',),
+        })
     )
 
     list_display = ('pk_formatted', 'assigned_bots', 'app', 'botflow',
@@ -664,7 +674,11 @@ class ScheduleTriggerAdmin(SimpleHistoryAdmin):
             'classes': ('collapse',),
             'fields': ('run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days'),
         }),
-        ('Advanced', {
+        ('Botflow Execution Note', {
+            'classes': ('collapse',),
+            'fields': ('botflow_execution_custom_status',),
+        }),
+        ('Next Execution', {
             'classes': ('collapse',),
             'fields': ('next_execution',),
         }),
@@ -724,6 +738,10 @@ class EmailImapTriggerAdmin(SimpleHistoryAdmin):
             'classes': ('collapse',),
             'fields': ('run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',),
         }),
+        ('Botflow Execution Note', {
+            'classes': ('collapse',),
+            'fields': ('botflow_execution_custom_status',),
+        })
     )
 
     list_display = ('pk_formatted', 'assigned_bots', 'app', 'botflow',
@@ -770,6 +788,10 @@ class EmailOutlookTriggerAdmin(SimpleHistoryAdmin):
             'classes': ('collapse',),
             'fields': ('run_after', 'run_until', 'run_on_week_days', 'run_on_weekend_days',),
         }),
+        ('Botflow Execution Note', {
+            'classes': ('collapse',),
+            'fields': ('botflow_execution_custom_status',),
+        })
     )
 
     list_display = ('pk_formatted', 'assigned_bots', 'app', 'botflow',
@@ -806,6 +828,10 @@ class ApiTriggerAdmin(SimpleHistoryAdmin):
         ('Activate', {
             'fields': ('activated',),
         }),
+        ('Botflow Execution Note', {
+            'classes': ('collapse',),
+            'fields': ('botflow_execution_custom_status',),
+        })
     )
 
     list_display = ('pk_formatted', 'assigned_bots', 'app', 'botflow',
@@ -846,7 +872,7 @@ class BotflowExecutionAdmin(SimpleHistoryAdmin):
                     'custom_status_formatted',)
     list_display_links = ['pk_formatted']
     list_filter = ('computer_name', 'user_name', 'app', 'botflow', 'status',)
-    readonly_fields = [field.name for field in BotflowExecution._meta.get_fields()]
+    readonly_fields = [field.name for field in BotflowExecution._meta.get_fields() if field.name != 'custom_status']
 
     actions = [cancel_selected_botflow_executions, export_selected_botflow_executions,]
 

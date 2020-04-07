@@ -109,7 +109,7 @@ def time_filter_evalution(item):
     return True
 
 
-def add_botflow_execution_object(bot_pk, app_pk, botflow_pk, trigger):
+def add_botflow_execution_object(bot_pk, app_pk, botflow_pk, trigger, custom_status):
     bot_object = Bot.objects.get(pk=bot_pk)
     app_object = App.objects.get(pk=app_pk)
     botflow_object = Botflow.objects.get(pk=botflow_pk)
@@ -123,6 +123,7 @@ def add_botflow_execution_object(bot_pk, app_pk, botflow_pk, trigger):
                                          computer_name=bot_object.computer_name,
                                          user_name=bot_object.user_name,
                                          priority=botflow_object.priority,
+                                         custom_status=custom_status[:250],
                                          status="Pending",
                                          queued_notification = botflow_object.queued_notification,
                                          started_notification = botflow_object.started_notification,
@@ -367,7 +368,13 @@ def file_trigger_monitor_evaluate():
                 add_botflow_execution = True
 
             if add_botflow_execution:
-                add_botflow_execution_object(bot_pk=determine_execution_bot(item).pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=f"File Trigger: {path_destination}")
+                add_botflow_execution_object(
+                    bot_pk=determine_execution_bot(item).pk,
+                    app_pk=item.app.pk,
+                    botflow_pk=item.botflow.pk,
+                    trigger=f"File Trigger: {path_destination}",
+                    custom_status=item.botflow_execution_custom_status
+                )
 
         if item.status != "Active":
             item.status = "Active"
@@ -456,7 +463,13 @@ def schedule_trigger_monitor_evaluate():
 
             if add_botflow_execution:
                 time_trigger = utc_now.astimezone(pytz.timezone('Europe/Copenhagen')).strftime("%Y-%m-%d %H:%M")
-                add_botflow_execution_object(bot_pk=determine_execution_bot(item).pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=f"Schedule Trigger: {time_trigger}")
+                add_botflow_execution_object(
+                    bot_pk=determine_execution_bot(item).pk,
+                    app_pk=item.app.pk,
+                    botflow_pk=item.botflow.pk,
+                    trigger=f"Schedule Trigger: {time_trigger}",
+                    custom_status=item.botflow_execution_custom_status
+                )
 
             run_start = utc_now
             item.next_execution = calculate_next_botflow_execution(run_start, item.frequency, item.run_every, run_after, run_until, item.run_on_week_days, item.run_on_weekend_days)
@@ -566,7 +579,13 @@ def email_imap_trigger_monitor_evaluate():
                     add_botflow_execution = True
 
                 if add_botflow_execution:
-                    add_botflow_execution_object(bot_pk=determine_execution_bot(item).pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=f"Email IMAP Trigger: {email_subject}")
+                    add_botflow_execution_object(
+                        bot_pk=determine_execution_bot(item).pk,
+                        app_pk=item.app.pk,
+                        botflow_pk=item.botflow.pk,
+                        trigger=f"Email IMAP Trigger: {email_subject}",
+                        custom_status=item.botflow_execution_custom_status
+                    )
 
             except:
                 pass
@@ -721,7 +740,13 @@ def email_outlook_trigger_monitor_evaluate(email_outlook):
                 add_botflow_execution = True
 
             if add_botflow_execution:
-                add_botflow_execution_object(bot_pk=determine_execution_bot(item).pk, app_pk=item.app.pk, botflow_pk=item.botflow.pk, trigger=f"Email Outlook Trigger: {email.Subject}")
+                add_botflow_execution_object(
+                    bot_pk=determine_execution_bot(item).pk,
+                    app_pk=item.app.pk,
+                    botflow_pk=item.botflow.pk,
+                    trigger=f"Email Outlook Trigger: {email.Subject}",
+                    custom_status=item.botflow_execution_custom_status
+                )
 
         if item.status != "Active":
             item.status = "Active"

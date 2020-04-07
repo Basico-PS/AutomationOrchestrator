@@ -3,6 +3,7 @@ import csv
 import pytz
 import datetime
 import subprocess
+from tzlocal import get_localzone
 from django import forms
 from django.db import models
 from django.contrib import admin, messages
@@ -54,7 +55,9 @@ def activate_selected_api_triggers(modeladmin, request, queryset):
 
 
 def cancel_selected_botflow_executions(modeladmin, request, queryset):
-    time_now = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))}00")
+    time_zone = str(get_localzone())
+
+    time_now = datetime.datetime.now(pytz.timezone(time_zone)).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone(time_zone)).utcoffset().seconds / 60 / 60))}00")
 
     for item in queryset:
         if item.time_start == None or item.time_end == None or item.status == "Running":

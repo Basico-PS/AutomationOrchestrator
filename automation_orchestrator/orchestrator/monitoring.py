@@ -11,6 +11,7 @@ import subprocess
 import time as t
 import win32com.client as win32
 from random import randrange
+from tzlocal import get_localzone
 from sqlite3 import OperationalError
 from imaplib import IMAP4, IMAP4_SSL
 from .models import Bot, App, Botflow, FileTrigger, ScheduleTrigger, EmailImapTrigger, EmailOutlookTrigger, BotflowExecution
@@ -72,9 +73,11 @@ def determine_execution_bot(trigger):
 
 
 def time_filter_evalution(item):
+    time_zone = str(get_localzone())
+
     utc_now = pytz.utc.localize(datetime.datetime.utcnow())
-    cph_now = datetime.datetime.now(pytz.timezone('Europe/Copenhagen'))
-    utc_offset = utc_now.astimezone(pytz.timezone('Europe/Copenhagen')).utcoffset()
+    cph_now = datetime.datetime.now(pytz.timezone(time_zone))
+    utc_offset = utc_now.astimezone(pytz.timezone(time_zone)).utcoffset()
 
     if not item.run_on_week_days:
         if 0 <= cph_now.weekday() <= 4:
@@ -139,8 +142,10 @@ def add_botflow_execution_object(bot_pk, app_pk, botflow_pk, trigger, custom_sta
 
 
 def calculate_next_botflow_execution(run_start, frequency, run_every, run_after, run_until, run_on_week_days, run_on_weekend_days):
+    time_zone = str(get_localzone())
+
     utc_now = pytz.utc.localize(datetime.datetime.utcnow())
-    utc_offset = utc_now.astimezone(pytz.timezone('Europe/Copenhagen')).utcoffset()
+    utc_offset = utc_now.astimezone(pytz.timezone(time_zone)).utcoffset()
 
     for i in range(5256000):
         if frequency == "MIN":
@@ -415,8 +420,10 @@ def schedule_trigger_monitor():
 def schedule_trigger_monitor_evaluate():
     items = ScheduleTrigger.objects.filter(activated=True)
 
+    time_zone = str(get_localzone())
+
     utc_now = pytz.utc.localize(datetime.datetime.utcnow())
-    utc_offset = utc_now.astimezone(pytz.timezone('Europe/Copenhagen')).utcoffset()
+    utc_offset = utc_now.astimezone(pytz.timezone(time_zone)).utcoffset()
     utc_now_formatted = pytz.utc.localize(datetime.datetime(
         year=utc_now.year,
         month=utc_now.month,
@@ -462,7 +469,7 @@ def schedule_trigger_monitor_evaluate():
                 add_botflow_execution = True
 
             if add_botflow_execution:
-                time_trigger = utc_now.astimezone(pytz.timezone('Europe/Copenhagen')).strftime("%Y-%m-%d %H:%M")
+                time_trigger = utc_now.astimezone(pytz.timezone(time_zone)).strftime("%Y-%m-%d %H:%M")
                 add_botflow_execution_object(
                     bot_pk=determine_execution_bot(item).pk,
                     app_pk=item.app.pk,
@@ -783,6 +790,8 @@ def botflow_execution_monitor():
 def botflow_execution_monitor_evaluate():
     items = BotflowExecution.objects.filter(status="Pending", computer_name__iexact=os.environ['COMPUTERNAME'], user_name__iexact=os.environ['USERNAME']).order_by('priority', 'time_queued')
 
+    time_zone = str(get_localzone())
+
     for item in items:
         app = item.app.split("\\")[-1].lower()
 
@@ -809,7 +818,7 @@ def botflow_execution_monitor_evaluate():
                             if item.nintex_rpa_available_foxtrot_licenses <= len([file for file in os.listdir(nintex_rpa_license_path) if file.startswith("FTE") and file.endswith(".net")]):
                                 continue
 
-        item.time_start = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))}00")
+        item.time_start = datetime.datetime.now(pytz.timezone(time_zone)).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone(time_zone)).utcoffset().seconds / 60 / 60))}00")
         item.status = "Running"
         item.save()
 
@@ -877,7 +886,7 @@ def botflow_execution_monitor_evaluate():
         else:
             status = "Error - Botflow Missing"
 
-        item.time_end = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))}00")
+        item.time_end = datetime.datetime.now(pytz.timezone(time_zone)).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone(time_zone)).utcoffset().seconds / 60 / 60))}00")
         item.status = status
         item.save()
 

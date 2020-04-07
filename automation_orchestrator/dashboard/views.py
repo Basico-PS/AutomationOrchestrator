@@ -1,5 +1,6 @@
 import pytz
 import json
+from tzlocal import get_localzone
 from datetime import datetime, timedelta
 from django.core import serializers
 from django.shortcuts import render, redirect
@@ -12,6 +13,8 @@ def redirect_overview(request):
 
 
 def format_botflow_executions(botflow_executions):
+    time_zone = str(get_localzone())
+
     botflow_executions_overview = []
     botflow_executions_calendar = []
 
@@ -62,12 +65,12 @@ def format_botflow_executions(botflow_executions):
         record_calendar['status'] = record_overview['status']
 
         try:
-            record_calendar['time_start'] = (record_overview['time_start'] + timedelta(hours=int(datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))).strftime(f"%Y-%m-%dT%H:%M:%S")
+            record_calendar['time_start'] = (record_overview['time_start'] + timedelta(hours=int(datetime.now(pytz.timezone(time_zone)).utcoffset().seconds / 60 / 60))).strftime(f"%Y-%m-%dT%H:%M:%S")
         except:
             record_calendar['time_start'] = ""
 
         try:
-            record_calendar['time_end'] = (record_overview['time_end'] + timedelta(hours=int(datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))).strftime(f"%Y-%m-%dT%H:%M:%S")
+            record_calendar['time_end'] = (record_overview['time_end'] + timedelta(hours=int(datetime.now(pytz.timezone(time_zone)).utcoffset().seconds / 60 / 60))).strftime(f"%Y-%m-%dT%H:%M:%S")
         except:
             record_calendar['time_end'] = ""
 

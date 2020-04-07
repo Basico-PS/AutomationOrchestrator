@@ -2,6 +2,7 @@ import json
 import pytz
 import datetime
 import traceback
+from tzlocal import get_localzone
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
@@ -209,6 +210,8 @@ def exec_python_function(code, encrypted_value_1, encrypted_value_2, encrypted_v
 
 
 def log_python_function(python_function=None, request_user=None, request_ip=None, code=None, input=None, output=None, execution=None):
+    time_zone = str(get_localzone())
+
     if execution is None:
         execution = PythonFunctionExecution(
             python_function=python_function,
@@ -216,7 +219,7 @@ def log_python_function(python_function=None, request_user=None, request_ip=None
             request_ip=request_ip,
             code=code,
             input=input,
-            time_start = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))}00")
+            time_start = datetime.datetime.now(pytz.timezone(time_zone)).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone(time_zone)).utcoffset().seconds / 60 / 60))}00")
         )
         execution.save()
 
@@ -224,7 +227,7 @@ def log_python_function(python_function=None, request_user=None, request_ip=None
 
     else:
         execution.output = output
-        execution.time_end = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).utcoffset().seconds / 60 / 60))}00")
+        execution.time_end = datetime.datetime.now(pytz.timezone(time_zone)).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone(time_zone)).utcoffset().seconds / 60 / 60))}00")
         execution.save()
 
         return execution

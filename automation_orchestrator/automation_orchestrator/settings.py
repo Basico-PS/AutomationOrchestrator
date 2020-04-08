@@ -142,7 +142,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': generate_database_folder_structure(DATABASE_DIR),
-    }
+        'OPTIONS': {
+            'timeout': 30,
+        },
+    },
 }
 
 

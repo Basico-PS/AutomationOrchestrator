@@ -299,6 +299,8 @@ def bot_status(item):
 
 
 def file_trigger_monitor():
+    t.sleep(15)
+
     while True:
         range(10000)
         t.sleep(randrange((round(trigger_sleep / 2)), trigger_sleep))
@@ -390,6 +392,8 @@ def file_trigger_monitor_evaluate():
 
 
 def schedule_trigger_monitor():
+    t.sleep(15)
+
     try:
         for schedule_trigger in ScheduleTrigger.objects.all():
             schedule_trigger.next_execution = None
@@ -498,6 +502,8 @@ def schedule_trigger_monitor_evaluate():
 
 
 def email_imap_trigger_monitor():
+    t.sleep(15)
+
     while True:
         range(10000)
         t.sleep(randrange((round(email_imap_sleep / 2)), email_imap_sleep))
@@ -616,6 +622,8 @@ def email_imap_trigger_monitor_evaluate():
 
 
 def email_outlook_trigger_monitor():
+    t.sleep(15)
+
     while True:
         range(10000)
         t.sleep(randrange((round(email_outlook_sleep / 2)), email_outlook_sleep))
@@ -767,6 +775,8 @@ def email_outlook_trigger_monitor_evaluate(email_outlook):
 
 
 def botflow_execution_monitor():
+    t.sleep(15)
+
     while True:
         range(10000)
         t.sleep(randrange((round(queue_sleep / 2)), queue_sleep))

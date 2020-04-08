@@ -21,7 +21,6 @@ from dateutil.relativedelta import relativedelta
 from pythoncom import CoInitialize, CoUninitialize
 
 
-bot_status_sleep = 60
 trigger_sleep = 5
 email_imap_sleep = 15
 email_outlook_sleep = 15

@@ -44,5 +44,5 @@ IF %privileges% == Y (
     )
 )
 
-CALL SCHTASKS /CREATE /SC DAILY /TN "AutomationOrchestratorRunServer" /TR "'%CD%\venv\scripts\python.exe' %CD%\automation_orchestrator\run_server.py --locally=%locally%" /ST 00:00 /RI 1 /DU 23:59 /RL %level% /F
+CALL SCHTASKS /CREATE /SC DAILY /TN "AutomationOrchestratorRunServer" /TR "'%CD%\venv\scripts\python.exe' '%CD%\automation_orchestrator\run_server.py' --locally=%locally%" /ST 00:00 /RI 1 /DU 23:59 /RL %level% /F
 TIMEOUT 15

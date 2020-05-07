@@ -9,13 +9,14 @@ The Automation Orchestrator is tested with and supports Nintex RPA version <= 15
 
 ## Table of contents
 
-- [Introduction](#introduction)
-- [Installation](#installation)
-- [Server](#server)
-- [Setup](#setup)
-- [Notes](#notes)
-- [Copyrights](#copyrights)
-- [Contact](#contact)
+-   [Introduction](#introduction)
+-   [Installation](#installation)
+-   [Server](#server)
+-   [Common Issues](#common-issues)
+-   [Setup](#setup)
+-   [Notes](#notes)
+-   [Copyrights](#copyrights)
+-   [Contact](#contact)
 
 ## Introduction
 
@@ -26,40 +27,42 @@ Some of the biggest web platforms and brands like [Instagram and Pinterest use t
 The purpose of the Automation Orchestrator is to offer a well-functioning, fully customizable web server application to trigger and schedule scripts. The Automation Orchestrator can run as a fully local server only available on the local host accessible via a browser or as a server available in your protected internal network accessible via a browser.
 
 Feature highlights out-of-the-box:
-- Authentication & Authorization
-  - Groups
-  - Users
-- Setup
-  - Bots
-  - Apps
-  - Botflows
-- Notifications
-  - SMTP accounts
-- Triggers
-  - API Triggers
-  - Email IMAP Triggers
-  - Email Outlook Triggers
-  - File Triggers
-  - Schedule Triggers
-- Botflow Execution Log
-  - Queue Functionality with License Awareness and Botflow Priorities
-- Native Script Support
-  - Python
-  - Nintex Foxtrot RPA
-  - UiPath
-  - VBScript
-  - Any other tools that can be executed as a command with: "application_path.exe" "file_path.abc"
-- Dashboard
-  - Graphic Execution Overview
-  - Calendar View of Execution History
+
+-   Authentication & Authorization
+    -   Groups
+    -   Users
+-   Setup
+    -   Bots
+    -   Apps
+    -   Botflows
+-   Notifications
+    -   SMTP accounts
+-   Triggers
+    -   API Triggers
+    -   Email IMAP Triggers
+    -   Email Outlook Triggers
+    -   File Triggers
+    -   Schedule Triggers
+-   Botflow Execution Log
+    -   Queue Functionality with License Awareness and Botflow Priorities
+-   Native Script Support
+    -   Python
+    -   Nintex Foxtrot RPA
+    -   UiPath
+    -   VBScript
+    -   Any other tools that can be executed as a command with: "application_path.exe" "file_path.abc"
+-   Dashboard
+    -   Graphic Execution Overview
+    -   Calendar View of Execution History
 
 ## Installation
 
 We highly recommend that the Automation Orchestrator is installed and setup only by people experienced with both Python and Nintex RPA. You are always welcome to contact us for assistance via: robotics@basico.dk
 
 Out-of-the-box, the Automation Orchestrator can trigger and schedule scripts on the same machine and user running the server. In case you wish to do either of the following two things, you need to utilize the [Automation Orchestrator Executor](https://github.com/Basico-PS/AutomationOrchestratorExecutor) add-on:
-- Run the Automation Orchestrator on one machine but execute the scripts on a different machine, or
-- Run the Automation Orchestrator on a machine (for example, a Windows Terminal Server) with multiple users that are supposed to execute scripts
+
+-   Run the Automation Orchestrator on one machine but execute the scripts on a different machine, or
+-   Run the Automation Orchestrator on a machine (for example, a Windows Terminal Server) with multiple users that are supposed to execute scripts
 
 For the Automation Orchestrator to work, you need to install Python. Make sure to install the latest [![Python 3](https://img.shields.io/badge/python-3-blue.svg)](https://www.python.org/ftp/python/3.8.2/python-3.8.2-amd64.exe) 64-bit version. If you are in any doubts on how to correctly install Python, follow [this guide](https://www.mbalslow.com/blog/article/how-to-install-python/) or [contact us](#contact).
 
@@ -93,6 +96,26 @@ IMPORTANT: If you wish to stop the server, <u>you MUST click the shortcut ctrl+c
   <img src="/images/close_server.png">
 </p>
 
+## Common Issues
+
+This section contains a list of common issues and a description on how to solve them. In case the explained solution does not solve the issue or you experience issues not listen below, please report it [here](https://github.com/Basico-PS/AutomationOrchestrator/issues/new).
+
+### During Installation
+
+-   If the process of downloading and installing the Python packages fail with a Proxy Error, you need to you must define the your proxy settings before performing the "pip install" command. This can be done either by adjusting the INSTALL.bat file or performing the installation process (the commands of the INSTALL.bat) manually using the CMD. This means that you need to run the following commands before running the "pip install -r requirements.txt --no-cache-dir" command (make sure to replace the placeholder values):
+    set http_proxy=http://USERNAME:PASSWORD@PROXY_ADRESS:PORT
+    set https_proxy=https://USERNAME:PASSWORD@PROXY_ADRESS:PORT
+
+### Running Automation Orchestrator
+
+-   After a successful installation (no errors during the process), if you experience that you are not able to access the Automation Orchestrator in the browser, make sure to restart the machine. In case that does not help, check the following point.
+
+-   The Automation Orchestrator will fail to run if the user does not have permissions to execute Python. Make sure to allow the user to execute the global install of Python (python.exe and pythonw.exe) and hereafter the Python (python.exe and pythonw.exe) installed in the virtual environment of the Automation Orchestrator ("./venv/scripts/python.exe" and "./venv/scripts/pythonw.exe").
+
+-   If you either experience that you are unable to access the Automation Orchestrator in the browser or you get a "OperationalError at /login/ - attempt to write a readonly database", make sure that the user has full read and write permissions to the folder where Automation Orchestrator is installed. Right-click on the main "AutomationOrchestrator" folder and give the specific if not all users full permissions.
+
+-   If you have selected to run the Automation Orchestrator in your protected internal network but are unable to access the application in a browser from another computer in your domain, you need to make sure that your Python instance is allowed to communicate through the firewall of your domain. To fix this, you can go to "Allow an app through Windows Firewall" and click "Allow another app...". First, make sure to add the global install of Python (python.exe and pythonw.exe) and hereafter the Python (python.exe and pythonw.exe) installed in the virtual environment of the Automation Orchestrator ("./venv/scripts/python.exe" and "./venv/scripts/pythonw.exe").
+
 ## Setup
 
 You are now ready to access the Automation Orchestrator via a browser and get started. As long as the Automation Orchestrator is running, you can access it in your browser. The URL is specified in the window of the server running. Begin by signing in to the Automation Orchestrator using the super user that you created during the installation process. You should now see the home page.
@@ -105,6 +128,7 @@ You are now ready to access the Automation Orchestrator via a browser and get st
 </p>
 
 After signing in, you can begin to set up the Automation Orchestrator. This is the order of the setup:
+
 1. Add a Bot: This is the computer name and username to run the automation. Begin by adding the current computer and user, which will be the default values of the first Bot you add.
 
 <p align="center">
@@ -132,18 +156,18 @@ After signing in, you can begin to set up the Automation Orchestrator. This is t
   <img src="/images/add_file_trigger.png">
 </p>
 
-- For testing purposes, and if you ever need to start an automation manually, you can always manually activate the Triggers by selecting them in the list and use the action in the dropdown to activate them.
+-   For testing purposes, and if you ever need to start an automation manually, you can always manually activate the Triggers by selecting them in the list and use the action in the dropdown to activate them.
 
 <p align="center">
   <img src="/images/test_trigger.png">
 </p>
 
 5. Follow the Botflow Executions: When Triggers are activated, a record is added to Botflow Executions. The different statusses are:
-    * Pending
-    * Running
-    * Completed
-    * Error
-    * Cancelled
+    - Pending
+    - Running
+    - Completed
+    - Error
+    - Cancelled
 
 <p align="center">
   <img src="/images/executions.png">
@@ -155,7 +179,7 @@ After signing in, you can begin to set up the Automation Orchestrator. This is t
   <img src="/images/add_smtp_account.png">
 </p>
 
-- After setting up the SMTP Account, you can test it to make sure that the settings are correct by selecting it in the list and use the action in the dropdown to test it.
+-   After setting up the SMTP Account, you can test it to make sure that the settings are correct by selecting it in the list and use the action in the dropdown to test it.
 
 <p align="center">
   <img src="/images/test_smtp_account_1.png">
@@ -164,7 +188,7 @@ After signing in, you can begin to set up the Automation Orchestrator. This is t
   <img src="/images/test_smtp_account_2.png">
 </p>
 
-- Now, go to your Botflows and add the recipients for each of the Botflow Execution events.
+-   Now, go to your Botflows and add the recipients for each of the Botflow Execution events.
 
 <p align="center">
   <img src="/images/add_botflow_3.png">

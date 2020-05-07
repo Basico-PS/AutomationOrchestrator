@@ -103,8 +103,8 @@ This section contains a list of common issues and a description on how to solve 
 ### During Installation
 
 -   If the process of downloading and installing the Python packages fail with a Proxy Error, you need to you must define the your proxy settings before performing the "pip install" command. This can be done either by adjusting the INSTALL.bat file or performing the installation process (the commands of the INSTALL.bat) manually using the CMD. This means that you need to run the following commands before running the "pip install -r requirements.txt --no-cache-dir" command (make sure to replace the placeholder values):
-    set http_proxy=http://USERNAME:PASSWORD@PROXY_ADRESS:PORT
-    set https_proxy=https://USERNAME:PASSWORD@PROXY_ADRESS:PORT
+    -   set "http_proxy=http://USERNAME:PASSWORD@PROXY_ADRESS:PORT"
+    -   set "https_proxy=https://USERNAME:PASSWORD@PROXY_ADRESS:PORT"
 
 ### Running Automation Orchestrator
 

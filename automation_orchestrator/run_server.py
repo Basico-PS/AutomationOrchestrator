@@ -146,9 +146,10 @@ def main():
 
 def on_quit_callback(systray):
     global SHUT_DOWN
-    SHUT_DOWN = True
+    if not SHUT_DOWN:
+        SHUT_DOWN = True
 
-    print(f"{datetime.now()}: Request to quit the server received!")
+        print(f"{datetime.now()}: Request to quit the server received!")
 
 
 if __name__ == '__main__':

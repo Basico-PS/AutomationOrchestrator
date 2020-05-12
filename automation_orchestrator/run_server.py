@@ -8,6 +8,7 @@ from django.db.models import Q
 from subprocess import Popen, PIPE
 from time import sleep
 from datetime import datetime
+from infi.systray import SysTrayIcon
 from automation_orchestrator.settings import DATABASE_DIR, DATABASE_NAME
 
 
@@ -59,8 +60,6 @@ def database_backup():
 def main():
     global SHUT_DOWN
 
-    os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
     server_runtime = 1800
     sleep_time = 10
     restart_time = 2
@@ -109,7 +108,7 @@ def main():
                     except requests.exceptions.Timeout:
                         server_responded = False
 
-                    if (datetime.now() - start_time_loop).seconds >= server_runtime or os.path.exists(ERROR_LOG_PATH) or not server_responded:
+                    if (datetime.now() - start_time_loop).seconds >= server_runtime or os.path.exists(ERROR_LOG_PATH) or not server_responded or SHUT_DOWN:
                         if not BotflowExecution.objects.filter(Q(status="Pending") | Q(status="Running")).exists() and not PythonFunctionExecution.objects.filter(time_end__isnull=True).exists():
                             if os.path.exists(ERROR_LOG_PATH):
                                 error_count += 1
@@ -129,8 +128,8 @@ def main():
                 SHUT_DOWN = True
 
             else:
-                print(f"{datetime.now()}: Restarting the server!")
-                SHUT_DOWN = False
+                if not SHUT_DOWN:
+                    print(f"{datetime.now()}: Restarting the server!")
 
             finally:
                 print(f"{datetime.now()}: Stopping the server...")
@@ -145,9 +144,19 @@ def main():
                 sleep(restart_time)
 
 
-if __name__ == '__main__':
-    while 1:
-        main()
+def on_quit_callback(systray):
+    global SHUT_DOWN
+    SHUT_DOWN = True
 
-        if SHUT_DOWN:
-            break
+    print(f"{datetime.now()}: Request to quit the server received!")
+
+
+if __name__ == '__main__':
+    os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+    with SysTrayIcon("automation_orchestrator\\static\\admin\\favicon.ico", "Automation Orchestrator", on_quit=on_quit_callback) as systray:
+        while 1:
+            main()
+
+            if SHUT_DOWN:
+                break

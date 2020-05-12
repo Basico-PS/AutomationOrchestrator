@@ -24,7 +24,7 @@ IF NOT %server% == N (
 echo It is recommended NOT to run with highest privileges unless it is necessary for the command to be executed.
 CALL SET /P privileges=Would you like to run the server with highest privileges (Y/N)?
 
-echo It is recommended NOT to run the application hidden.
+echo It is recommended NOT to run the application hidden. Only experienced users should run it hidden!
 CALL SET /P hidden=Would you like to run the application hidden (Y/N)?
 
 IF %server% == L (

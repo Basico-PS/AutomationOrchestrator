@@ -297,6 +297,20 @@ def bot_status(item):
             item.save_without_historical_record()
 
 
+def botflow_execution_monitor_running_timeout():
+    time_zone = str(get_localzone())
+
+    items = BotflowExecution.objects.filter(status="Running")
+
+    for item in items:
+        runtime_minutes = ((pytz.utc.localize(datetime.datetime.utcnow()) - item.time_start).total_seconds()) / 60
+
+        if runtime_minutes > (item.timeout_minutes + 5):
+            item.time_end = datetime.datetime.now(pytz.timezone(time_zone)).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone(time_zone)).utcoffset().seconds / 60 / 60))}00")
+            item.status = "Error - Unknown Interruption"
+            item.save()
+
+
 def file_trigger_monitor():
     t.sleep(15)
 
@@ -785,6 +799,10 @@ def botflow_execution_monitor():
 
         try:
             botflow_execution_monitor_evaluate()
+
+            # Using the randrange to make sure that the check is not completed in every loop.
+            if randrange(1, 20) == 1:
+                botflow_execution_monitor_running_timeout()
 
         except:
             with open("logs\\error_log.txt", 'a') as f:

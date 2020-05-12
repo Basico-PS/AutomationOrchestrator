@@ -495,7 +495,8 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
             with SMTP(item.server, item.port) as server:
                 if item.tls:
                     server.starttls()
-                server.login(item.email, item.password)
+                if item.password != "":
+                    server.login(item.email, item.password)
                 server.send_message(msg)
 
             messages.success(request, f"Successfully sent an email with {item.email}!")
@@ -513,7 +514,8 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
                     msg['To'] = item.email
 
                     with SMTP_SSL(item.server, item.port) as server:
-                        server.login(item.email, item.password)
+                        if item.password != "":
+                            server.login(item.email, item.password)
                         server.send_message(msg)
 
                     messages.success(request, f"Successfully sent an email with {item.email}!")

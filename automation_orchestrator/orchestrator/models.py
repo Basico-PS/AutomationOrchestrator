@@ -400,7 +400,7 @@ class BotflowExecution(models.Model):
 
 class SmtpAccount(models.Model):
     email = models.EmailField(unique=True, help_text="Specify the email of the SMTP account.")
-    password = EncryptedCharField(max_length=255, help_text="Specify the password of the SMTP account.")
+    password = EncryptedCharField(max_length=255, blank=True, help_text="Specify the password of the SMTP account. If the SMTP account does not require authentication, leave the password blank.<br>IMPORTANT: Remember to re-enter the password every time you edit the SMTP account.")
     server = models.CharField(max_length=255, help_text="Specify the server of the SMTP account. For example: smtp.office365.com")
     port = models.PositiveIntegerField(help_text="Specify the port of the SMTP account. For example: 587")
     tls = models.BooleanField("SSL/TLS", default=True, help_text="Specify whether the SMTP account requires 'SSL/TLS'.")

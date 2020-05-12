@@ -122,7 +122,8 @@ def botflow_execution_notification(sender, instance, **kwargs):
         with SMTP(smtp_account.server, smtp_account.port) as server:
             if smtp_account.tls:
                 server.starttls()
-            server.login(email_from, smtp_account.password)
+            if smtp_account.password != "":
+                server.login(email_from, smtp_account.password)
             server.send_message(msg)
 
         if smtp_account.status != "Active":
@@ -142,7 +143,8 @@ def botflow_execution_notification(sender, instance, **kwargs):
                 )
 
                 with SMTP_SSL(smtp_account.server, smtp_account.port) as server:
-                    server.login(email_from, smtp_account.password)
+                    if smtp_account.password != "":
+                        server.login(email_from, smtp_account.password)
                     server.send_message(msg)
 
                 if smtp_account.status != "Active":
@@ -153,3 +155,8 @@ def botflow_execution_notification(sender, instance, **kwargs):
                 if smtp_account.status != "ERROR":
                     smtp_account.status = "ERROR"
                     smtp_account.save_without_historical_record()
+
+        else:
+            if smtp_account.status != "ERROR":
+                smtp_account.status = "ERROR"
+                smtp_account.save_without_historical_record()

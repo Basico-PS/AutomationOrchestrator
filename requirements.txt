@@ -1,13 +1,13 @@
-Django==3.0.4
+Django==3.0.6
 djangorestframework==3.11
 django-fernet-fields==0.6
 django-filter==2.2.0
 django-modeladmin-reorder==0.3.1
-django-simple-history==2.8.0
+django-simple-history==2.10.0
 django-sortedm2m==3.0.0
 coreapi==2.3.3
 Markdown==3.2
-Pygments==2.5.2
+Pygments==2.6.1
 python-dateutil>=2.8.1
 pywin32>=227
-tzlocal==2.0.0
+tzlocal==2.1

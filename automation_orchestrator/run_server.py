@@ -11,6 +11,7 @@ from datetime import datetime
 from automation_orchestrator.settings import DATABASE_DIR, DATABASE_NAME
 
 
+INFO_LOG_PATH = "logs\\info_log.txt"
 SERVER_LOG_PATH = "logs\\server_log.txt"
 ERROR_LOG_PATH = "logs\\error_log.txt"
 MANAGE_SERVER_PATH = "automation_orchestrator\\manage.py"
@@ -69,10 +70,11 @@ def main():
         sleep(restart_time)
         return None
 
-    if os.path.exists('venv\\scripts\\python.exe'):
-        python = 'venv\\scripts\\python.exe'
+    python_exe = 'pythonw.exe'
+    if os.path.exists(f'venv\\scripts\\{python_exe}'):
+        python = f'venv\\scripts\\{python_exe}'
     else:
-        python = 'python.exe'
+        python = python_exe
 
     if str(sys.argv[-1]).lower() == '--locally=true':
         url = "http://127.0.0.1:8000/"
@@ -90,6 +92,9 @@ def main():
                 try:
                     print(f"{datetime.now()}: The server is now running on: {url}")
                     print(f"{datetime.now()}: The server will automatically restart in {str(server_runtime)} seconds...")
+
+                    with open(INFO_LOG_PATH, "w") as file:
+                        file.write(f"Url: {url}\n")
 
                     while True:
                         range(10000)

@@ -833,7 +833,7 @@ def botflow_execution_monitor_evaluate():
 
         status = "Completed"
 
-        if os.path.isfile(item.botflow):
+        if os.path.isfile(item.app) and os.path.isfile(item.botflow):
             if not [{'botflow': x.botflow, 'trigger': x.trigger} for x in items if x.status == 'Completed'].count({'botflow': item.botflow, 'trigger': item.trigger}) >= 1:
                 try:
                     if app == "foxbot.exe" or app == "foxtrot.exe":
@@ -893,7 +893,12 @@ def botflow_execution_monitor_evaluate():
                 status = "Skipped - Duplicate Queue Items Detected"
 
         else:
-            status = "Error - Botflow Missing"
+            if not os.path.isfile(item.app):
+                status = "Error - App Missing"
+            elif not os.path.isfile(item.botflow):
+                status = "Error - Botflow Missing"
+            else:
+                status = "Error - Unknown Issue"
 
         item.time_end = datetime.datetime.now(pytz.timezone(time_zone)).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone(time_zone)).utcoffset().seconds / 60 / 60))}00")
         item.status = status

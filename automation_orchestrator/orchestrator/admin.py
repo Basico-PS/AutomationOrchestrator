@@ -321,6 +321,14 @@ def refresh_selected_bots(modeladmin, request, queryset):
                 item.save_without_historical_record()
 
 
+def test_selected_apps(modeladmin, request, queryset):
+    for item in queryset:
+        if os.path.isfile(item.path):
+            messages.success(request, f"Successfully located the '{item.name}' App file: {item.path}")
+        else:
+            messages.error(request, f"Failed to locate the '{item.name}' App file: {item.path}")
+
+
 def test_selected_botflows(modeladmin, request, queryset):
     for item in queryset:
         if os.path.isfile(item.path):
@@ -563,6 +571,8 @@ class AppAdmin(SimpleHistoryAdmin):
                     'update_record')
     list_editable = ('name', 'path',)
     list_display_links = ['pk_formatted']
+
+    actions = [test_selected_apps,]
 
     def update_record(self, obj):
         return format_html('<a type="submit" class="default" href="/orchestrator/app/{}/change/">EDIT</a>', obj.id)

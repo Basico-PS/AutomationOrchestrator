@@ -4,6 +4,7 @@ import glob
 import pytz
 import email
 import shutil
+import psutil
 import datetime
 import calendar
 import traceback
@@ -823,11 +824,13 @@ def botflow_execution_monitor_evaluate():
         app = item.app.split("\\")[-1].lower()
 
         if app == "foxbot.exe" or app == "foxtrot.exe":
-            processes = subprocess.run(["wmic", "process", "where", f"name='{app}'", "call", "GetOwner"], stdout=subprocess.PIPE, text=True).stdout.split('\n')
-
             username = os.environ['USERNAME'].lower()
 
-            if any(str(f'\tuser = "{username}";') in user.lower() for user in processes):
+            processes = [proc.as_dict(attrs=['name', 'username']) for proc in psutil.process_iter()]
+            processes = [proc for proc in processes if proc['name'].lower() == "foxtrot.exe" or proc['name'].lower() == "foxbot.exe"]
+            processes = [proc for proc in processes if username in str(proc['username']).lower()]
+
+            if len(processes):
                 continue
 
             if item.nintex_rpa_license_path != "":

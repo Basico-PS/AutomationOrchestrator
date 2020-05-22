@@ -827,7 +827,7 @@ def botflow_execution_monitor_evaluate():
             username = os.environ['USERNAME'].lower()
 
             processes = [proc.as_dict(attrs=['name', 'username']) for proc in psutil.process_iter()]
-            processes = [proc for proc in processes if proc['name'].lower() == "foxtrot.exe" or proc['name'].lower() == "foxbot.exe"]
+            processes = [proc for proc in processes if str(proc['name']).lower() == "foxtrot.exe" or str(proc['name']).lower() == "foxbot.exe"]
             processes = [proc for proc in processes if username in str(proc['username']).lower()]
 
             if len(processes):

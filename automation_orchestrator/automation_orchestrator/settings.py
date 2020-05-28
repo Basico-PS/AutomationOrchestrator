@@ -15,6 +15,9 @@ import socket
 from tzlocal import get_localzone
 
 
+VERSION = 'v0.3.7'
+
+
 # Retrieve the secret key for the server.
 def get_secret_key():
     env_var_name = "BASICO_AUTOMATIONORCHESTRATOR_SECRET_KEY"

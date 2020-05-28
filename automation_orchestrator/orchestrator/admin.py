@@ -12,11 +12,12 @@ from django.utils.html import format_html
 from simple_history.admin import SimpleHistoryAdmin
 from .models import Bot, App, Botflow, FileTrigger, PythonFunction, ScheduleTrigger, EmailImapTrigger, EmailOutlookTrigger, ApiTrigger, BotflowExecution, SmtpAccount, PythonFunction, PythonFunctionExecution
 from .monitoring import add_botflow_execution_object, determine_execution_bot
+from automation_orchestrator.settings import VERSION
 
 
-admin.site.site_header = 'Basico P/S - Automation Orchestrator'
-admin.site.site_title = 'Basico P/S - Automation Orchestrator'
-admin.site.index_title = 'Orchestrate amazing automation'
+admin.site.site_header = 'Automation Orchestrator'
+admin.site.site_title = f'Automation Orchestrator {VERSION}'
+admin.site.index_title = 'Orchestrate Amazing Automation'
 
 
 def queue_item(item, trigger):
@@ -488,7 +489,7 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
     for item in queryset:
         try:
             msg = EmailMessage()
-            msg['Subject'] = "[TEST] Basico P/S Automation Orchestrator"
+            msg['Subject'] = "[TEST] Automation Orchestrator"
             msg['From'] = item.email
             msg['To'] = item.email
 
@@ -509,7 +510,7 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
             if item.tls:
                 try:
                     msg = EmailMessage()
-                    msg['Subject'] = "[TEST] Basico P/S Automation Orchestrator"
+                    msg['Subject'] = "[TEST] Automation Orchestrator"
                     msg['From'] = item.email
                     msg['To'] = item.email
 

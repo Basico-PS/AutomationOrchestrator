@@ -823,6 +823,8 @@ def botflow_execution_monitor_evaluate():
     for item in items:
         app = item.app.split("\\")[-1].lower()
 
+        nintex_rpa_license_path = None
+
         if app == "foxbot.exe" or app == "foxtrot.exe":
             username = os.environ['USERNAME'].lower()
 
@@ -834,19 +836,16 @@ def botflow_execution_monitor_evaluate():
                 continue
 
             if item.nintex_rpa_license_path != "":
-                nintex_rpa_license_path = item.nintex_rpa_license_path
+                nintex_rpa_license_path = os.path.join(item.nintex_rpa_license_path, "System")
 
                 if os.path.exists(nintex_rpa_license_path):
-                    nintex_rpa_license_path = os.path.join(item.nintex_rpa_license_path, "System")
+                    if app == "foxbot.exe":
+                        if item.nintex_rpa_available_foxbot_licenses <= len([file for file in os.listdir(nintex_rpa_license_path) if file.startswith("RPA") and file.endswith(".net")]):
+                            continue
 
-                    if os.path.exists(nintex_rpa_license_path):
-                        if app == "foxbot.exe":
-                            if item.nintex_rpa_available_foxbot_licenses <= len([file for file in os.listdir(nintex_rpa_license_path) if file.startswith("RPA") and file.endswith(".net")]):
-                                continue
-
-                        elif app == "foxtrot.exe":
-                            if item.nintex_rpa_available_foxtrot_licenses <= len([file for file in os.listdir(nintex_rpa_license_path) if file.startswith("FTE") and file.endswith(".net")]):
-                                continue
+                    elif app == "foxtrot.exe":
+                        if item.nintex_rpa_available_foxtrot_licenses <= len([file for file in os.listdir(nintex_rpa_license_path) if file.startswith("FTE") and file.endswith(".net")]):
+                            continue
 
         item.time_start = datetime.datetime.now(pytz.timezone(time_zone)).strftime(f"%Y-%m-%dT%H:%M:%S+0{str(int(datetime.datetime.now(pytz.timezone(time_zone)).utcoffset().seconds / 60 / 60))}00")
         item.status = "Running"
@@ -902,13 +901,21 @@ def botflow_execution_monitor_evaluate():
                     except:
                         pass
 
-                    timeout_kill_processes = [str(process).strip() for process in item.timeout_kill_processes.split(",")]
+                    if str(item.timeout_kill_processes).strip() != "":
+                        timeout_kill_processes = [str(process).strip() for process in item.timeout_kill_processes.split(",")]
 
-                    for process in timeout_kill_processes:
-                        try:
-                            os.system(f'taskkill /f /im {process}')
-                        except:
-                            pass
+                        for process in timeout_kill_processes:
+                            try:
+                                os.system(f'taskkill /f /im {process}')
+                            except:
+                                pass
+
+                    if nintex_rpa_license_path != None:
+                        for file in glob.glob(os.path.join(nintex_rpa_license_path, '*.net')):
+                            try:
+                                os.remove(file)
+                            except:
+                                pass
 
             else:
                 status = "Skipped - Duplicate Queue Items Detected"

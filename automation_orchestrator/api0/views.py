@@ -141,7 +141,10 @@ class PythonFunctionView(viewsets.ModelViewSet):
         encrypted_value_4 = item.encrypted_value_4
         encrypted_value_5 = item.encrypted_value_5
 
-        input = self.request.query_params.get('input')
+        if 'input' in self.request.query_params:
+            input = self.request.query_params.get('input')
+        else:
+            input = ''
 
         request_user = request.user
 

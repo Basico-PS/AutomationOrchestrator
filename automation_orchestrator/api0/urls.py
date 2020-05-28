@@ -13,7 +13,7 @@ router.register('pythonfunctionexecution', PythonFunctionExecutionView)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('docs/', include_docs_urls(title='Basico P/S - Automation Orchestrator',
+    path('docs/', include_docs_urls(title='Automation Orchestrator',
                                     description="",
                                     public=True))
 ]

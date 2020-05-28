@@ -30,29 +30,29 @@ def queue_item(item, trigger):
     )
 
 
-def activate_selected_file_triggers(modeladmin, request, queryset):
+def run_selected_triggers(modeladmin, request, queryset):
     for item in queryset:
-        queue_item(item, "File Trigger: Activated Manually")
+        queue_item(item, "No Trigger: Activated Manually")
 
 
-def activate_selected_schedule_triggers(modeladmin, request, queryset):
-    for item in queryset:
-        queue_item(item, "Schedule Trigger: Activated Manually")
+def run_selected_file_triggers(modeladmin, request, queryset):
+    run_selected_triggers(modeladmin, request, queryset)
 
 
-def activate_selected_email_imap_triggers(modeladmin, request, queryset):
-    for item in queryset:
-        queue_item(item, "Email IMAP Trigger: Activated Manually")
+def run_selected_schedule_triggers(modeladmin, request, queryset):
+    run_selected_triggers(modeladmin, request, queryset)
 
 
-def activate_selected_email_outlook_triggers(modeladmin, request, queryset):
-    for item in queryset:
-        queue_item(item, "Email Outlook Trigger: Activated Manually")
+def run_selected_email_imap_triggers(modeladmin, request, queryset):
+    run_selected_triggers(modeladmin, request, queryset)
 
 
-def activate_selected_api_triggers(modeladmin, request, queryset):
-    for item in queryset:
-        queue_item(item, "API Trigger: Activated Manually")
+def run_selected_email_outlook_triggers(modeladmin, request, queryset):
+    run_selected_triggers(modeladmin, request, queryset)
+
+
+def run_selected_api_triggers(modeladmin, request, queryset):
+    run_selected_triggers(modeladmin, request, queryset)
 
 
 def cancel_selected_botflow_executions(modeladmin, request, queryset):
@@ -533,6 +533,12 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
 
 
 class BotAdmin(SimpleHistoryAdmin):
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/bot/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
+
     fieldsets = (
         ('General', {
             'fields': ('name', 'computer_name', 'user_name',),
@@ -552,18 +558,19 @@ class BotAdmin(SimpleHistoryAdmin):
     list_editable = ('name', 'computer_name', 'user_name',)
     list_display_links = ['pk_formatted']
 
-    actions = [refresh_selected_bots,]
-
-    def update_record(self, obj):
-        return format_html('<a type="submit" class="default" href="/orchestrator/bot/{}/change/">EDIT</a>', obj.id)
-
-    def pk_formatted(self, obj):
-        return obj.pk
     pk_formatted.admin_order_field = 'pk'
     pk_formatted.short_description = 'ID'
 
+    actions = [refresh_selected_bots,]
+
 
 class AppAdmin(SimpleHistoryAdmin):
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/app/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
+
     fieldsets = (
         ('General', {
             'fields': ('name', 'path',),
@@ -575,18 +582,21 @@ class AppAdmin(SimpleHistoryAdmin):
     list_editable = ('name', 'path',)
     list_display_links = ['pk_formatted']
 
+    pk_formatted.admin_order_field = 'pk'
+    pk_formatted.short_description = 'ID'
+
     actions = [test_selected_apps,]
 
+
+class BotflowAdmin(SimpleHistoryAdmin):
     def update_record(self, obj):
-        return format_html('<a type="submit" class="default" href="/orchestrator/app/{}/change/">EDIT</a>', obj.id)
+        return format_html('<a type="submit" class="default" href="/orchestrator/botflow/{}/change/">EDIT</a>', obj.id)
 
     def pk_formatted(self, obj):
         return obj.pk
     pk_formatted.admin_order_field = 'pk'
     pk_formatted.short_description = 'ID'
 
-
-class BotflowAdmin(SimpleHistoryAdmin):
     fieldsets = (
         ('General', {
             'fields': ('name', 'path',),
@@ -623,16 +633,14 @@ class BotflowAdmin(SimpleHistoryAdmin):
 
     actions = [test_selected_botflows,]
 
+
+class FileTriggerAdmin(SimpleHistoryAdmin):
     def update_record(self, obj):
-        return format_html('<a type="submit" class="default" href="/orchestrator/botflow/{}/change/">EDIT</a>', obj.id)
+        return format_html('<a type="submit" class="default" href="/orchestrator/filetrigger/{}/change/">EDIT</a>', obj.id)
 
     def pk_formatted(self, obj):
         return obj.pk
-    pk_formatted.admin_order_field = 'pk'
-    pk_formatted.short_description = 'ID'
 
-
-class FileTriggerAdmin(SimpleHistoryAdmin):
     fieldsets = (
         ('General', {
             'fields': ('bots', 'app', 'botflow',),
@@ -664,18 +672,27 @@ class FileTriggerAdmin(SimpleHistoryAdmin):
                     'folder_in', 'folder_out', 'filter', 'activated',)
     list_display_links = ['pk_formatted']
 
-    actions = [activate_selected_file_triggers, copy_selected_file_triggers, export_selected_file_triggers, test_selected_file_triggers,]
-
-    def update_record(self, obj):
-        return format_html('<a type="submit" class="default" href="/orchestrator/filetrigger/{}/change/">EDIT</a>', obj.id)
-
-    def pk_formatted(self, obj):
-        return obj.pk
-    pk_formatted.admin_order_field = 'pk'
     pk_formatted.short_description = 'ID'
+    run_selected_file_triggers.short_description = "Run selected file triggers"
+
+    pk_formatted.admin_order_field = 'pk'
+
+    actions = [copy_selected_file_triggers, export_selected_file_triggers, test_selected_file_triggers, run_selected_file_triggers]
 
 
 class ScheduleTriggerAdmin(SimpleHistoryAdmin):
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/scheduletrigger/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
+
+    def next_execution_formatted(self, obj):
+        time = obj.next_execution
+        if time != None and time != "":
+            time = time.astimezone().strftime("%Y-%m-%d %H:%M")
+        return time
+
     fieldsets = (
         ('General', {
             'fields': ('bots', 'app', 'botflow'),
@@ -711,23 +728,14 @@ class ScheduleTriggerAdmin(SimpleHistoryAdmin):
     exclude = ('past_settings',)
     readonly_fields = ('next_execution',)
 
-    actions = [activate_selected_schedule_triggers, copy_selected_schedule_triggers, export_selected_schedule_triggers,]
-
-    def update_record(self, obj):
-        return format_html('<a type="submit" class="default" href="/orchestrator/scheduletrigger/{}/change/">EDIT</a>', obj.id)
-
-    def pk_formatted(self, obj):
-        return obj.pk
-    pk_formatted.admin_order_field = 'pk'
     pk_formatted.short_description = 'ID'
-
-    def next_execution_formatted(self, obj):
-        time = obj.next_execution
-        if time != None and time != "":
-            time = time.astimezone().strftime("%Y-%m-%d %H:%M")
-        return time
-    next_execution_formatted.admin_order_field = 'next_execution'
+    run_selected_schedule_triggers.short_description = "Run selected schedule triggers"
     next_execution_formatted.short_description = 'Next Execution'
+
+    pk_formatted.admin_order_field = 'pk'
+    next_execution_formatted.admin_order_field = 'next_execution'
+
+    actions = [copy_selected_schedule_triggers, export_selected_schedule_triggers, run_selected_schedule_triggers]
 
 
 class EmailImapTriggerForm(forms.ModelForm):
@@ -740,7 +748,11 @@ class EmailImapTriggerForm(forms.ModelForm):
 
 
 class EmailImapTriggerAdmin(SimpleHistoryAdmin):
-    form = EmailImapTriggerForm
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/emailimaptrigger/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
 
     fieldsets = (
         ('General', {
@@ -778,23 +790,26 @@ class EmailImapTriggerAdmin(SimpleHistoryAdmin):
                      'folder_in', 'folder_out', 'activated',)
     list_display_links = ['pk_formatted']
 
-    activate_selected_email_imap_triggers.short_description = "Activate selected email IMAP triggers"
+    pk_formatted.short_description = 'ID'
     copy_selected_email_imap_triggers.short_description = "Copy selected email IMAP triggers"
     export_selected_email_imap_triggers.short_description = "Export selected email IMAP triggers"
+    run_selected_email_imap_triggers.short_description = "Activate selected email IMAP triggers"
     test_selected_email_imap_triggers.short_description = "Test selected email IMAP triggers"
 
-    actions = [activate_selected_email_imap_triggers, copy_selected_email_imap_triggers, export_selected_email_imap_triggers, test_selected_email_imap_triggers,]
-
-    def update_record(self, obj):
-        return format_html('<a type="submit" class="default" href="/orchestrator/emailimaptrigger/{}/change/">EDIT</a>', obj.id)
-
-    def pk_formatted(self, obj):
-        return obj.pk
     pk_formatted.admin_order_field = 'pk'
-    pk_formatted.short_description = 'ID'
+
+    actions = [copy_selected_email_imap_triggers, export_selected_email_imap_triggers, test_selected_email_imap_triggers, run_selected_email_imap_triggers]
+
+    form = EmailImapTriggerForm
 
 
 class EmailOutlookTriggerAdmin(SimpleHistoryAdmin):
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/emailoutlooktrigger/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
+
     fieldsets = (
         ('General', {
             'fields': ('bots', 'app', 'botflow',),
@@ -828,23 +843,24 @@ class EmailOutlookTriggerAdmin(SimpleHistoryAdmin):
                      'folder_in', 'folder_out', 'activated',)
     list_display_links = ['pk_formatted']
 
-    activate_selected_email_outlook_triggers.short_description = "Activate selected email Outlook triggers"
+    pk_formatted.short_description = 'ID'
     copy_selected_email_outlook_triggers.short_description = "Copy selected email Outlook triggers"
     export_selected_email_outlook_triggers.short_description = "Export selected email Outlook triggers"
+    run_selected_email_outlook_triggers.short_description = "Run selected email Outlook triggers"
     test_selected_email_outlook_triggers.short_description = "Test selected email Outlook triggers"
 
-    actions = [activate_selected_email_outlook_triggers, copy_selected_email_outlook_triggers, export_selected_email_outlook_triggers,]
-
-    def update_record(self, obj):
-        return format_html('<a type="submit" class="default" href="/orchestrator/emailoutlooktrigger/{}/change/">EDIT</a>', obj.id)
-
-    def pk_formatted(self, obj):
-        return obj.pk
     pk_formatted.admin_order_field = 'pk'
-    pk_formatted.short_description = 'ID'
+
+    actions = [copy_selected_email_outlook_triggers, export_selected_email_outlook_triggers, run_selected_email_outlook_triggers]
 
 
 class ApiTriggerAdmin(SimpleHistoryAdmin):
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/apitrigger/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
+
     fieldsets = (
         ('General', {
             'fields': ('bots', 'app', 'botflow',),
@@ -865,22 +881,76 @@ class ApiTriggerAdmin(SimpleHistoryAdmin):
                      'activated',)
     list_display_links = ['pk_formatted']
 
-    activate_selected_api_triggers.short_description = "Activate selected API triggers"
+    pk_formatted.short_description = 'ID'
     copy_selected_api_triggers.short_description = "Copy selected API triggers"
     export_selected_api_triggers.short_description = "Export selected API triggers"
+    run_selected_api_triggers.short_description = "Run selected API triggers"
 
-    actions = [activate_selected_api_triggers, copy_selected_api_triggers, export_selected_api_triggers,]
-
-    def update_record(self, obj):
-        return format_html('<a type="submit" class="default" href="/orchestrator/apitrigger/{}/change/">EDIT</a>', obj.id)
-
-    def pk_formatted(self, obj):
-        return obj.pk
     pk_formatted.admin_order_field = 'pk'
-    pk_formatted.short_description = 'ID'
+
+    actions = [copy_selected_api_triggers, export_selected_api_triggers, run_selected_api_triggers]
 
 
 class BotflowExecutionAdmin(SimpleHistoryAdmin):
+    def get_ordering(self, request):
+        return ['-time_queued']
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def pk_formatted(self, obj):
+        return obj.pk
+
+    def time_queued_formatted(self, obj):
+        time = obj.time_queued
+        if time != None:
+            time = time.astimezone().strftime("%Y-%m-%d %H:%M:%S")
+        return time
+
+    def time_start_formatted(self, obj):
+        time = obj.time_start
+        if time != None:
+            time = time.astimezone().strftime("%Y-%m-%d %H:%M:%S")
+        return time
+
+    def time_end_formatted(self, obj):
+        time = obj.time_end
+        if time != None:
+            time = time.astimezone().strftime("%Y-%m-%d %H:%M:%S")
+        return time
+
+    def time_updated_formatted(self, obj):
+        time = obj.time_updated
+        if time != None:
+            time = time.astimezone().strftime("%Y-%m-%d %H:%M:%S")
+        return time
+
+    def app_formatted(self, obj):
+        return os.path.basename(obj.app)
+
+    def bot_formatted(self, obj):
+        return f"{obj.computer_name} - {obj.user_name}"
+
+    def botflow_formatted(self, obj):
+        return os.path.basename(obj.botflow)
+
+    def trigger_formatted(self, obj):
+        trigger = obj.trigger
+        trigger_file = "File Trigger: "
+        if trigger.startswith(trigger_file):
+            if not "Activated Manually" in trigger:
+                return trigger_file + os.path.basename(trigger[len(trigger_file):])
+        return trigger
+
+    def custom_progress_formatted(self, obj):
+        progress = str(obj.custom_progress)
+        progress = progress.replace('.00', '') + "%"
+        return progress
+
+    def custom_status_formatted(self, obj):
+        note = str(obj.custom_status)
+        return note
+
     list_display = ('pk_formatted',
                     'time_queued_formatted',
                     'bot_formatted',
@@ -898,90 +968,33 @@ class BotflowExecutionAdmin(SimpleHistoryAdmin):
     list_filter = ('computer_name', 'user_name', 'app', 'botflow', 'status',)
     readonly_fields = [field.name for field in BotflowExecution._meta.get_fields() if field.name != 'custom_status']
 
+    time_queued_formatted.short_description = 'Time Queued'
+    time_start_formatted.short_description = 'Time Start'
+    time_end_formatted.short_description = 'Time End'
+    time_updated_formatted.short_description = 'Time Updated'
+    app_formatted.short_description = 'App'
+    bot_formatted.short_description = 'Bot'
+    botflow_formatted.short_description = 'Botflow'
+    trigger_formatted.short_description = 'Trigger'
+    custom_progress_formatted.short_description = 'Progress'
+    custom_status_formatted.short_description = 'Note'
+    pk_formatted.short_description = 'ID'
+
+    time_queued_formatted.admin_order_field = 'time_queued'
+    time_start_formatted.admin_order_field = 'time_start'
+    time_end_formatted.admin_order_field = 'time_end'
+    time_updated_formatted.admin_order_field = 'time_updated'
+    app_formatted.admin_order_field = 'app'
+    bot_formatted.admin_order_field = 'computer_name'
+    botflow_formatted.admin_order_field = 'botflow'
+    trigger_formatted.admin_order_field = 'trigger'
+    custom_progress_formatted.admin_order_field = 'custom_progress'
+    custom_status_formatted.admin_order_field = 'custom_status'
+    pk_formatted.admin_order_field = 'pk'
+
     actions = [cancel_selected_botflow_executions, export_selected_botflow_executions,]
 
     list_per_page = 20
-
-    def get_ordering(self, request):
-        return ['-time_queued']
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def pk_formatted(self, obj):
-        return obj.pk
-    pk_formatted.admin_order_field = 'pk'
-    pk_formatted.short_description = 'ID'
-
-    def time_queued_formatted(self, obj):
-        time = obj.time_queued
-        if time != None:
-            time = time.astimezone().strftime("%Y-%m-%d %H:%M:%S")
-        return time
-    time_queued_formatted.admin_order_field = 'time_queued'
-    time_queued_formatted.short_description = 'Time Queued'
-
-    def time_start_formatted(self, obj):
-        time = obj.time_start
-        if time != None:
-            time = time.astimezone().strftime("%Y-%m-%d %H:%M:%S")
-        return time
-    time_start_formatted.admin_order_field = 'time_start'
-    time_start_formatted.short_description = 'Time Start'
-
-    def time_end_formatted(self, obj):
-        time = obj.time_end
-        if time != None:
-            time = time.astimezone().strftime("%Y-%m-%d %H:%M:%S")
-        return time
-    time_end_formatted.admin_order_field = 'time_end'
-    time_end_formatted.short_description = 'Time End'
-
-    def time_updated_formatted(self, obj):
-        time = obj.time_updated
-        if time != None:
-            time = time.astimezone().strftime("%Y-%m-%d %H:%M:%S")
-        return time
-    time_updated_formatted.admin_order_field = 'time_updated'
-    time_updated_formatted.short_description = 'Time Updated'
-
-    def app_formatted(self, obj):
-        return os.path.basename(obj.app)
-    app_formatted.admin_order_field = 'app'
-    app_formatted.short_description = 'App'
-
-    def bot_formatted(self, obj):
-        return f"{obj.computer_name} - {obj.user_name}"
-    bot_formatted.admin_order_field = 'computer_name'
-    bot_formatted.short_description = 'Bot'
-
-    def botflow_formatted(self, obj):
-        return os.path.basename(obj.botflow)
-    botflow_formatted.admin_order_field = 'botflow'
-    botflow_formatted.short_description = 'Botflow'
-
-    def trigger_formatted(self, obj):
-        trigger = obj.trigger
-        trigger_file = "File Trigger: "
-        if trigger.startswith(trigger_file):
-            if not "Activated Manually" in trigger:
-                return trigger_file + os.path.basename(trigger[len(trigger_file):])
-        return trigger
-    trigger_formatted.admin_order_field = 'trigger'
-    trigger_formatted.short_description = 'Trigger'
-
-    def custom_progress_formatted(self, obj):
-        progress = str(obj.custom_progress)
-        progress = progress.replace('.00', '') + "%"
-        return progress
-    custom_progress_formatted.admin_order_field = 'custom_progress'
-    custom_progress_formatted.short_description = 'Progress'
-
-    def custom_status_formatted(self, obj):
-        note = str(obj.custom_status)
-        return note
-    custom_status_formatted.admin_order_field = 'custom_status'
-    custom_status_formatted.short_description = 'Note'
 
 
 class SmtpAccountForm(forms.ModelForm):
@@ -994,7 +1007,14 @@ class SmtpAccountForm(forms.ModelForm):
 
 
 class SmtpAccountAdmin(SimpleHistoryAdmin):
-    form = SmtpAccountForm
+    def get_ordering(self, request):
+        return ['-activated']
+
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/smtpaccount/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
 
     fieldsets = (
         ('General', {
@@ -1016,20 +1036,14 @@ class SmtpAccountAdmin(SimpleHistoryAdmin):
                      'activated',)
     list_display_links = ['pk_formatted']
 
+    pk_formatted.short_description = 'ID'
     test_selected_smtp_accounts.short_description = "Test selected SMTP accounts"
+
+    pk_formatted.admin_order_field = 'pk'
 
     actions = [test_selected_smtp_accounts, ]
 
-    def get_ordering(self, request):
-        return ['-activated']
-
-    def update_record(self, obj):
-        return format_html('<a type="submit" class="default" href="/orchestrator/smtpaccount/{}/change/">EDIT</a>', obj.id)
-
-    def pk_formatted(self, obj):
-        return obj.pk
-    pk_formatted.admin_order_field = 'pk'
-    pk_formatted.short_description = 'ID'
+    form = SmtpAccountForm
 
 
 class PythonFunctionForm(forms.ModelForm):
@@ -1048,7 +1062,11 @@ class PythonFunctionForm(forms.ModelForm):
 
 
 class PythonFunctionAdmin(SimpleHistoryAdmin):
-    form = PythonFunctionForm
+    def update_record(self, obj):
+        return format_html('<a type="submit" class="default" href="/orchestrator/pythonfunction/{}/change/">EDIT</a>', obj.id)
+
+    def pk_formatted(self, obj):
+        return obj.pk
 
     fieldsets = (
         ('General', {
@@ -1071,25 +1089,13 @@ class PythonFunctionAdmin(SimpleHistoryAdmin):
                      'activated',)
     list_display_links = ['pk_formatted']
 
-    def update_record(self, obj):
-        return format_html('<a type="submit" class="default" href="/orchestrator/pythonfunction/{}/change/">EDIT</a>', obj.id)
-
-    def pk_formatted(self, obj):
-        return obj.pk
     pk_formatted.admin_order_field = 'pk'
     pk_formatted.short_description = 'ID'
 
+    form = PythonFunctionForm
+
 
 class PythonFunctionExecutionAdmin(SimpleHistoryAdmin):
-    list_display = ('pk_formatted', 'python_function',
-                    'request_user', 'request_ip',
-                    'time_start', 'time_end',)
-    list_display_links = ['pk_formatted']
-    list_filter = ('python_function', 'request_user', 'request_ip',)
-    readonly_fields = [field.name for field in PythonFunctionExecution._meta.get_fields()]
-
-    list_per_page = 20
-
     def get_ordering(self, request):
         return ['-time_start']
 
@@ -1098,8 +1104,19 @@ class PythonFunctionExecutionAdmin(SimpleHistoryAdmin):
 
     def pk_formatted(self, obj):
         return obj.pk
+
+    list_display = ('pk_formatted', 'python_function',
+                    'request_user', 'request_ip',
+                    'time_start', 'time_end',)
+    list_display_links = ['pk_formatted']
+    list_filter = ('python_function', 'request_user', 'request_ip',)
+
+    readonly_fields = [field.name for field in PythonFunctionExecution._meta.get_fields()]
+
     pk_formatted.admin_order_field = 'pk'
     pk_formatted.short_description = 'ID'
+
+    list_per_page = 20
 
 
 admin.site.register(Bot, BotAdmin)

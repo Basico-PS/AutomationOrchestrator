@@ -60,6 +60,7 @@ def database_backup():
 def main():
     global SHUT_DOWN
 
+    program_runtime = 7200
     server_runtime = 1800
     sleep_time = 10
     restart_time = 2
@@ -128,7 +129,11 @@ def main():
                 SHUT_DOWN = True
 
             else:
-                if not SHUT_DOWN:
+                if (datetime.now() - start_time_program).seconds >= program_runtime:
+                    print(f"{datetime.now()}: Restarting the program!")
+                    SHUT_DOWN = True
+
+                elif not SHUT_DOWN:
                     print(f"{datetime.now()}: Restarting the server!")
 
             finally:
@@ -154,6 +159,8 @@ def on_quit_callback(systray):
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    
+    start_time_program = datetime.now()
 
     with SysTrayIcon("automation_orchestrator\\static\\admin\\favicon.ico", "Automation Orchestrator", on_quit=on_quit_callback) as systray:
         while 1:

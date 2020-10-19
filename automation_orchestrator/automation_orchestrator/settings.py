@@ -15,7 +15,7 @@ import socket
 from tzlocal import get_localzone
 
 
-VERSION = 'v0.3.7'
+VERSION = 'v0.3.9'
 
 
 # Retrieve the secret key for the server.

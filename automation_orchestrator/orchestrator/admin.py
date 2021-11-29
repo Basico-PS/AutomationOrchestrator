@@ -316,7 +316,7 @@ def refresh_selected_bots(modeladmin, request, queryset):
                             item.status = "Unknown"
                             item.save_without_historical_record()
 
-        except:
+        except Exception:
             if item.status != "Unknown":
                 item.status = "Unknown"
                 item.save_without_historical_record()
@@ -361,7 +361,7 @@ def test_selected_file_triggers(modeladmin, request, queryset):
                 item.status = "Active"
                 item.save_without_historical_record()
 
-        except:
+        except Exception:
             messages.error(request, f"Failed to retrieve files from the incoming folder: {item.folder_in}")
 
             if item.status != "ERROR":
@@ -404,7 +404,7 @@ def test_selected_email_imap_triggers(modeladmin, request, queryset):
                     item.status = "Active"
                     item.save_without_historical_record()
 
-        except:
+        except Exception:
             messages.error(request, f"Failed to connect to email {item.email}!")
 
             if item.status != "ERROR":
@@ -414,7 +414,7 @@ def test_selected_email_imap_triggers(modeladmin, request, queryset):
         finally:
             try:
                 server.logout()
-            except:
+            except Exception:
                 pass
 
             server = None
@@ -464,7 +464,7 @@ def test_selected_email_outlook_triggers(modeladmin, request, queryset):
                 item.status = "Active"
                 item.save_without_historical_record()
 
-        except:
+        except Exception:
             if item.status != "ERROR":
                 item.status = "ERROR"
                 item.save_without_historical_record()
@@ -475,7 +475,7 @@ def test_selected_email_outlook_triggers(modeladmin, request, queryset):
 
     try:
         email_outlook.Application.Quit()
-    except:
+    except Exception:
         pass
 
     email_outlook = None
@@ -506,7 +506,7 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
                 item.status = "Active"
                 item.save_without_historical_record()
 
-        except:
+        except Exception:
             if item.tls:
                 try:
                     msg = EmailMessage()
@@ -522,7 +522,7 @@ def test_selected_smtp_accounts(modeladmin, request, queryset):
                     messages.success(request, f"Successfully sent an email with {item.email}!")
                     continue
 
-                except:
+                except Exception:
                     pass
 
             messages.error(request, f"Failed to send email with {item.email}!")

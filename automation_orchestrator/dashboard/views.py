@@ -66,12 +66,12 @@ def format_botflow_executions(botflow_executions):
 
         try:
             record_calendar['time_start'] = (record_overview['time_start'] + timedelta(hours=int(datetime.now(pytz.timezone(time_zone)).utcoffset().seconds / 60 / 60))).strftime(f"%Y-%m-%dT%H:%M:%S")
-        except:
+        except Exception:
             record_calendar['time_start'] = ""
 
         try:
             record_calendar['time_end'] = (record_overview['time_end'] + timedelta(hours=int(datetime.now(pytz.timezone(time_zone)).utcoffset().seconds / 60 / 60))).strftime(f"%Y-%m-%dT%H:%M:%S")
-        except:
+        except Exception:
             record_calendar['time_end'] = ""
 
         botflow_executions_overview.append(record_overview)

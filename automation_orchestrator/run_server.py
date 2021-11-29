@@ -5,7 +5,7 @@ import requests
 import sqlite3
 from socket import gethostname, gethostbyname_ex
 from django.db.models import Q
-from subprocess import Popen, PIPE
+from subprocess import Popen
 from time import sleep
 from datetime import datetime
 from infi.systray import SysTrayIcon
@@ -42,18 +42,18 @@ def database_backup():
 
         print(f"{datetime.now()}: Backup of database complete!")
 
-    except:
+    except Exception:
         print(f"{datetime.now()}: ERROR! Failed to perform a backup of the database...")
 
     finally:
         try:
             db.close()
-        except:
+        except Exception:
             pass
 
         try:
             db_backup.close()
-        except:
+        except Exception:
             pass
 
 
@@ -124,7 +124,7 @@ def main():
 
                             break
 
-            except:
+            except Exception:
                 print(f"{datetime.now()}: Server interrupted!")
                 SHUT_DOWN = True
 
@@ -159,7 +159,7 @@ def on_quit_callback(systray):
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    
+
     start_time_program = datetime.now()
 
     with SysTrayIcon("automation_orchestrator\\static\\admin\\favicon.ico", "Automation Orchestrator", on_quit=on_quit_callback) as systray:

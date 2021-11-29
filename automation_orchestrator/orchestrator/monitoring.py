@@ -3,6 +3,7 @@ import os
 import glob
 import pytz
 import email
+import shlex
 import shutil
 import psutil
 import datetime
@@ -286,12 +287,12 @@ def bot_status(item):
                         item.status = "Unknown"
                         item.save_without_historical_record()
 
-    except:
+    except Exception:
         with open("logs\\error_bot_status.txt", 'a') as f:
             try:
                 f.write(traceback.format_exc())
                 print(traceback.format_exc())
-            except:
+            except Exception:
                 pass
 
         if item.status != "Unknown":
@@ -326,12 +327,12 @@ def file_trigger_monitor():
         try:
             file_trigger_monitor_evaluate()
 
-        except:
+        except Exception:
             with open("logs\\error_log.txt", 'a') as f:
                 try:
                     f.write(traceback.format_exc())
                     print(traceback.format_exc())
-                except:
+                except Exception:
                     pass
             break
 
@@ -426,12 +427,12 @@ def schedule_trigger_monitor():
         try:
             schedule_trigger_monitor_evaluate()
 
-        except:
+        except Exception:
             with open("logs\\error_log.txt", 'a') as f:
                 try:
                     f.write(traceback.format_exc())
                     print(traceback.format_exc())
-                except:
+                except Exception:
                     pass
             break
 
@@ -529,12 +530,12 @@ def email_imap_trigger_monitor():
         try:
             email_imap_trigger_monitor_evaluate()
 
-        except:
+        except Exception:
             with open("logs\\error_log.txt", 'a') as f:
                 try:
                     f.write(traceback.format_exc())
                     print(traceback.format_exc())
-                except:
+                except Exception:
                     pass
             break
 
@@ -615,10 +616,10 @@ def email_imap_trigger_monitor_evaluate():
                         custom_status=item.botflow_execution_custom_status
                     )
 
-            except:
+            except Exception:
                 pass
 
-        except:
+        except Exception:
             if item.status != "ERROR":
                 item.status = "ERROR"
                 item.save_without_historical_record()
@@ -626,7 +627,7 @@ def email_imap_trigger_monitor_evaluate():
         finally:
             try:
                 server.logout()
-            except:
+            except Exception:
                 pass
 
             server = None
@@ -664,7 +665,7 @@ def email_outlook_trigger_monitor():
 
             try:
                 email_outlook.Application.Quit()
-            except:
+            except Exception:
                 pass
 
             email_outlook = None
@@ -674,19 +675,19 @@ def email_outlook_trigger_monitor():
 
             email_outlook_trigger_monitor()
 
-        except:
+        except Exception:
             with open("logs\\error_log.txt", 'a') as f:
                 try:
                     f.write(traceback.format_exc())
                     print(traceback.format_exc())
-                except:
+                except Exception:
                     pass
             break
 
         if not EmailOutlookTrigger.objects.filter(activated=True).exists():
             try:
                 email_outlook.Application.Quit()
-            except:
+            except Exception:
                 pass
 
             email_outlook = None
@@ -698,7 +699,7 @@ def email_outlook_trigger_monitor():
 
     try:
         email_outlook.Application.Quit()
-    except:
+    except Exception:
         pass
 
     email_outlook = None
@@ -737,7 +738,7 @@ def email_outlook_trigger_monitor_evaluate(email_outlook):
 
             inbox = namespace.GetDefaultFolder(6)
 
-        except:
+        except Exception:
             if item.status != "ERROR":
                 item.status = "ERROR"
                 item.save_without_historical_record()
@@ -806,12 +807,12 @@ def botflow_execution_monitor():
             if randrange(1, 20) == 1:
                 botflow_execution_monitor_running_timeout()
 
-        except:
+        except Exception:
             with open("logs\\error_log.txt", 'a') as f:
                 try:
                     f.write(traceback.format_exc())
                     print(traceback.format_exc())
-                except:
+                except Exception:
                     pass
             break
 
@@ -876,21 +877,21 @@ def botflow_execution_monitor_evaluate():
                         subprocess.run(
                             [item.app, "execute", "--file", item.botflow, "--input", str({'aoId': str(item.pk), 'aoTrigger': item.trigger})],
                             timeout=(item.timeout_minutes * 60),
-                            cwd=os.path.dirname(item.botflow)
+                            cwd=os.path.dirname(item.botflow) if item.is_file else os.path.dirname(item.app)
                         )
 
                     elif (app == "python.exe" or app == "pythonw.exe" or app == "cscript.exe" or app == "wscript.exe"):
                         subprocess.run(
                             [item.app, item.botflow, str(item.pk), item.trigger],
                             timeout=(item.timeout_minutes * 60),
-                            cwd=os.path.dirname(item.botflow)
+                            cwd=os.path.dirname(item.botflow) if item.is_file else os.path.dirname(item.app)
                         )
 
                     else:
                         subprocess.run(
-                            [item.app, item.botflow],
+                            [item.app] + shlex.split(item.botflow, posix=False),
                             timeout=(item.timeout_minutes * 60),
-                            cwd=os.path.dirname(item.botflow)
+                            cwd=os.path.dirname(item.botflow) if item.is_file else os.path.dirname(item.app)
                         )
 
                 except subprocess.TimeoutExpired:
@@ -899,7 +900,7 @@ def botflow_execution_monitor_evaluate():
                     try:
                         if app == "foxbot.exe" or app == "foxtrot.exe":
                             os.system('taskkill /f /im foxtrot64.exe')
-                    except:
+                    except Exception:
                         pass
 
                     if str(item.timeout_kill_processes).strip() != "":
@@ -908,14 +909,14 @@ def botflow_execution_monitor_evaluate():
                         for process in timeout_kill_processes:
                             try:
                                 os.system(f'taskkill /f /im {process}')
-                            except:
+                            except Exception:
                                 pass
 
                     if nintex_rpa_license_path != None:
                         for file in glob.glob(os.path.join(nintex_rpa_license_path, '*.net')):
                             try:
                                 os.remove(file)
-                            except:
+                            except Exception:
                                 pass
 
             else:

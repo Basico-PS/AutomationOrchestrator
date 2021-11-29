@@ -28,7 +28,7 @@ def get_secret_key():
     else:
         try:
             secret_key = os.environ[env_var_name]
-        except:
+        except Exception:
             secret_key = generate_secret_key(env_var_name)
 
     return secret_key

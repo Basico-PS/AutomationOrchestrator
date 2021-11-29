@@ -106,7 +106,7 @@ class BotflowExecutionView(viewsets.ModelViewSet):
                     bot.status = "Active"
                     bot.save_without_historical_record()
 
-            except:
+            except Exception:
                 pass
 
         return BotflowExecution.objects.all()
@@ -206,7 +206,7 @@ def exec_python_function(code, encrypted_value_1, encrypted_value_2, encrypted_v
         exec(code, locals(), output)
         output = output.get('output')
 
-    except:
+    except Exception:
         output = traceback.format_exc()
 
     return output

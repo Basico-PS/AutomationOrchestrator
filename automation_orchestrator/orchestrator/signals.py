@@ -20,7 +20,7 @@ def botflow_execution_bot_status(sender, instance, **kwargs):
     if instance.status == "Running":
         try:
             bot = Bot.objects.filter(computer_name__iexact=instance.computer_name, user_name__iexact=instance.user_name)[0]
-        except:
+        except Exception:
             return
 
         if bot.status != "Running":
@@ -30,7 +30,7 @@ def botflow_execution_bot_status(sender, instance, **kwargs):
     elif instance.status != "Pending":
         try:
             bot = Bot.objects.filter(computer_name__iexact=instance.computer_name, user_name__iexact=instance.user_name)[0]
-        except:
+        except Exception:
             return
 
         if instance.status == "Completed":
@@ -59,7 +59,7 @@ def botflow_execution_bot_status(sender, instance, **kwargs):
 def botflow_execution_notification(sender, instance, **kwargs):
     try:
         smtp_account = SmtpAccount.objects.filter(activated=True)[0]
-    except:
+    except Exception:
         return
 
     if instance.status == "Pending":
@@ -130,7 +130,7 @@ def botflow_execution_notification(sender, instance, **kwargs):
             smtp_account.status = "Active"
             smtp_account.save_without_historical_record()
 
-    except:
+    except Exception:
         if smtp_account.tls:
             try:
                 msg = EmailMessage()
@@ -151,7 +151,7 @@ def botflow_execution_notification(sender, instance, **kwargs):
                     smtp_account.status = "Active"
                     smtp_account.save_without_historical_record()
 
-            except:
+            except Exception:
                 if smtp_account.status != "ERROR":
                     smtp_account.status = "ERROR"
                     smtp_account.save_without_historical_record()

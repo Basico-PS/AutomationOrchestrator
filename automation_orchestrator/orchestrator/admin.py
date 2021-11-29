@@ -620,6 +620,10 @@ class BotflowAdmin(SimpleHistoryAdmin):
             'classes': ('collapse',),
             'fields': ('close_bot_automatically',),
         }),
+        ('Type', {
+            'classes': ('collapse',),
+            'fields': ('is_file',),
+        }),
     )
 
     list_display = ('pk_formatted', 'name', 'path',
@@ -932,7 +936,7 @@ class BotflowExecutionAdmin(SimpleHistoryAdmin):
         return f"{obj.computer_name} - {obj.user_name}"
 
     def botflow_formatted(self, obj):
-        return os.path.basename(obj.botflow)
+        return os.path.basename(obj.botflow) if obj.is_file else obj.botflow
 
     def trigger_formatted(self, obj):
         trigger = obj.trigger

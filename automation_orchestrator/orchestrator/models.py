@@ -128,6 +128,8 @@ class Botflow(models.Model):
 
     close_bot_automatically = models.BooleanField(default=False, help_text="Specify whether to automatically close the bot using the /Close /Exit commands. IMPORTANT: This is a Nintex RPA specific setting.")
 
+    is_file = models.BooleanField(default=True, help_text="Specify whether the botflow is a path to a file that the app should run or a (list of) command argument(s).")
+
     date_created = models.DateTimeField(auto_now_add=True, editable=False)
     date_updated = models.DateTimeField(auto_now=True, editable=False)
 
@@ -386,6 +388,8 @@ class BotflowExecution(models.Model):
     error_notification = models.CharField(max_length=255, blank=True)
 
     close_bot_automatically = models.BooleanField(default=False)
+
+    is_file = models.BooleanField(default=True)
 
     nintex_rpa_license_path = models.CharField(max_length=255)
     nintex_rpa_available_foxtrot_licenses = models.PositiveIntegerField()

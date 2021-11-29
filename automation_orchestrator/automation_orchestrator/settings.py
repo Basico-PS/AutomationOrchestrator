@@ -15,7 +15,7 @@ import socket
 from tzlocal import get_localzone
 
 
-VERSION = 'v0.3.9'
+VERSION = 'v0.4.0'
 
 
 # Retrieve the secret key for the server.
@@ -229,3 +229,5 @@ ADMIN_REORDER = (
      'label': 'Python',
      'models': ('orchestrator.PythonFunction', 'orchestrator.PythonFunctionExecution',)}
 )
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

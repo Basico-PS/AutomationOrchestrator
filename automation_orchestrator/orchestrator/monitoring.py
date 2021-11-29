@@ -121,6 +121,7 @@ def add_botflow_execution_object(bot_pk, app_pk, botflow_pk, trigger, custom_sta
                                          botflow=botflow_object.path,
                                          trigger=trigger[:250],
                                          close_bot_automatically=botflow_object.close_bot_automatically,
+                                         is_file=botflow_object.is_file,
                                          timeout_minutes=botflow_object.timeout_minutes,
                                          timeout_kill_processes=botflow_object.timeout_kill_processes,
                                          computer_name=bot_object.computer_name,
@@ -853,7 +854,7 @@ def botflow_execution_monitor_evaluate():
 
         status = "Completed"
 
-        if os.path.isfile(item.app) and os.path.isfile(item.botflow):
+        if os.path.isfile(item.app) and (os.path.isfile(item.botflow) or item.is_file == False):
             if not [{'botflow': x.botflow, 'trigger': x.trigger} for x in items if x.status == 'Completed'].count({'botflow': item.botflow, 'trigger': item.trigger}) >= 1:
                 try:
                     if app == "foxbot.exe" or app == "foxtrot.exe":

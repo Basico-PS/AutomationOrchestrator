@@ -3,6 +3,7 @@
 CALL CD %~dp0
 CALL python -m venv venv
 CALL venv\scripts\activate
+CALL python -m pip install --upgrade pip
 CALL pip install -r requirements.txt --no-cache-dir
 CALL python automation_orchestrator/manage.py migrate
 

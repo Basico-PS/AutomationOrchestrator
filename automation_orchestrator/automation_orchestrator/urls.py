@@ -38,9 +38,9 @@ def start_botflow_execution_monitor():
 
 
 urlpatterns = [
-    path('', admin.site.urls),
     path('api/0/', include('api0.urls')),
     path('dashboard/', include('dashboard.urls')),
+    path('', admin.site.urls),
 ]
 
 if os.path.exists('logs\\error_log.txt'):

@@ -1,4 +1,4 @@
-Django==3.2.10
+Django==3.2.14
 djangorestframework==3.12.4
 django-fernet-fields==0.6
 django-filter==21.1
